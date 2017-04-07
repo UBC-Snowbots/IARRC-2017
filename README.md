@@ -3,4 +3,4 @@ UBC Snowbots Repo for the 2017 IARRC Competition
 
 Run `get_started.sh` if you don't have a development environment.
 
-It is similar to what's found on the Snowbots/IGVC-2017 repository.
+It's the same to the one on the [Snowbots/IGVC-2017](https://github.com/UBC-Snowbots/IGVC-2017) repository.
