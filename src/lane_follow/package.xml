@@ -24,5 +24,6 @@
   <run_depend>rospy</run_depend>
   <run_depend>cv_bridge</run_depend>
   <run_depend>sb_utils</run_depend>
+  <run_depend>cv_camera</run_depend>
    
 </package>
