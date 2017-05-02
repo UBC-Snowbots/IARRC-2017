@@ -20,154 +20,139 @@ Copyright (C) 2013 Jason Dorweiler, www.transistor.io
 /*
  * Created by: Raad Khan
  * Created On: April 23, 2017
- * Description:
+ * Description: Analyzes an image and detects lane lines, following them accordingly.
  * Usage:
  * Subscribes to:
  * Publishes to:
- *
  */
 
-#ifndef LINEF
-#define LINEF
+#ifndef LANE_FOLLOW_LINEDETECT_H
+#define LANE_FOLLOW_LINEDETECT_H
 
-#include <ros/ros.h>
-#include <ros/package.h>
-#include <image_transport/image_transport.h>
-#include <cv_bridge/cv_bridge.h>
-#include <ros/console.h>
-#include <sb_utils.h>
-#include <ros/time.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include "opencv2/highgui/highgui.hpp"
-#include <opencv2/objdetect/objdetect.hpp>
 #include <iostream>
 #include <vector>
 #include <stdio.h>
+#include <string>
 
-class LineFinder {
+class LineDetect {
 
 public:
 
+    LineDetect(int argc, char** argv, std::string node_name);
     /**
      * Constructor
      */
-    RosVision(int argc, char** argv, std::string node_name);
-
-    RosVision();
-
-public:
-
-	// Default accumulator resolution is 1 pixel by 1 degree
-	// no gap, no mimimum length
-	LineFinder() : deltaRho(1), deltaTheta(PI/180), minVote(10), minLength(0.), maxGap(0.) {}
-
-	// Set the resolution of the accumulator
-	void setAccResolution(double dRho, double dTheta) {
-
-	    deltaRho= dRho;
-		deltaTheta= dTheta;
-    }
-
+    LineDetect();
+    /**
+     * Default accumulator resolution is 1 pixel by 1 degree
+     *
+     * no gap, no minimum length
+     */
+	LineFinder() : deltaRho(1),
+                   deltaTheta(PI/180),
+                   minVote(10),
+                   minLength(0.0),
+                   maxGap(0.0) {}
+    /**
+     * Sets the resolution of the accumulator
+     *
+     * @param resolution to set in polar coordinates,
+     * rho and theta
+     *
+     */
+	void setAccResolution(double dRho, double dTheta);
+    /**
+     * Sets the minimum number of votes
+     *
+     * @param minimum number of votes
+     */
 	// Set the minimum number of votes
-	void setMinVote(int minv) {
-
-		minVote= minv;
-    }
-
-	// Set line length and gap
-	void setLineLengthAndGap(double length, double gap) {
-
-		minLength= length;
-		maxGap= gap;
-	}
-
-	// set image shift
-	void setShift(int imgShift) {
-
-		shift = imgShift;
-	}
-
-	// Apply probabilistic Hough Transform
-	std::vector<cv::Vec4i> findLines(cv::Mat& binary) {
-
-		lines.clear();
-		cv::HoughLinesP(binary,lines,deltaRho,deltaTheta,minVote, minLength, maxGap);
-
-		return lines;
-	}
-
-	// Draw the detected lines on an image
-	void drawDetectedLines(cv::Mat &image, cv::Scalar color=cv::Scalar(255)) {
-		
-		// Draw the lines
-		std::vector<cv::Vec4i>::const_iterator it2= lines.begin();
-	
-		while (it2!=lines.end()) {
-		
-		    cv::Point pt1((*it2)[0],(*it2)[1]+shift);
-			cv::Point pt2((*it2)[2],(*it2)[3]+shift);
-
-			cv::line( image, pt1, pt2, color, 6 );
-		    std::cout << " HoughP line: ("<< pt1 <<"," << pt2 << ")\n";
-			++it2;
-        }
-    }
-
-	// Eliminates lines that do not have an orientation equals to
-	// the ones specified in the input matrix of orientations
-	// At least the given percentage of pixels on the line must
-	// be within plus or minus delta of the corresponding orientation
+	void setMinVote(int minv);
+    /**
+     * Sets line length and line gap
+     *
+     * @param line length and line gap
+     */
+	void setLineLengthAndGap(double length, double gap);
+    /**
+     * Sets image shift
+     *
+     * @param magnitude of the image shift
+     */
+	void setShift(int imgShift);
+    /**
+     * Applies probabilistic hough transform
+     *
+     * @param
+     *
+     * @return
+     */
+	std::vector<cv::Vec4i> findLines(cv::Mat& binary);
+    /**
+     * Draws the detected lines on an image
+     *
+     * @param
+     */
+	void drawDetectedLines(cv::Mat &image, cv::Scalar color=cv::Scalar(255));
+    /**
+     * Eliminates lines that do not have an orientation equals to the ones
+     * specified in the input matrix of orientations
+     *
+     * At least the given percentage of pixels on the line must be within
+     * plus or minus delta of the corresponding orientation
+     *
+     * @param
+     *
+     * @return
+     */
 	std::vector<cv::Vec4i> removeLinesOfInconsistentOrientations(
-	    const cv::Mat &orientations, double percentage, double delta) {
-
-		std::vector<cv::Vec4i>::iterator it= lines.begin();
-	
-		    // check all lines
-			while (it!=lines.end()) {
-
-			    // end points
-				int x1= (*it)[0];
-				int y1= (*it)[1];
-				int x2= (*it)[2];
-				int y2= (*it)[3];
-		   
-				// line orientation + 90o to get the parallel line
-				double ori1= atan2(static_cast<double>(y1-y2),static_cast<double>(x1-x2))+PI/2;
-				if (ori1>PI) ori1= ori1-2*PI;
-
-				double ori2= atan2(static_cast<double>(y2-y1),static_cast<double>(x2-x1))+PI/2;
-				if (ori2>PI) ori2= ori2-2*PI;
-	
-				// for all points on the line
-				cv::LineIterator lit(orientations,cv::Point(x1,y1),cv::Point(x2,y2));
-				int i,count=0;
-				for(i = 0, count=0; i < lit.count; i++, ++lit) {
-		
-				    float ori= *(reinterpret_cast<float *>(*lit));
-
-                    // is line orientation similar to gradient orientation ?
-					if (std::min(fabs(ori-ori1),fabs(ori-ori2))<delta)
-					    count++;
-		
-                }
-
-                double consistency= count/static_cast<double>(i);
-
-				// set to zero lines of inconsistent orientation
-				if (consistency < percentage)
-                    (*it)[0]=(*it)[1]=(*it)[2]=(*it)[3]=0;
-
-                ++it;
-            }
-
-            return lines;
-    }
+            const cv::Mat &orientations, double percentage, double delta);
+    /**
+     * Reads in the image to process from the terminal
+     */
+    void displayVideo();
+    /**
+     * Gets binary map of image ROI using Canny algorithm
+     */
+    void getBinaryMap();
+    /**
+     * Increases houghVote by 25 for the next frame if we found some lines
+     *
+     * so we don't miss other lines that may crop up in the next frame but
+     * at the same time we don't want to start the feedback loop from scratch.
+     */
+    void houghVoteAdjust();
+    /**
+     * Draws lane lines on the image ROI
+     */
+    void drawLines();
+    /**
+     * Performs a bitwise AND operation on both hough images
+     *
+     * regular hough transform does not find endpoints and
+     * probabilistic hough transform finds endpoints but several
+     * other unwanted lines, so bitwise AND to output the ideal lines
+     */
+    void houghImageAndPhoughImage();
 
 private:
 
     // original image
     cv::Mat img;
+
+    cv::Mat image;
+
+    cv::Mat imgROI;
+
+    cv::Mat contours;
+
+    cv::Mat contoursInv;
+
+    cv::Mat hough;
+
+    cv::Mat houghP;
 
     // vector containing the end points
     // of the detected lines
@@ -189,6 +174,8 @@ private:
 
     // distance to shift the drawn lines down when using a ROI
     int shift;
+
+    bool showSteps;
 };
 
 #endif

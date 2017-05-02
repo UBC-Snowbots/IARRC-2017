@@ -10,7 +10,6 @@ find_package(catkin REQUIRED COMPONENTS
         )
 
 find_package(OpenCV REQUIRED)
-
 find_package(sb_utils REQUIRED)
 
 add_definitions(-std=c++14)
