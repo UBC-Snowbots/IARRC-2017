@@ -28,7 +28,6 @@ class Stitcher:
 			# if the match is None, then there aren't enough matched
 			# keypoints to create a panorama
 			if M is None:
-				print("Cannot stitched")
 				return None
 
 			# cache the homography matrix

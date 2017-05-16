@@ -16,7 +16,7 @@ import rospy
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 
-# initialize the video streams and allow them to warmup
+# ialize the video streams and allow them to warmup
 print("[INFO] starting cameras...")
 leftStream = VideoStream(src=0).start()
 rightStream = VideoStream(src=1).start()
@@ -29,7 +29,7 @@ motion = BasicMotionDetector(minArea=500)
 total = 0
 
 ImgStitcher = rospy.Publisher('ImgStitcher', Image, queue_size=10) 
-rospy.init_node('ImgPublisher', anonymous=True)
+rospy.init_node('ImgPublisher')
 rate = rospy.Rate(10) # 10hz
 
 # loop over frames from the video streams
@@ -53,14 +53,14 @@ while not rospy.is_shutdown():
 		print("[INFO] homography could not be computed")
 		break
 
+	#Convert OpenCV image to ROS Image type
 	image_cv = CvBridge().cv2_to_imgmsg(result, "bgr8")
 
+	#Publish ROS image
 	try: 
 		ImgStitcher.publish(image_cv)
         except CvBridgeError as e:
 		print(e)
-
-	print("Published stitched image")
 
 	rate.sleep()
 
