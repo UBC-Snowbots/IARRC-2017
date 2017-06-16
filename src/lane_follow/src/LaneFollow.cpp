@@ -1,51 +1,77 @@
 /*
  * Created By: Raad Khan
  * Created On: April 23, 2017
- * Description: Gets angle of lane point of intersection
- *              and broadcasts a recommended Twist message.
+ * Description: Gets angle of point of intersection of lane lines
+ *              relative to the robot and broadcasts a
+ *              recommended Twist message.
  */
 
 #include <ros/ros.h>
-#include <LineDetect.h>
+#include <LaneFollow.h>
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 
-LaneFollow::LaneFollow(int argc, char** argv, std::string lane_follow) {
+class Twist;
 
-    // Instantiate LineDetect class in LaneFollow ROS node
-    LineDetect line_detect(argc, argv, lane_follow);
+using namespace cv;
+
+LaneFollow::LaneFollow(int argc, char** argv, std::string node_name) {
 
     // Setup handles
-    ros::init(argc, argv, lane_follow);
+    ros::init(argc, argv, node_name);
     ros::NodeHandle nh;
     ros::NodeHandle private_nh("~");
 
-    std::string image_topic_name = "/robot/cameras/raw_image";
-    std::string filtered_topic_name = "/robot/line_detect/filtered_image";
-    uint32_t refresh_rate = 10;
+    // Setup subscriber
+    std::string image_topic_name = "/robot/line_detect/camera_image";
+    int refresh_rate = 10;
+    ros::Subscriber image_sub = nh.subscribe(image_topic_name, refresh_rate,
+                                             &LaneFollow::subscriberCallBack, this);
+
+    // Setup publishers
+    std::string filter_topic_name = "/robot/lane_follow/filtered_image";
+    std::string twist_topic_name = "/robot/lane_follow/twist_message";
     uint32_t queue_size = 1;
 
-    // Setup subscriber
-    ros::Subscriber image_sub = n.subscribe(image_topic_name, refresh_rate, &LaneFollow::imageCallBack, this);
-
-    // Setup publisher
-    ros::Publisher filter_pub = n.advertise<cv::Mat>(filtered_topic_name, queue_size);
+    ros::Publisher filter_pub = private_nh.advertise<cv::Mat>(image_topic_name, queue_size);
+    ros::Publisher twist_pub = private_nh.advertise<geometry_msgs::Twist>(twist_topic_name, queue_size);
 
     ros::Rate loop_rate(10);
 
-    while (ros::ok()) {
+    int angle_theta = 0;
 
-        // Wrapper function which runs LineDetect alg
+    /*while (ros::ok()) {
 
-        filter_pub.publish(LineDetect::cv::image);
-
+        // ...
         ros::spinOnce();
         loop_rate.sleep();
-    }
+    }*/
 }
 
+void LaneFollow::subscriberCallBack(const Mat& img) {
 
+    // ...
 
+    // Publish filtered image to an arbitrary topic
+    filter_pub.publish(img);
 
-    int angle_theta = LaneFollow::angleDetermine(LineDetect::cv::image);
-    geometry_msgs::Twist stayInLane = LaneFollow::magicFunction(angle_theta);
+    // Calculate angle of POI of lane lines and broadcast a recommended Twist message
+    angle_theta = LaneFollow::angleDetermine(const Mat& img);
+
+    geometry_msgs::Twist stayInLane;
+
+    // ...
+
+    // Publish recommended Twist message
+    twist_pub.publish(stayInLane);
 }
 
+double LaneFollow::magicFunction(double x, double y, double x_scale, double y_scale){
+    return (1/fabs(x)*x_scale + sqrt(fabs(y))*y_scale)/2;
+}
+
+int angleDetermine(const Mat& img) {
+    // ...
+
+}

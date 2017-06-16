@@ -20,7 +20,7 @@ Copyright (C) 2013 Jason Dorweiler, www.transistor.io
 /*
  * Created by: Raad Khan
  * Created On: April 23, 2017
- * Description: Analyzes an image and detects lane lines, following them accordingly.
+ * Description: Takes in an image feed and generates lane lines.
  * Usage:
  * Subscribes to:
  * Publishes to:
@@ -29,32 +29,41 @@ Copyright (C) 2013 Jason Dorweiler, www.transistor.io
 #ifndef LANE_FOLLOW_LINEDETECT_H
 #define LANE_FOLLOW_LINEDETECT_H
 
-#include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/core/core.hpp>
 #include <iostream>
 #include <vector>
-#include <stdio.h>
 #include <string>
+#include <stdio.h>
 
 class LineDetect {
 
 public:
 
-    LineDetect(int argc, char** argv, std::string node_name);
     /**
      * Constructor
      */
-    LineDetect();
+    LineDetect(int argc, char** argv, std::string node_name);
+
     /**
      * Default accumulator resolution is 1 pixel by 1 degree
      *
      * no gap, no minimum length
      */
-	LineFinder() : deltaRho(1),
-                   deltaTheta(PI/180),
+    LineDetect() : deltaRho(1),
+                   deltaTheta(M_PI/180),
                    minVote(10),
                    minLength(0.0),
                    maxGap(0.0) {}
+
+    /**
+     * Wrapper function which runs LineDetect algorithm to generate
+     * the filtered image with detected lane lines
+     *
+     * @return filtered image matrix
+     */
+     cv::Mat getFilteredImage();
+
     /**
      * Sets the resolution of the accumulator
      *
@@ -63,39 +72,44 @@ public:
      *
      */
 	void setAccResolution(double dRho, double dTheta);
+
     /**
      * Sets the minimum number of votes
      *
      * @param minimum number of votes
      */
-	// Set the minimum number of votes
 	void setMinVote(int minv);
+
     /**
      * Sets line length and line gap
      *
      * @param line length and line gap
      */
 	void setLineLengthAndGap(double length, double gap);
+
     /**
      * Sets image shift
      *
      * @param magnitude of the image shift
      */
 	void setShift(int imgShift);
+
     /**
-     * Applies probabilistic hough transform
+     * Applies probabilistic Hough transform
      *
-     * @param
+     * @param address of Canny image matrix
      *
-     * @return
+     * @return lines created by probabilistic Hough transform
      */
 	std::vector<cv::Vec4i> findLines(cv::Mat& binary);
+
     /**
      * Draws the detected lines on an image
      *
-     * @param
+     * @param address of raw image matrix, pixel color value of the lines
      */
 	void drawDetectedLines(cv::Mat &image, cv::Scalar color=cv::Scalar(255));
+
     /**
      * Eliminates lines that do not have an orientation equals to the ones
      * specified in the input matrix of orientations
@@ -103,20 +117,25 @@ public:
      * At least the given percentage of pixels on the line must be within
      * plus or minus delta of the corresponding orientation
      *
-     * @param
+     * @param lines of consistent orientations
      *
-     * @return
+     * @return address of consistent orientations matrix,
+     * percentage of pixels on the line within the orientation,
+     * within some upper and lower limit, delta
      */
 	std::vector<cv::Vec4i> removeLinesOfInconsistentOrientations(
             const cv::Mat &orientations, double percentage, double delta);
+
     /**
      * Reads in the image to process from the terminal
      */
-    void displayVideo();
+    void getVideo();
+
     /**
      * Gets binary map of image ROI using Canny algorithm
      */
     void getBinaryMap();
+
     /**
      * Increases houghVote by 25 for the next frame if we found some lines
      *
@@ -124,34 +143,31 @@ public:
      * at the same time we don't want to start the feedback loop from scratch.
      */
     void houghVoteAdjust();
+
     /**
      * Draws lane lines on the image ROI
      */
     void drawLines();
+
     /**
-     * Performs a bitwise AND operation on both hough images
+     * Performs a bitwise AND operation on both Hough images
      *
-     * regular hough transform does not find endpoints and
-     * probabilistic hough transform finds endpoints but several
+     * Regular Hough transform does not find endpoints and
+     * probabilistic Hough transform finds endpoints but several
      * other unwanted lines, so bitwise AND to output the ideal lines
      */
-    void houghImageAndPhoughImage();
+    void andHoughPHough();
 
 private:
-
-    // original image
-    cv::Mat img;
 
     cv::Mat image;
 
     cv::Mat imgROI;
 
     cv::Mat contours;
-
     cv::Mat contoursInv;
 
     cv::Mat hough;
-
     cv::Mat houghP;
 
     // vector containing the end points

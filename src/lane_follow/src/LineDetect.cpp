@@ -1,50 +1,51 @@
 /*------------------------------------------------------------------------------------------*\
-   Lane Detection
+Lane Detection
 
-   General idea and some code modified from:
-   chapter 7 of Computer Vision Programming using the OpenCV Library. 
-   by Robert Laganiere, Packt Publishing, 2011.
+General idea and some code modified from:
+chapter 7 of Computer Vision Programming using the OpenCV Library.
+by Robert Laganiere, Packt Publishing, 2011.
 
-   This program is free software; permission is hereby granted to use, copy, modify, 
-   and distribute this source code, or portions thereof, for any purpose, without fee, 
-   subject to the restriction that the copyright notice may not be removed 
-   or altered from any source or altered source distribution. 
-   The software is released on an as-is basis and without any warranties of any kind. 
-   In particular, the software is not guaranteed to be fault-tolerant or free from failure. 
-   The author disclaims all warranties with regard to this software, any use, 
-   and any consequent failure, is purely the responsibility of the user.
- 
-   Copyright (C) 2013 Jason Dorweiler, www.transistor.io
+This program is free software; permission is hereby granted to use, copy, modify,
+and distribute this source code, or portions thereof, for any purpose, without fee,
+subject to the restriction that the copyright notice may not be removed
+or altered from any source or altered source distribution.
+The software is released on an as-is basis and without any warranties of any kind.
+In particular, the software is not guaranteed to be fault-tolerant or free from failure.
+The author disclaims all warranties with regard to this software, any use,
+and any consequent failure, is purely the responsibility of the user.
 
-Notes: 
+Copyright (C) 2013 Jason Dorweiler, www.transistor.io
 
-	Add up number on lines that are found within a threshold of a given rho,theta and 
-	use that to determine a score.  Only lines with a good enough score are kept. 
+Notes:
 
-	Calculation for the distance of the car from the center.  This should also determine
-	if the road in turning.  We might not want to be in the center of the road for a turn. 
+Add up number on lines that are found within a threshold of a given rho, theta and
+use that to determine a score.  Only lines with a good enough score are kept.
+
+Calculation for the distance of the car from the center.  This should also determine
+if the road in turning.  We might not want to be in the center of the road for a turn.
 	
-	Several other parameters can be played with: min vote on houghp, line distance and gap.  Some
-	type of feed back loop might be good to self tune these parameters. 
+Several other parameters can be played with: min vote on houghp, line distance and gap.  Some
+type of feed back loop might be good to self tune these parameters.
 
-	We are still finding the Road, i.e. both left and right lanes.  we Need to set it up to find the
-	yellow divider line in the middle. 
+We are still finding the Road, i.e. both left and right lanes.  we Need to set it up to find the
+yellow divider line in the middle.
 
-	Added filter on theta angle to reduce horizontal and vertical lines. 
+Added filter on theta angle to reduce horizontal and vertical lines.
 
-	Added image ROI to reduce false lines from things like trees/powerlines
+Added image ROI to reduce false lines from things like trees/power lines
 \*------------------------------------------------------------------------------------------*/
 
 /*
  * Created by: Raad Khan
  * Created On: April 23, 2017
- * Description: Analyzes an image and detects lane lines, following them accordingly.
+ * Description: Takes in an image feed and generates lane lines.
  * Usage:
  * Subscribes to:
  * Publishes to:
  */
 
 #include <LineDetect.h>
+#include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/objdetect/objdetect.hpp>
 
@@ -83,58 +84,57 @@ std::vector<cv::Vec4i> LineDetect::findLines(cv::Mat& binary) {
 void LineDetect::drawDetectedLines(cv::Mat &image, cv::Scalar color) {
 
     // Draw the lines
-    std::vector<cv::Vec4i>::const_iterator it2= lines.begin();
+    std::vector<cv::Vec4i>::const_iterator iterator2 = lines.begin();
 
-    while (it2!=lines.end()) {
+    while (iterator2 != lines.end()) {
 
-        cv::Point pt1((*it2)[0],(*it2)[1]+shift);
-        cv::Point pt2((*it2)[2],(*it2)[3]+shift);
+        cv::Point pt1((*iterator2)[0], (*iterator2)[1] + shift);
+        cv::Point pt2((*iterator2)[2], (*iterator2)[3] + shift);
 
         cv::line(image, pt1, pt2, color, 6);
         std::cout << "HoughP line: ("<< pt1 <<"," << pt2 << ")\n";
-        ++it2;
+        ++iterator2;
     }
 }
 
 std::vector<cv::Vec4i> LineDetect::removeLinesOfInconsistentOrientations(
         const cv::Mat &orientations, double percentage, double delta) {
 
-    std::vector<cv::Vec4i>::iterator it= lines.begin();
+    std::vector<cv::Vec4i>::iterator it = lines.begin();
 
     // check all lines
-    while (it!=lines.end()) {
+    while (it != lines.end()) {
 
         // end points
-        int x1= (*it)[0];
-        int y1= (*it)[1];
-        int x2= (*it)[2];
-        int y2= (*it)[3];
+        int x1 = (*it)[0];
+        int y1 = (*it)[1];
+        int x2 = (*it)[2];
+        int y2 = (*it)[3];
 
-        // line orientation + 90o to get the parallel line
-        double ori1= atan2(static_cast<double>(y1-y2),static_cast<double>(x1-x2))+PI/2;
-        if (ori1>PI) ori1= ori1-2*PI;
+        // line orientation + 90 degrees to get the parallel line
+        double orientation1 = atan2(static_cast<double>(y1 - y2), static_cast<double>(x1 - x2)) + M_PI/2;
+        if (orientation1 > M_PI) orientation1 = orientation1 - 2*M_PI;
 
-        double ori2= atan2(static_cast<double>(y2-y1),static_cast<double>(x2-x1))+PI/2;
-        if (ori2>PI) ori2= ori2-2*PI;
+        double orientation2 = atan2(static_cast<double>(y2 - y1), static_cast<double>(x2 - x1)) + M_PI/2;
+        if (orientation2 > M_PI) orientation2 = orientation2 - 2*M_PI;
 
         // for all points on the line
-        cv::LineIterator lit(orientations,cv::Point(x1,y1),cv::Point(x2,y2));
-        int i,count=0;
-        for(i = 0, count=0; i < lit.count; i++, ++lit) {
+        cv::LineIterator lit(orientations, cv::Point(x1, y1), cv::Point(x2, y2));
+        int i, count = 0;
+        for (i = 0, count = 0; i < lit.count; i++, ++lit) {
 
-            float ori= *(reinterpret_cast<float *>(*lit));
+            float orientation = *(reinterpret_cast<float*>(*lit));
 
-            // is line orientation similar to gradient orientation ?
-            if (std::min(fabs(ori-ori1),fabs(ori-ori2))<delta)
+            // is line orientation similar to gradient orientation?
+            if (std::min(fabs(orientation - orientation1), fabs(orientation - orientation2)) < delta)
                 count++;
-
         }
 
-        double consistency= count/static_cast<double>(i);
+        double consistency = count / static_cast<double>(i);
 
         // set to zero lines of inconsistent orientation
         if (consistency < percentage)
-            (*it)[0]=(*it)[1]=(*it)[2]=(*it)[3]=0;
+            (*it)[0] = (*it)[1] = (*it)[2] = (*it)[3] = 0;
 
         ++it;
     }
@@ -142,7 +142,7 @@ std::vector<cv::Vec4i> LineDetect::removeLinesOfInconsistentOrientations(
     return lines;
 }
 
-void LineDetect::displayVideo() {
+void LineDetect::getVideo() {
 
     bool showSteps = argv[2];
     string arg = argv[1];
@@ -153,9 +153,11 @@ void LineDetect::displayVideo() {
 
     // if this fails, try to open as a video camera, through the use of integer param
     if (!capture.isOpened())
-        {capture.open(atoi(arg.c_str()));}
+        capture.open(atoi(arg.c_str()));
+
     // get the width of frames of the video
     double dWidth = capture.get(CV_CAP_PROP_FRAME_WIDTH);
+
     // get the height of frames of the video
     double dHeight = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
 
@@ -213,9 +215,9 @@ void LineDetect::houghVoteAdjust() {
     std::vector <Vec2f> lines;
 
     // all lines are lost so reset
-    if (houghVote < 1 or lines.size() > 2) {
+    if (houghVote < 1 or lines.size() > 2)
         houghVote = 200;
-    } else
+    else
         houghVote += 25;
 
     while (lines.size() < 5 && houghVote > 0) {
@@ -229,6 +231,7 @@ void LineDetect::houghVoteAdjust() {
 }
 
 void LineDetect::drawLines() {
+
     // Draw the lines
     std::vector<Vec2f>::const_iterator it = lines.begin();
     Mat hough(imgROI.size(), CV_8U, Scalar(0));
@@ -260,8 +263,8 @@ void LineDetect::drawLines() {
         imwrite("hough.bmp", result);
     }
 
-    // Create LineFinder instance
-    LineFinder ld;
+    // Create LineDetect instance
+    LineDetect ld;
 
     // Set probabilistic Hough parameters
     ld.setLineLengthAndGap(60, 10);
@@ -281,8 +284,9 @@ void LineDetect::drawLines() {
     }
 }
 
-void LineDetect::houghImageAndPhoughImage() {
-    // bitwise AND of the two hough images
+void LineDetect::andHoughPHough() {
+
+    // bitwise AND of the two Hough images
     bitwise_and(houghP, hough, houghP);
     Mat houghPinv(imgROI.size(), CV_8U, Scalar(0));
     Mat dst(imgROI.size(), CV_8U, Scalar(0));
@@ -317,11 +321,23 @@ void LineDetect::houghImageAndPhoughImage() {
     imshow(window_name, image);
     imwrite("processed.bmp", image);
 
-    // writer the frame into the file
+    // Writes the frame into the file
     oVideoWriter.write(image);
 
     char key = (char) waitKey(10);
     lines.clear();
+}
+
+// Wrapper function which executes line detect algorithm
+cv::Mat getFilteredImage() {
+
+    ld.getVideo();
+    ld.getBinaryMap();
+    ld.houghVoteAdjust();
+    ld.drawLines();
+    ld.andHoughPHough();
+    
+    return image;
 }
 
 

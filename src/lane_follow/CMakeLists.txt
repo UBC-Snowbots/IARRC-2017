@@ -36,12 +36,12 @@ include_directories(
 ## Declare a C++ executable
 # add_executable(sample_package_node src/sample_package_node.cpp)
 add_executable(lane_follower
-    src/line_detect.cpp    
-    src/LineDetect.cpp 
+    src/LineDetect.cpp
     include/LineDetect.h
+    src/lane_follow.cpp
+    src/LaneFollow.cpp
+    include/LaneFollow.h
     )
-
-add_executable(camera src/camera_init.cpp)
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(sample_package_node
@@ -52,8 +52,6 @@ target_link_libraries(lane_follower
     ${OpenCV_LIBS}
     ${sb_utils_LIBRARIES}
     )
-
-target_link_libraries(camera ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 #############
 ## Testing ##
