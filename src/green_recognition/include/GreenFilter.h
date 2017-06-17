@@ -27,10 +27,21 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <geometry_msgs/Twist.h>
+#include <ros/console.h>
+#include <ros/package.h>
 
 // STD
 #include <vector>
 #include <string>
+
+// I/O
+#include <iostream>
+#include <stdio.h>
+#include <fstream>
+
+// Snowbots
+#include <ManualFilter.h>
+#include <sb_utils.h>
 
 using namespace cv;
 
@@ -57,12 +68,8 @@ private:
      */
     void subscriberCallBack(const sensor_msgs::Image::ConstPtr& image);
 
-    /**
-     * Filters the green out of the image
-     *
-     * @param raw_image
-     */
-    Mat filterImage(const Mat &raw_image);
+    void setUpFilter();
+
     Mat rosToMat(const sensor_msgs::Image::ConstPtr& image);
 
     void check_if_image_exist(const cv::Mat &img, const std::string &path);
@@ -76,6 +83,31 @@ private:
      * Publishes the filtered image
      */
     ros::Publisher filter_pub;
+
+    //Frequency handling
+    ros::Time last_published;
+    ros::Duration publish_interval;
+
+
+    // The name and size of the display window
+    std::string displayWindowName;
+
+    //Filters and their variables
+    snowbotsFilter filter;
+    std::string mfilter_file;
+    double frequency;
+    int width , height;
+    int x1, x2, x3, x4, y1, y2, y3, y4;
+    std::vector<cv::Point2f> orig_points;
+    std::vector<cv::Point2f> dst_points;
+
+    // Whether or not we've received the first image
+    bool receivedFirstImage;
+
+    //Debug and calibration variables
+    bool showWindow;
+    bool isCalibratingManually;
+
 
 
 

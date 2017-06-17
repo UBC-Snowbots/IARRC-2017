@@ -38,6 +38,9 @@ class GreenRecognition {
 
 public:
 
+    // Testing purposes
+    GreenRecognition(std::string image_path);
+
     /**
      * Constructor
      */
@@ -54,6 +57,8 @@ private:
 
     int findObjects(const Mat &filtered_image);
     Mat rosToMat(const sensor_msgs::Image::ConstPtr& image);
+    void check_if_image_exist(const cv::Mat &img, const std::string &path);
+
     /**
      * Subscribes to the filtered camera image node
      */

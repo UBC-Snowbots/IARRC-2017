@@ -10,7 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
         )
 
 find_package(OpenCV REQUIRED)
-# find_package(sb_utils REQUIRED)
+find_package(sb_utils REQUIRED)
 
 add_definitions(-std=c++14)
 
@@ -45,7 +45,9 @@ add_executable(green_recognition
 add_executable(green_filter
         src/green_filter.cpp
         src/GreenFilter.cpp
+        src/ManualFilter.cpp
         include/GreenFilter.h
+        include/ManualFilter.h
         )
 
 ## Specify libraries to link a library or executable target against
