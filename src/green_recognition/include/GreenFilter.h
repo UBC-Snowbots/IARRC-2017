@@ -14,14 +14,22 @@
 
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 #include <vector>
 #include <string>
 #include <stdio.h>
 
+using namespace cv;
+
 class GreenFilter {
 
 public:
+
+    /**
+     * Empty Constructor for testing purposes
+     */
+    GreenFilter();
 
     /**
      * Constructor
@@ -38,14 +46,25 @@ private:
     void subscriberCallBack(const Mat &img);
 
     /**
-     * Subscribes to the raw camera image node
+     * Filters the green out of the image
+     *
+     * @param raw_image
      */
-    ros::Subscriber image_sub;
+    Mat filterImage(const Mat &raw_image);
 
-    /**
-     * Publishes the filtered image
-     */
-    ros::Publisher filter_pub;
+    void check_if_image_exist(const cv::Mat &img, const std::string &path);
+
+//    /**
+//     * Subscribes to the raw camera image node
+//     */
+//    ros::Subscriber image_sub;
+//
+//    /**
+//     * Publishes the filtered image
+//     */
+//    ros::Publisher filter_pub;
+
+
 
 };
 

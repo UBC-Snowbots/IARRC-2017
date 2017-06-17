@@ -10,7 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
         )
 
 find_package(OpenCV REQUIRED)
-find_package(sb_utils REQUIRED)
+# find_package(sb_utils REQUIRED)
 
 add_definitions(-std=c++14)
 
@@ -38,8 +38,12 @@ include_directories(
 add_executable(green_recognition
         src/green_recognition.cpp
         src/GreenRecognition.cpp
-        src/GreenFilter.cpp
         include/GreenRecognition.h
+        )
+
+add_executable(green_filter
+        src/green_filter.cpp
+        src/GreenFilter.cpp
         include/GreenFilter.h
         )
 
@@ -47,7 +51,13 @@ add_executable(green_recognition
 # target_link_libraries(sample_package_node
 #   ${catkin_LIBRARIES}
 # )
-target_link_libraries(lane_follower
+target_link_libraries(green_recognition
+        ${catkin_LIBRARIES}
+        ${OpenCV_LIBS}
+        ${sb_utils_LIBRARIES}
+        )
+
+target_link_libraries(green_filter
         ${catkin_LIBRARIES}
         ${OpenCV_LIBS}
         ${sb_utils_LIBRARIES}

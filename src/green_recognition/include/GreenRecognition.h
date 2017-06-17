@@ -19,6 +19,8 @@
 #include <string>
 #include <stdio.h>
 
+using namespace cv;
+
 class GreenRecognition {
 
 public:
@@ -37,15 +39,15 @@ private:
      */
     void subscriberCallBack(const Mat &img);
 
-    /**
-     * Subscribes to the filtered camera image node
-     */
-    ros::Subscriber image_sub;
-
-    /**
-     * Publishes the recommended twist message
-     */
-    ros::Publisher twist_pub;
+//    /**
+//     * Subscribes to the filtered camera image node
+//     */
+//    ros::Subscriber image_sub;
+//
+//    /**
+//     * Publishes the recommended twist message
+//     */
+//    ros::Publisher twist_pub;
 
 };
 

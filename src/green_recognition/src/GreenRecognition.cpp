@@ -6,7 +6,7 @@
  */
 
 #include <ros/ros.h>
-#include <LaneFollow.h>
+#include <GreenRecognition.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/objdetect/objdetect.hpp>
@@ -26,7 +26,7 @@ GreenRecognition::GreenRecognition(int argc, char **argv, std::string node_name)
     std::string image_topic = "/robot/line_detect/camera_image"; // TODO: Get topic name
     int refresh_rate = 10;
     ros::Subscriber image_sub = nh.subscribe(image_topic, refresh_rate,
-                                             &LaneFollow::subscriberCallBack, this);
+                                             &GreenRecognition::subscriberCallBack, this);
 
     // Setup publishers
     std::string twist_topic = "/robot/lane_follow/twist_message"; // TODO: Decide on topic names
