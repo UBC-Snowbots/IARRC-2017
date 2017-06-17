@@ -7,14 +7,9 @@
 
 //#include <ros/ros.h>
 #include <GreenFilter.h>
-#include <opencv2/opencv.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/objdetect/objdetect.hpp>
-
-class Twist;
 
 using namespace cv;
-
+using namespace cv_bridge;
 GreenFilter::GreenFilter() {
 
     std::string path_image = "/home/robyncastro/IARRC-2017/src/green_recognition/test/images/moreCircles.jpg";
@@ -28,32 +23,44 @@ GreenFilter::GreenFilter() {
 
 GreenFilter::GreenFilter(int argc, char **argv, std::string node_name) {
 
-//    // Setup handles
-//    ros::init(argc, argv, node_name);
-//    ros::NodeHandle nh;
-//    ros::NodeHandle private_nh("~");
-//
-//    // Setup subscriber
-//    std::string image_topic = "/robot/line_detect/camera_image"; // TODO: Get topic name
-//    int refresh_rate = 10;
-//    image_sub = nh.subscribe(image_topic, refresh_rate,
-//                                             &GreenFilter::subscriberCallBack, this);
-//
-//    // Setup publishers
-//    std::string twist_topic = "/robot/lane_follow/twist_message"; // TODO: Decide on topic names
-//    uint32_t queue_size = 1;
-//
-//    filter_pub = private_nh.advertise<Mat>(twist_topic, queue_size);
+    // Setup handles
+    ros::init(argc, argv, node_name);
+    ros::NodeHandle nh;
+    ros::NodeHandle private_nh("~");
+
+    // Setup subscriber
+    std::string image_topic = "/robot/line_detect/camera_image"; // TODO: Get topic name
+    int refresh_rate = 10;
+    image_sub = nh.subscribe(image_topic, refresh_rate,
+                                             &GreenFilter::subscriberCallBack, this);
+
+    // Setup publishers
+    std::string twist_topic = "/robot/lane_follow/twist_message"; // TODO: Decide on topic names
+    uint32_t queue_size = 1;
+
+    filter_pub = private_nh.advertise<sensor_msgs::Image>(twist_topic, queue_size);
 
 }
 
-void GreenFilter::subscriberCallBack(const Mat &img) {
-//
-//    // Filter out non-green colors
-//    Mat filteredImage = filterImage(img);
-//
-//    // Publish recommended Twist message
-//    filter_pub.publish(filteredImage);
+void GreenFilter::subscriberCallBack(const sensor_msgs::Image::ConstPtr& image) {
+
+
+    // Filter out non-green colors
+    Mat filteredImage = filterImage(rosToMat(image));
+
+    cv_bridge::CvImage out_msg;
+    out_msg.header   = image->header; // Same timestamp and tf frame as input image
+    out_msg.encoding = sensor_msgs::image_encodings::TYPE_32FC1; // Or whatever
+    out_msg.image    = filteredImage; // Your cv::Mat
+
+    // Publish recommended Twist message
+    filter_pub.publish(out_msg.toImageMsg());
+}
+
+Mat GreenFilter::rosToMat(const sensor_msgs::Image::ConstPtr& image) {
+    CvImagePtr imagePtr;
+    imagePtr = toCvCopy(image, image->encoding);
+    return imagePtr->image;
 }
 
 Mat GreenFilter::filterImage(const Mat &raw_image) {

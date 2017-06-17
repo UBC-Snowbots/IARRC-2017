@@ -30,6 +30,7 @@ include_directories(
         ${catkin_INCLUDE_DIRS}
         ${sb_utils_INCLUDE_DIRS}
         ${OpenCV_INCLUDE_DIRS}
+        vector
         ./include
 )
 

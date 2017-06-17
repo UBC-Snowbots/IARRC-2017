@@ -12,13 +12,25 @@
 #ifndef GREEN_FILTER_H
 #define GREEN_FILTER_H
 
+// OpenCV
+#include <opencv2/opencv.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <iostream>
+
+// Image Conversion
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+
+// ROS
+#include <ros/ros.h>
+#include <sensor_msgs/Image.h>
+#include <geometry_msgs/Twist.h>
+
+// STD
 #include <vector>
 #include <string>
-#include <stdio.h>
 
 using namespace cv;
 
@@ -43,7 +55,7 @@ private:
      *
      * @param address of filtered image matrix
      */
-    void subscriberCallBack(const Mat &img);
+    void subscriberCallBack(const sensor_msgs::Image::ConstPtr& image);
 
     /**
      * Filters the green out of the image
@@ -51,18 +63,19 @@ private:
      * @param raw_image
      */
     Mat filterImage(const Mat &raw_image);
+    Mat rosToMat(const sensor_msgs::Image::ConstPtr& image);
 
     void check_if_image_exist(const cv::Mat &img, const std::string &path);
 
-//    /**
-//     * Subscribes to the raw camera image node
-//     */
-//    ros::Subscriber image_sub;
-//
-//    /**
-//     * Publishes the filtered image
-//     */
-//    ros::Publisher filter_pub;
+    /**
+     * Subscribes to the raw camera image node
+     */
+    ros::Subscriber image_sub;
+
+    /**
+     * Publishes the filtered image
+     */
+    ros::Publisher filter_pub;
 
 
 
