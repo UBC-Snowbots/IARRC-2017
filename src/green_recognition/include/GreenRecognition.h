@@ -22,6 +22,7 @@
 // Image Conversion
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
+#include <image_transport/subscriber.h>
 
 // ROS
 #include <ros/ros.h>
@@ -32,13 +33,16 @@
 #include <vector>
 #include <string>
 
+// Snowbots
+#include <sb_utils.h>
+
 using namespace cv;
 
 class GreenRecognition {
 
 public:
 
-    // Testing purposes
+    // Constructor used for testing
     GreenRecognition(std::string image_path);
 
     /**
@@ -53,21 +57,49 @@ private:
      *
      * @param address of filtered image matrix
      */
-    void subscriberCallBack(const sensor_msgs::Image::ConstPtr& image);
+    void subscriberCallBack(const sensor_msgs::Image::ConstPtr &image);
 
-    int findObjects(const Mat &filtered_image);
-    Mat rosToMat(const sensor_msgs::Image::ConstPtr& image);
+    /**
+     * Counts the number of circles found in the image.
+     *
+     * @param image to be parsed
+     */
+    int countObjects(const Mat &filtered_image);
+
+    /**
+     * Converts ros::sensor_msgs::Image into a cv::Mat
+     *
+     * @param message to be converted
+     */
+    Mat rosToMat(const sensor_msgs::Image::ConstPtr &image);
+
+    /**
+     *  Displays a window with the detected objects being circled
+     */
+    void showFilteredObjectsWindow(const Mat &filtered_image, std::vector<cv::Point2i> center,
+                                   std::vector<int> radii);
+
+    /**
+     * Determines whether path contains an image.
+     *
+     */
     void check_if_image_exist(const cv::Mat &img, const std::string &path);
 
     /**
      * Subscribes to the filtered camera image node
      */
-    ros::Subscriber image_sub;
+    image_transport::Subscriber image_sub;
 
     /**
      * Publishes the recommended twist message
      */
     ros::Publisher twist_pub;
+
+    // Minimum radius needed to be considered an object
+    int minTargetRadius;
+
+    // Show window for debugging purposes
+    bool showWindow;
 
 };
 

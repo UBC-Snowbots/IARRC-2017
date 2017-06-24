@@ -7,6 +7,7 @@
  */
 
 #include <GreenRecognition.h>
+#include <image_transport/image_transport.h>
 
 using namespace cv;
 using namespace std;
@@ -19,9 +20,10 @@ GreenRecognition::GreenRecognition(std::string image_path) {
     // Check if the image can be loaded
     check_if_image_exist(bgr_image, image_path);
 
-    findObjects(bgr_image);
+    countObjects(bgr_image);
 
 }
+
 GreenRecognition::GreenRecognition(int argc, char **argv, std::string node_name) {
 
     // Setup handles
@@ -29,21 +31,27 @@ GreenRecognition::GreenRecognition(int argc, char **argv, std::string node_name)
     ros::NodeHandle nh;
     ros::NodeHandle private_nh("~");
 
+    // Setup image transport
+    image_transport::ImageTransport it(nh);
+
     // Setup subscriber
     std::string image_topic = "/robot/vision/filtered_image";
     int refresh_rate = 10;
-    image_sub = nh.subscribe(image_topic, refresh_rate,
-                                             &GreenRecognition::subscriberCallBack, this);
+    image_sub = it.subscribe<GreenRecognition>(image_topic, refresh_rate,
+                                               &GreenRecognition::subscriberCallBack, this);
 
     // Setup publishers
     std::string twist_topic = private_nh.resolveName("command");
     uint32_t queue_size = 1;
-
     twist_pub = private_nh.advertise<geometry_msgs::Twist>(twist_topic, queue_size);
+
+    // Get some params
+    SB_getParam(private_nh, "minimum_target_radius", minTargetRadius, 50);
+    SB_getParam(private_nh, "show_image_window", showWindow, true);
 
 }
 
-void GreenRecognition::subscriberCallBack(const sensor_msgs::Image::ConstPtr& image) {
+void GreenRecognition::subscriberCallBack(const sensor_msgs::Image::ConstPtr &image) {
 
     geometry_msgs::Twist twist_message;
 
@@ -53,67 +61,71 @@ void GreenRecognition::subscriberCallBack(const sensor_msgs::Image::ConstPtr& im
     twist_message.angular.z = 0;
     twist_message.linear.x = 0;
     twist_message.linear.y = 0;
-    twist_message.linear.z =0;
+    twist_message.linear.z = 0;
 
     // If something is seen tell the robot to move
-    int numObjects = findObjects(rosToMat(image));
-    if(numObjects > 0)
+    int numObjects = countObjects(rosToMat(image));
+    if (numObjects > 0)
         twist_message.linear.x = 1;
 
     twist_pub.publish(twist_message);
 }
 
-Mat GreenRecognition::rosToMat(const sensor_msgs::Image::ConstPtr& image) {
+Mat GreenRecognition::rosToMat(const sensor_msgs::Image::ConstPtr &image) {
     CvImagePtr imagePtr;
     imagePtr = toCvCopy(image, image->encoding);
     return imagePtr->image;
 }
 
-int GreenRecognition::findObjects(const Mat &filtered_image) {
+int GreenRecognition::countObjects(const Mat &filtered_image) {
 
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
     vector<cv::Point2i> center;
-    cv::Mat bwImage;
-    cv::cvtColor(filtered_image, bwImage, CV_RGB2GRAY);
     vector<int> radii;
 
-    cv::findContours( bwImage.clone(), contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
+    // Convert grayscale image to black and white image
+    cv::Mat bwImage;
+    cv::cvtColor(filtered_image, bwImage, CV_RGB2GRAY);
+
+    cv::findContours(bwImage.clone(), contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
 
     size_t count = contours.size();
-    int minTargetRadius = 50;
 
-    for( int i=0; i<count; i++)
-    {
+    for (int i = 0; i < count; i++) {
         cv::Point2f c;
         float r;
-        cv::minEnclosingCircle( (Mat) contours[i], c, r);
+        cv::minEnclosingCircle((Mat) contours[i], c, r);
 
+        // Only count circles with large enough radius
         if (r >= minTargetRadius) {
             center.push_back(c);
             radii.push_back(r);
         }
-
     }
 
-    size_t center_count = center.size();
-    cv::Scalar red(255,0,0);
-
-    for( int i = 0; i < center_count; i++)
-    {
-        cv::circle(filtered_image, center[i], radii[i], red, 3);
-    }
-
-    namedWindow("Threshold lower image", WINDOW_AUTOSIZE);
-    imshow("Threshold lower image", filtered_image);
-
-    waitKey(0);
+    // Displays a window with the detected objects being circled
+    showFilteredObjectsWindow(filtered_image, center, radii);
 
     return center.size();
 }
 
+void GreenRecognition::showFilteredObjectsWindow(const Mat &filtered_image, std::vector<cv::Point2i> center,
+                                                 std::vector<int> radii) {
+    size_t center_count = center.size();
+    cv::Scalar red(255, 0, 0);
+
+    for (int i = 0; i < center_count; i++) {
+        cv::circle(filtered_image, center[i], radii[i], red, 3);
+    }
+
+    namedWindow("Filtered Objects", WINDOW_AUTOSIZE);
+    imshow("Filtered Objects", filtered_image);
+
+}
+
 void GreenRecognition::check_if_image_exist(const cv::Mat &img, const std::string &path) {
-    if(img.empty()) {
+    if (img.empty()) {
         std::cout << "Error! Unable to load image: " << path << std::endl;
         std::exit(-1);
     }

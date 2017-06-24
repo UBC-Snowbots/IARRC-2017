@@ -22,6 +22,7 @@
 // Image Conversion
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
+#include <image_transport/image_transport.h>
 
 // ROS
 #include <ros/ros.h>
@@ -68,8 +69,27 @@ private:
      */
     void subscriberCallBack(const sensor_msgs::Image::ConstPtr& image);
 
+    /**
+     * Initialization of the filter
+     */
     void setUpFilter();
 
+    /**
+     * Update filter values
+     *
+     */
+    void updateFilter();
+
+    /**
+     * Show the image taken from the camera and the
+     * image to be published
+     */
+    void showRawAndFilteredImageWindow();
+    /**
+     * Converts ros::sensor_msgs::Image into a cv::Mat
+     *
+     * @param message to be converted
+     */
     Mat rosToMat(const sensor_msgs::Image::ConstPtr& image);
 
     void check_if_image_exist(const cv::Mat &img, const std::string &path);
@@ -77,34 +97,34 @@ private:
     /**
      * Subscribes to the raw camera image node
      */
-    ros::Subscriber image_sub;
+    image_transport::Subscriber image_sub;
 
     /**
      * Publishes the filtered image
      */
-    ros::Publisher filter_pub;
+    image_transport::Publisher filter_pub;
 
     //Frequency handling
     ros::Time last_published;
     ros::Duration publish_interval;
 
+    //Image processing Mat pipeline
+    cv::Mat imageInput;
+    cv::Mat filterOutput;
 
     // The name and size of the display window
     std::string displayWindowName;
 
-    //Filters and their variables
+    // Filters and their variables
     snowbotsFilter filter;
     std::string mfilter_file;
     double frequency;
-    int width , height;
-    int x1, x2, x3, x4, y1, y2, y3, y4;
-    std::vector<cv::Point2f> orig_points;
-    std::vector<cv::Point2f> dst_points;
 
     // Whether or not we've received the first image
     bool receivedFirstImage;
 
-    //Debug and calibration variables
+    // Debug and calibration variables
+    int image_width, image_height;
     bool showWindow;
     bool isCalibratingManually;
 
