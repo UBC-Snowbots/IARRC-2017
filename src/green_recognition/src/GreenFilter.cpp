@@ -24,7 +24,7 @@ GreenFilter::GreenFilter(std::string &image_path){
     GreenRecognition *greenRecognition = new GreenRecognition();
 
     cvtColor(output_image, output_image, CV_GRAY2BGR);
-    greenRecognition->countObjects(output_image);
+    greenRecognition->countCircles(output_image);
 
     namedWindow("Filtered Objects", WINDOW_AUTOSIZE);
     imshow("Filtered Objects", output_image);

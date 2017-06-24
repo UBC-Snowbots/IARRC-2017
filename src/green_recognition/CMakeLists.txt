@@ -36,9 +36,9 @@ include_directories(
 ## Declare a C++ executable
 # add_executable(sample_package_node src/sample_package_node.cpp)
 add_executable(green_recognition
-        src/green_recognition.cpp
-        src/GreenRecognition.cpp
-        include/GreenRecognition.h
+        src/circle_detection.cpp
+        src/CircleDetection.cpp
+        include/CircleDetection.h
         )
 
 add_executable(green_filter
@@ -47,8 +47,8 @@ add_executable(green_filter
         src/ManualFilter.cpp
         include/GreenFilter.h
         include/ManualFilter.h
-        include/GreenRecognition.h
-        src/GreenRecognition.cpp
+        include/CircleDetection.h
+        src/CircleDetection.cpp
         )
 
 ## Specify libraries to link a library or executable target against
@@ -79,6 +79,6 @@ target_link_libraries(green_filter
 
 if (CATKIN_ENABLE_TESTING)
     # gTest
-    catkin_add_gtest(green-recognition-test test/green-recognition-test.cpp src/ManualFilter.cpp src/GreenFilter.cpp src/GreenRecognition.cpp)
+    catkin_add_gtest(green-recognition-test test/green-recognition-test.cpp src/ManualFilter.cpp src/GreenFilter.cpp src/CircleDetection.cpp)
     target_link_libraries(green-recognition-test ${catkin_LIBRARIES})
 endif()

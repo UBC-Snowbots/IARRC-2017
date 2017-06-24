@@ -43,7 +43,7 @@
 // Snowbots
 #include <ManualFilter.h>
 #include <sb_utils.h>
-#include <GreenRecognition.h>
+#include <CircleDetection.h>
 
 using namespace cv;
 

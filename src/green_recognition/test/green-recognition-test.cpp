@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <GreenRecognition.h>
+#include <CircleDetection.h>
 #include <GreenFilter.h>
 
 TEST(realImage, GreenLight) {
@@ -12,10 +12,10 @@ TEST(realImage, RedLight) {
     GreenFilter *greenFilter = new GreenFilter(image_path);
 }
 
-//TEST(filteredImage, oneCircle) {
-//    std::string image_path = "/home/robyncastro/IARRC-2017/src/green_recognition/test/images/binaryCircles.jpg";
-//    GreenRecognition *greenRecognition = new GreenRecognition(image_path);
-//}
+TEST(filteredImage, oneCircle) {
+    std::string image_path = "/home/robyncastro/IARRC-2017/src/green_recognition/test/images/binaryCircles.jpg";
+    GreenRecognition *greenRecognition = new GreenRecognition(image_path);
+}
 
 int main(int aimageTests, char **argv) {
     testing::InitGoogleTest(&aimageTests, argv);

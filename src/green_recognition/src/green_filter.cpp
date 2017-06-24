@@ -5,7 +5,7 @@
  *              then publishes the new filtered image.
  */
 
-#include <GreenRecognition.h>
+#include <CircleDetection.h>
 #include <ros/ros.h>
 #include <GreenFilter.h>
 

@@ -5,7 +5,7 @@
  *              based on whether green is being seen.
  */
 
-#include <GreenRecognition.h>
+#include <CircleDetection.h>
 
 int main(int argc, char** argv) {
     // Setup your ROS node

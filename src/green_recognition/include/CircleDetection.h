@@ -57,7 +57,7 @@ public:
      *
      * @param image to be parsed
      */
-    int countObjects(const Mat &filtered_image);
+    int countCircles(const Mat &filtered_image);
 
 private:
 
@@ -95,7 +95,7 @@ private:
     /**
      * Publishes the recommended twist message
      */
-    ros::Publisher twist_pub;
+    ros::Publisher boolean_pub;
 
     // Minimum radius needed to be considered an object
     int minTargetRadius;

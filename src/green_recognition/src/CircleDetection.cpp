@@ -6,8 +6,9 @@
  *              message.
  */
 
-#include <GreenRecognition.h>
+#include <CircleDetection.h>
 #include <image_transport/image_transport.h>
+#include <std_msgs/Bool.h>
 
 using namespace cv;
 using namespace std;
@@ -21,7 +22,7 @@ GreenRecognition::GreenRecognition(std::string &image_path) {
     check_if_image_exist(bgr_image, image_path);
 
     minTargetRadius = 20;
-    countObjects(bgr_image);
+    countCircles(bgr_image);
 
     waitKey(0);
 
@@ -48,9 +49,9 @@ GreenRecognition::GreenRecognition(int argc, char **argv, std::string node_name)
                                                &GreenRecognition::subscriberCallBack, this);
 
     // Setup publishers
-    std::string twist_topic = private_nh.resolveName("command");
+    std::string output_topic = "/robot/vision/green_detected";
     uint32_t queue_size = 1;
-    twist_pub = private_nh.advertise<geometry_msgs::Twist>(twist_topic, queue_size);
+    boolean_pub = private_nh.advertise<std_msgs::Bool>(output_topic, queue_size);
 
     // Get some params
     SB_getParam(private_nh, "minimum_target_radius", minTargetRadius, 50);
@@ -60,22 +61,11 @@ GreenRecognition::GreenRecognition(int argc, char **argv, std::string node_name)
 
 void GreenRecognition::subscriberCallBack(const sensor_msgs::Image::ConstPtr &image) {
 
-    geometry_msgs::Twist twist_message;
-
-    // Make sure all values inside twist_message are 0
-    twist_message.angular.x = 0;
-    twist_message.angular.y = 0;
-    twist_message.angular.z = 0;
-    twist_message.linear.x = 0;
-    twist_message.linear.y = 0;
-    twist_message.linear.z = 0;
-
     // If something is seen tell the robot to move
-    int numObjects = countObjects(rosToMat(image));
-    if (numObjects > 0)
-        twist_message.linear.x = 1;
-
-    twist_pub.publish(twist_message);
+    int numCircles = countCircles(rosToMat(image));
+    std_msgs::Bool circle_detected;
+    circle_detected.data = numCircles > 0;
+    boolean_pub.publish(circle_detected);
 }
 
 Mat GreenRecognition::rosToMat(const sensor_msgs::Image::ConstPtr &image) {
@@ -84,7 +74,7 @@ Mat GreenRecognition::rosToMat(const sensor_msgs::Image::ConstPtr &image) {
     return imagePtr->image;
 }
 
-int GreenRecognition::countObjects(const Mat &filtered_image) {
+int GreenRecognition::countCircles(const Mat &filtered_image) {
 
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;

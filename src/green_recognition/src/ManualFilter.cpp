@@ -56,15 +56,19 @@ void snowbotsFilter::filterImage(const cv::Mat &input, cv::Mat &output){
     cv::cvtColor(input, hsvOutput, CV_BGR2HSV, 0);
     cv::inRange(hsvOutput, cv::Scalar(_iLowH, _iLowS, _iLowV), cv::Scalar(_iHighH, _iHighS, _iHighV), rangeOutput);
 
-    cv::Size size = cv::Size(2 , 2);
-    //Morphological Opening (removes small objects from foreground)
-    cv::erode(rangeOutput, rangeOutput, getStructuringElement(cv::MORPH_ELLIPSE, size));
-    cv::dilate(rangeOutput, rangeOutput, getStructuringElement(cv::MORPH_ELLIPSE, size));
+    // Determines how many times to erode then dilate
+    int noise_filter_count = 5;
+    for(int i = 0; i < noise_filter_count; i++) {
+        cv::Size size = cv::Size(2, 2);
+        //Morphological Opening (removes small objects from foreground)
+        cv::erode(rangeOutput, rangeOutput, getStructuringElement(cv::MORPH_ELLIPSE, size));
+        cv::dilate(rangeOutput, rangeOutput, getStructuringElement(cv::MORPH_ELLIPSE, size));
 
-    //Morphological Closing (fill small holes in the foreground)
-    cv::dilate(rangeOutput, rangeOutput, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
-    cv::erode(rangeOutput, rangeOutput, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
-
+        cv::Size size2 = cv::Size(10, 10);
+        //Morphological Closing (fill small holes in the foreground)
+        cv::dilate(rangeOutput, rangeOutput, getStructuringElement(cv::MORPH_ELLIPSE, size2));
+        cv::erode(rangeOutput, rangeOutput, getStructuringElement(cv::MORPH_ELLIPSE, size2));
+    }
     rangeOutput.copyTo(output);
 }
 
