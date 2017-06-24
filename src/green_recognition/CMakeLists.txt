@@ -30,7 +30,6 @@ include_directories(
         ${catkin_INCLUDE_DIRS}
         ${sb_utils_INCLUDE_DIRS}
         ${OpenCV_INCLUDE_DIRS}
-        vector
         ./include
 )
 
@@ -48,6 +47,8 @@ add_executable(green_filter
         src/ManualFilter.cpp
         include/GreenFilter.h
         include/ManualFilter.h
+        include/GreenRecognition.h
+        src/GreenRecognition.cpp
         )
 
 ## Specify libraries to link a library or executable target against

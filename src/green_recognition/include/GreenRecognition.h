@@ -42,13 +42,22 @@ class GreenRecognition {
 
 public:
 
-    // Constructor used for testing
-    GreenRecognition(std::string image_path);
+    // Constructors used for testing
+    GreenRecognition(std::string &image_path);
+
+    GreenRecognition();
 
     /**
      * Constructor
      */
     GreenRecognition(int argc, char **argv, std::string node_name);
+
+    /**
+     * Counts the number of circles found in the image.
+     *
+     * @param image to be parsed
+     */
+    int countObjects(const Mat &filtered_image);
 
 private:
 
@@ -58,13 +67,6 @@ private:
      * @param address of filtered image matrix
      */
     void subscriberCallBack(const sensor_msgs::Image::ConstPtr &image);
-
-    /**
-     * Counts the number of circles found in the image.
-     *
-     * @param image to be parsed
-     */
-    int countObjects(const Mat &filtered_image);
 
     /**
      * Converts ros::sensor_msgs::Image into a cv::Mat

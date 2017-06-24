@@ -13,15 +13,22 @@ using namespace cv;
 using namespace std;
 using namespace cv_bridge;
 
-GreenRecognition::GreenRecognition(std::string image_path) {
+GreenRecognition::GreenRecognition(std::string &image_path) {
 
     cv::Mat bgr_image = imread(image_path);
 
     // Check if the image can be loaded
     check_if_image_exist(bgr_image, image_path);
 
+    minTargetRadius = 20;
     countObjects(bgr_image);
 
+    waitKey(0);
+
+}
+
+GreenRecognition::GreenRecognition() {
+    minTargetRadius = 20;
 }
 
 GreenRecognition::GreenRecognition(int argc, char **argv, std::string node_name) {
@@ -86,8 +93,11 @@ int GreenRecognition::countObjects(const Mat &filtered_image) {
 
     // Convert grayscale image to black and white image
     cv::Mat bwImage;
-    cv::cvtColor(filtered_image, bwImage, CV_RGB2GRAY);
-
+    try {
+        cv::cvtColor(filtered_image, bwImage, CV_RGB2GRAY);
+    } catch(cv::Exception) {
+        bwImage = filtered_image;
+    }
     cv::findContours(bwImage.clone(), contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
 
     size_t count = contours.size();
@@ -113,10 +123,11 @@ int GreenRecognition::countObjects(const Mat &filtered_image) {
 void GreenRecognition::showFilteredObjectsWindow(const Mat &filtered_image, std::vector<cv::Point2i> center,
                                                  std::vector<int> radii) {
     size_t center_count = center.size();
-    cv::Scalar red(255, 0, 0);
+    cv::Scalar green(0, 255, 0);
 
+    // Draw green circles around object
     for (int i = 0; i < center_count; i++) {
-        cv::circle(filtered_image, center[i], radii[i], red, 3);
+        cv::circle(filtered_image, center[i], radii[i], green, 3);
     }
 
     namedWindow("Filtered Objects", WINDOW_AUTOSIZE);

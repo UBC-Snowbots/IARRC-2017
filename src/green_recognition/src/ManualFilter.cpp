@@ -13,7 +13,8 @@
 
 //Two different constructors
 snowbotsFilter::snowbotsFilter(){
-    createFilter(0, 179, 0, 255, 0, 255);
+    int sensitivity = 30;
+    createFilter(60 - sensitivity, 60 + sensitivity, 100, 255, 100, 255);
 }
 
 snowbotsFilter::snowbotsFilter(int iLowH, int iHighH, int iLowS, int iHighS, int iLowV, int iHighV){
@@ -55,9 +56,10 @@ void snowbotsFilter::filterImage(const cv::Mat &input, cv::Mat &output){
     cv::cvtColor(input, hsvOutput, CV_BGR2HSV, 0);
     cv::inRange(hsvOutput, cv::Scalar(_iLowH, _iLowS, _iLowV), cv::Scalar(_iHighH, _iHighS, _iHighV), rangeOutput);
 
+    cv::Size size = cv::Size(2 , 2);
     //Morphological Opening (removes small objects from foreground)
-    cv::erode(rangeOutput, rangeOutput, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5,5)));
-    cv::dilate(rangeOutput, rangeOutput, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5,5)));
+    cv::erode(rangeOutput, rangeOutput, getStructuringElement(cv::MORPH_ELLIPSE, size));
+    cv::dilate(rangeOutput, rangeOutput, getStructuringElement(cv::MORPH_ELLIPSE, size));
 
     //Morphological Closing (fill small holes in the foreground)
     cv::dilate(rangeOutput, rangeOutput, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );

@@ -11,6 +11,27 @@ using namespace cv;
 using namespace std;
 using namespace cv_bridge;
 
+GreenFilter::GreenFilter(std::string &image_path){
+    cv::Mat bgr_image = imread(image_path);
+
+    // Check if the image can be loaded
+    check_if_image_exist(bgr_image, image_path);
+
+    Mat output_image;
+    snowbotsFilter testFilter = snowbotsFilter();
+    testFilter.filterImage(bgr_image, output_image);
+
+    GreenRecognition *greenRecognition = new GreenRecognition();
+
+    cvtColor(output_image, output_image, CV_GRAY2BGR);
+    greenRecognition->countObjects(output_image);
+
+    namedWindow("Filtered Objects", WINDOW_AUTOSIZE);
+    imshow("Filtered Objects", output_image);
+    namedWindow("Raw Image", WINDOW_AUTOSIZE);
+    imshow("Raw Image", bgr_image);
+    waitKey(0);
+}
 GreenFilter::GreenFilter(int argc, char **argv, std::string node_name) {
 
     displayWindowName = "Snowbots - GreenFilter";
@@ -50,9 +71,10 @@ GreenFilter::GreenFilter(int argc, char **argv, std::string node_name) {
 
 void GreenFilter::subscriberCallBack(const sensor_msgs::Image::ConstPtr &image) {
 
+    imageInput = rosToMat(image);
+
     // Filter out non-green colors
     Mat filteredImage;
-    imageInput = rosToMat(image);
     filter.filterImage(imageInput, filteredImage);
     filterOutput = filteredImage;
 
@@ -87,7 +109,7 @@ Mat GreenFilter::rosToMat(const sensor_msgs::Image::ConstPtr &image) {
 
 void GreenFilter::setUpFilter() {
 
-    //Sets up filter update frequency
+    // Sets up filter update frequency
     publish_interval = ros::Duration(1 / frequency);
     last_published = ros::Time::now();
 

@@ -43,6 +43,7 @@
 // Snowbots
 #include <ManualFilter.h>
 #include <sb_utils.h>
+#include <GreenRecognition.h>
 
 using namespace cv;
 
@@ -51,9 +52,9 @@ class GreenFilter {
 public:
 
     /**
-     * Empty Constructor for testing purposes
+     * Constructor used for testing
      */
-    GreenFilter();
+    GreenFilter(std::string &image_path);
 
     /**
      * Constructor
