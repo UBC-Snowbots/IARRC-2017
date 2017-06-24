@@ -50,19 +50,13 @@ public:
      *
      * no gap, no minimum length
      */
-    LineDetect() : deltaRho(1),
+    LineDetect() : showSteps(true),
+                   deltaRho(1),
                    deltaTheta(M_PI/180),
+                   houghVote(200),
                    minVote(10),
                    minLength(0.0),
                    maxGap(0.0) {}
-
-    /**
-     * Wrapper function which runs LineDetect algorithm to generate
-     * the filtered image with detected lane lines
-     *
-     * @return filtered image matrix
-     */
-     cv::Mat getFilteredImage();
 
     /**
      * Sets the resolution of the accumulator
@@ -97,11 +91,11 @@ public:
     /**
      * Applies probabilistic Hough transform
      *
-     * @param address of Canny image matrix
+     * @param address of raw image matrix
      *
      * @return lines created by probabilistic Hough transform
      */
-	std::vector<cv::Vec4i> findLines(cv::Mat& binary);
+	std::vector<cv::Vec4i> findLines(cv::Mat& image);
 
     /**
      * Draws the detected lines on an image
@@ -123,8 +117,8 @@ public:
      * percentage of pixels on the line within the orientation,
      * within some upper and lower limit, delta
      */
-	std::vector<cv::Vec4i> removeLinesOfInconsistentOrientations(
-            const cv::Mat &orientations, double percentage, double delta);
+	std::vector<cv::Vec4i> removeLinesOfInconsistentOrientations(const cv::Mat &orientations,
+                                                                 double percentage, double delta);
 
     /**
      * Reads in the image to process from the terminal
@@ -134,7 +128,7 @@ public:
     /**
      * Gets binary map of image ROI using Canny algorithm
      */
-    void getBinaryMap();
+    cv::Mat getBinaryMap(cv::Mat& image);
 
     /**
      * Increases houghVote by 25 for the next frame if we found some lines
@@ -142,12 +136,12 @@ public:
      * so we don't miss other lines that may crop up in the next frame but
      * at the same time we don't want to start the feedback loop from scratch.
      */
-    void houghVoteAdjust();
+    void houghVoteAdjust(cv::Mat& contours, cv::Mat& imageROI);
 
     /**
      * Draws lane lines on the image ROI
      */
-    void drawLines();
+    cv::Mat drawLines(std::vector<cv::Vec4i> lines, cv::Mat& imageROI);
 
     /**
      * Performs a bitwise AND operation on both Hough images
@@ -156,23 +150,17 @@ public:
      * probabilistic Hough transform finds endpoints but several
      * other unwanted lines, so bitwise AND to output the ideal lines
      */
-    void andHoughPHough();
+    void andHoughPHough(cv::Mat& image, cv::Mat& imageROI);
+
+    /**
+     * Takes in raw image and gets ROI
+     */
+    cv::Mat getROI(cv::Mat& image);
 
 private:
 
-    cv::Mat image;
-
-    cv::Mat imgROI;
-
-    cv::Mat contours;
-    cv::Mat contoursInv;
-
-    cv::Mat hough;
-    cv::Mat houghP;
-
-    // vector containing the end points
-    // of the detected lines
-    std::vector<cv::Vec4i> lines;
+    // saving this here for now if needed for rendering later
+    cv::Mat result;
 
     // accumulator resolution parameters
     double deltaRho;
@@ -181,6 +169,9 @@ private:
     // minimum number of votes that a line
     // must receive before being considered
     int minVote;
+
+    // todo
+    int houghVote;
 
     // min length for a line
     double minLength;

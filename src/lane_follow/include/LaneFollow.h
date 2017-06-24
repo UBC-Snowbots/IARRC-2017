@@ -18,6 +18,10 @@
 #include <vector>
 #include <string>
 #include <stdio.h>
+#include <ros/ros.h>
+#include <geometry_msgs/Twist.h>
+#include <sensor_msgs/Image.h>
+#include <LineDetect.h>
 
 class LaneFollow {
 
@@ -35,7 +39,7 @@ private:
      *
      * @param address of filtered image matrix
      */
-    void subscriberCallBack(const Mat &img);
+    void subscriberCallBack(const sensor_msgs::ImageConstPtr &msg);
 
     /**
      * Subscribes to the raw camera image node
@@ -63,7 +67,7 @@ private:
      *
      * @return angle_theta
      */
-    int angleDetermine(const Mat &img);
+    int angleDetermine(const cv::Mat& img);
 
     /**
      * Computes the average of 1/x and sqrt(y), multiplied by their respective scaling factors
@@ -76,6 +80,13 @@ private:
      * @return the average of: [x_scale * 1/x] and [y_scale * sqrt(y)]
      */
      double magicFunction(double x, double y, double x_scale, double y_scale);
+
+    /**
+     *
+     * @param lane lines detected by LineDetect class
+     * @return
+     */
+    std::vector<cv::Vec4i> extendLines( std::vector<cv::Vec4i> lines );
 
     // Instantiate LineDetect class which generates the lane lines
     LineDetect ld;

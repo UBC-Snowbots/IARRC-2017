@@ -6,7 +6,6 @@
  *              recommended Twist message.
  */
 
-#include <ros/ros.h>
 #include <LaneFollow.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -34,7 +33,7 @@ LaneFollow::LaneFollow(int argc, char** argv, std::string node_name) {
     std::string twist_topic_name = "/robot/lane_follow/twist_message";
     uint32_t queue_size = 1;
 
-    ros::Publisher filter_pub = private_nh.advertise<cv::Mat>(image_topic_name, queue_size);
+    ros::Publisher filter_pub = private_nh.advertise<sensor_msgs::Image>(image_topic_name, queue_size);
     ros::Publisher twist_pub = private_nh.advertise<geometry_msgs::Twist>(twist_topic_name, queue_size);
 
     ros::Rate loop_rate(10);
@@ -49,29 +48,32 @@ LaneFollow::LaneFollow(int argc, char** argv, std::string node_name) {
     }*/
 }
 
-void LaneFollow::subscriberCallBack(const Mat& img) {
+void LaneFollow::subscriberCallBack(const sensor_msgs::ImageConstPtr &msg) {
 
     // ...
 
     // Publish filtered image to an arbitrary topic
-    filter_pub.publish(img);
+    // filter_pub.publish(msg);
 
     // Calculate angle of POI of lane lines and broadcast a recommended Twist message
-    angle_theta = LaneFollow::angleDetermine(const Mat& img);
+    // angle_theta = LaneFollow::angleDetermine(msg);
 
     geometry_msgs::Twist stayInLane;
 
     // ...
 
     // Publish recommended Twist message
-    twist_pub.publish(stayInLane);
+    // twist_pub.publish(stayInLane);
 }
 
 double LaneFollow::magicFunction(double x, double y, double x_scale, double y_scale){
     return (1/fabs(x)*x_scale + sqrt(fabs(y))*y_scale)/2;
 }
 
-int angleDetermine(const Mat& img) {
+std::vector<cv::Vec4i> LaneFollow::extendLines( std::vector<cv::Vec4i> lines ) {
     // ...
+}
 
+int LaneFollow::angleDetermine(const cv::Mat& img) {
+    // ...
 }

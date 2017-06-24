@@ -5,10 +5,16 @@
  *              and broadcasts a recommended Twist message.
  */
 
-#include <LineDetect.h>
+#include <LaneFollow.h>
 #include <ros/ros.h>
 
+// temp headers
+#include <opencv2/opencv.hpp>
+
+using namespace std;
+
 int main(int argc, char** argv) {
+    /**
     // Setup your ROS node
     std::string node_name = "lane_follow";
     // Create an instance of your class
@@ -17,5 +23,27 @@ int main(int argc, char** argv) {
     ros::spin();
     // Once the node stops, return 0
     return 0;
+     **/
+    LineDetect ld;
+    std::string cameraFilePath = "/dev/video1";
+    std::string window_name = "Processed Video";
+    // resizable window;
+    cv::VideoCapture capture(cameraFilePath);
+    cv::Mat image;
+    image = cv::imread(cameraFilePath);
+    while (true)
+    {
+        capture >> image;
+        if (image.empty())
+            continue;
+        auto discardedLines = ld.findLines(image);
+
+
+    }
+
+
+
+
+
 }
 
