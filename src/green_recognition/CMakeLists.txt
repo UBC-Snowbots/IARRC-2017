@@ -76,3 +76,9 @@ target_link_libraries(green_filter
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
+
+if (CATKIN_ENABLE_TESTING)
+    # gTest
+    catkin_add_gtest(green-recognition-test test/green-recognition-test.cpp src/ManualFilter.cpp src/GreenFilter.cpp src/GreenRecognition.cpp)
+    target_link_libraries(green-recognition-test ${catkin_LIBRARIES})
+endif()
