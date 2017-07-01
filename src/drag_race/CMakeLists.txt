@@ -32,6 +32,8 @@ include_directories(
 ## Declare a C++ executable
 # add_executable(${PROJECT_NAME}_node src/drag_race_node.cpp)
 
+add_executable(drag_race_node src/drag_race_node.cpp src/DragRaceNode.cpp)
+
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
