@@ -4,18 +4,45 @@
 
 TEST(realImage, GreenLight) {
     std::string image_path = "images/GreenLight.jpg";
-    HSVFilterNode *greenFilter = new HSVFilterNode(image_path);
+
+    cv::Mat bgr_image = imread(image_path);
+    Mat filtered_image;
+
+    HSVFilter testFilter = HSVFilter();
+    testFilter.filterImage(bgr_image, filtered_image);
+
+    CircleDetection *circleDetection = new CircleDetection();
+    int numCircles = circleDetection->countCircles(filtered_image);
+
+    EXPECT_EQ(1, numCircles);
 }
 
-TEST(realImage, RedLight) {
+TEST(realImage, noCircle) {
     std::string image_path = "images/RedLight.jpg";
-    HSVFilterNode *greenFilter = new HSVFilterNode(image_path);
+
+    cv::Mat bgr_image = imread(image_path);
+    Mat filtered_image;
+
+    HSVFilter testFilter = HSVFilter();
+    testFilter.filterImage(bgr_image, filtered_image);
+
+    CircleDetection *circleDetection = new CircleDetection();
+    int numCircles = circleDetection->countCircles(filtered_image);
+
+    EXPECT_EQ(0, numCircles);
 }
 
 TEST(filteredImage, oneCircle) {
     std::string image_path = "images/binaryCircles.jpg";
-    CircleDetection *greenRecognition = new CircleDetection(image_path);
+
+    cv::Mat bgr_image = imread(image_path);
+    
+    CircleDetection *circleDetection = new CircleDetection();
+    int numCircles = circleDetection->countCircles(bgr_image);
+
+    EXPECT_EQ(1, numCircles);
 }
+
 
 int main(int aimageTests, char **argv) {
     testing::InitGoogleTest(&aimageTests, argv);
