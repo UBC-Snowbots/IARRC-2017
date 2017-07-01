@@ -3,17 +3,17 @@
 #include <GreenFilter.h>
 
 TEST(realImage, GreenLight) {
-    std::string image_path = "/home/sb/IARRC-2017/src/green_recognition/test/images/GreenLight.jpg";
+    std::string image_path = "images/GreenLight.jpg";
     GreenFilter *greenFilter = new GreenFilter(image_path);
 }
 
 TEST(realImage, RedLight) {
-    std::string image_path = "/home/sb/IARRC-2017/src/green_recognition/test/images/RedLight.jpg";
+    std::string image_path = "images/RedLight.jpg";
     GreenFilter *greenFilter = new GreenFilter(image_path);
 }
 
 TEST(filteredImage, oneCircle) {
-    std::string image_path = "/home/sb/IARRC-2017/src/green_recognition/test/images/binaryCircles.jpg";
+    std::string image_path = "images/binaryCircles.jpg";
     CircleDetection *greenRecognition = new CircleDetection(image_path);
 }
 
