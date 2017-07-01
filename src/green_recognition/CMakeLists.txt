@@ -44,9 +44,9 @@ add_executable(green_recognition
 add_executable(green_filter
         src/green_filter.cpp
         src/GreenFilter.cpp
-        src/ManualFilter.cpp
+        src/HSVFilter.cpp
         include/GreenFilter.h
-        include/ManualFilter.h
+        include/HSVFilter.h
         include/CircleDetection.h
         src/CircleDetection.cpp
         )
@@ -79,6 +79,6 @@ target_link_libraries(green_filter
 
 if (CATKIN_ENABLE_TESTING)
     # gTest
-    catkin_add_gtest(green-recognition-test test/green-recognition-test.cpp src/ManualFilter.cpp src/GreenFilter.cpp src/CircleDetection.cpp)
+    catkin_add_gtest(green-recognition-test test/green-recognition-test.cpp src/HSVFilter.cpp src/GreenFilter.cpp src/CircleDetection.cpp)
     target_link_libraries(green-recognition-test ${catkin_LIBRARIES})
 endif()

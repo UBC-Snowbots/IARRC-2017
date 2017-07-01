@@ -1,12 +1,9 @@
 /*
  * Created By: Robyn Castro
  * Created On: June 15, 2017
- * Description: Determines whether or not green is seen on
- *              the screen then publishes a recommended twist
- *              message.
- * Usage:
- * Subscribes to: camera // TODO: Determine topic names
- * Publishes to:
+ * Description: Determines whether or not a circle is seen on
+ *              the screen then publishes a recommended std_msgs
+ *              boolean
  */
 
 #ifndef GREEN_RECOGNITION_H
@@ -38,19 +35,19 @@
 
 using namespace cv;
 
-class GreenRecognition {
+class CircleDetection {
 
 public:
 
     // Constructors used for testing
-    GreenRecognition(std::string &image_path);
+    CircleDetection(std::string &image_path);
 
-    GreenRecognition();
+    CircleDetection();
 
     /**
      * Constructor
      */
-    GreenRecognition(int argc, char **argv, std::string node_name);
+    CircleDetection(int argc, char **argv, std::string node_name);
 
     /**
      * Counts the number of circles found in the image.
@@ -66,7 +63,7 @@ private:
      *
      * @param address of filtered image matrix
      */
-    void subscriberCallBack(const sensor_msgs::Image::ConstPtr &image);
+    void filteredImageCallBack(const sensor_msgs::Image::ConstPtr &image);
 
     /**
      * Converts ros::sensor_msgs::Image into a cv::Mat
@@ -88,14 +85,14 @@ private:
     void check_if_image_exist(const cv::Mat &img, const std::string &path);
 
     /**
-     * Subscribes to the filtered camera image node
+     * Subscribes to the filtered camera image topic
      */
     image_transport::Subscriber image_sub;
 
     /**
      * Publishes the recommended twist message
      */
-    ros::Publisher boolean_pub;
+    ros::Publisher is_green_detected_pub;
 
     // Minimum radius needed to be considered an object
     int minTargetRadius;

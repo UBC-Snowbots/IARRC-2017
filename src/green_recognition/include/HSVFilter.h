@@ -14,7 +14,7 @@
 #include <iostream>
 #include <opencv2/imgproc/imgproc.hpp>
 
-class snowbotsFilter
+class HSVFilter
 {
     //Thresholds
     int _iLowH;
@@ -35,14 +35,14 @@ public:
     /**
      * Initializes the filter with known values
      */
-    snowbotsFilter( int iLowH, int iHighH,
+    HSVFilter( int iLowH, int iHighH,
                     int iLowS, int iHighS,
                     int iLowV, int iHighV);
 
     /**
      * Initializes the filter with default values
      */
-    snowbotsFilter(void);
+    HSVFilter(void);
 
     /**
      * Filters an image according to threshold values

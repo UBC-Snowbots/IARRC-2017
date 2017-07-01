@@ -4,9 +4,6 @@
  * Description: Anything green is mapped to white, everything
  *              else is mapped to black.
  *
- * Usage:
- * Subscribes to: camera // TODO: Determine topic names
- * Publishes to:
  */
 
 #ifndef GREEN_FILTER_H
@@ -41,7 +38,7 @@
 #include <fstream>
 
 // Snowbots
-#include <ManualFilter.h>
+#include <HSVFilter.h>
 #include <sb_utils.h>
 #include <CircleDetection.h>
 
@@ -68,7 +65,7 @@ private:
      *
      * @param address of filtered image matrix
      */
-    void subscriberCallBack(const sensor_msgs::Image::ConstPtr& image);
+    void rawImageCallBack(const sensor_msgs::Image::ConstPtr &image);
 
     /**
      * Initialization of the filter
@@ -117,7 +114,7 @@ private:
     std::string displayWindowName;
 
     // Filters and their variables
-    snowbotsFilter filter;
+    HSVFilter filter;
     std::string mfilter_file;
     double frequency;
 

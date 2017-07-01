@@ -8,22 +8,22 @@
  *			http://opencv-srf.blogspot.ca/2010/09/object-detection-using-color-seperation.html
  */
 
-#include <ManualFilter.h>
+#include <HSVFilter.h>
 
 
 //Two different constructors
-snowbotsFilter::snowbotsFilter(){
+HSVFilter::HSVFilter(){
     int sensitivity = 30;
     createFilter(60 - sensitivity, 60 + sensitivity, 100, 255, 100, 255);
 }
 
-snowbotsFilter::snowbotsFilter(int iLowH, int iHighH, int iLowS, int iHighS, int iLowV, int iHighV){
+HSVFilter::HSVFilter(int iLowH, int iHighH, int iLowS, int iHighS, int iLowV, int iHighV){
     createFilter(iLowH, iHighH, iLowS, iHighS, iLowV, iHighV);
 }
 
 
 //Initializer
-void snowbotsFilter::createFilter(int iLowH, int iHighH, int iLowS, int iHighS, int iLowV, int iHighV){
+void HSVFilter::createFilter(int iLowH, int iHighH, int iLowS, int iHighS, int iLowV, int iHighV){
     _iLowH = iLowH;
     _iHighH = iHighH;
     _iLowS = iLowS;
@@ -34,7 +34,7 @@ void snowbotsFilter::createFilter(int iLowH, int iHighH, int iLowS, int iHighS, 
 }
 
 //Functions
-void snowbotsFilter::manualCalibration(void){
+void HSVFilter::manualCalibration(void){
     cv::namedWindow(manualCalibrationWindow, CV_WINDOW_AUTOSIZE);
     cv::createTrackbar("LowH", manualCalibrationWindow, &_iLowH, 179); //Hue (0 - 179)
     cv::createTrackbar("HighH", manualCalibrationWindow, &_iHighH, 179);
@@ -47,11 +47,11 @@ void snowbotsFilter::manualCalibration(void){
 
 }
 
-void snowbotsFilter::stopManualCalibration(){
+void HSVFilter::stopManualCalibration(){
     cv::destroyWindow(manualCalibrationWindow);
 }
 
-void snowbotsFilter::filterImage(const cv::Mat &input, cv::Mat &output){
+void HSVFilter::filterImage(const cv::Mat &input, cv::Mat &output){
 
     cv::cvtColor(input, hsvOutput, CV_BGR2HSV, 0);
     cv::inRange(hsvOutput, cv::Scalar(_iLowH, _iLowS, _iLowV), cv::Scalar(_iHighH, _iHighS, _iHighV), rangeOutput);
@@ -72,7 +72,7 @@ void snowbotsFilter::filterImage(const cv::Mat &input, cv::Mat &output){
     rangeOutput.copyTo(output);
 }
 
-void snowbotsFilter::printValues(void){
+void HSVFilter::printValues(void){
     std::cout << "iLowH: " << _iLowH << std::endl;
     std::cout << "iHighH: " << _iHighH << std::endl;
     std::cout << "iLowS: " << _iLowS << std::endl;
@@ -81,7 +81,7 @@ void snowbotsFilter::printValues(void){
     std::cout << "iHighV: " << _iHighV << std::endl;
 }
 
-std::string snowbotsFilter::getValues(void){
+std::string HSVFilter::getValues(void){
     std::stringstream values;
     values << _iLowH << " " << _iHighH << " "
     << _iLowS << " " << _iHighS << " "

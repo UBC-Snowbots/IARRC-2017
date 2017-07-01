@@ -1,7 +1,7 @@
 /*
  * Created By: Robyn Castro
  * Created On: June 17, 2017
- * Description: Determines whether or not green is seen on
+ * Description: Determines whether or not a circle is seen on
  *              the screen then publishes a recommended twist
  *              message.
  */
@@ -14,7 +14,7 @@ using namespace cv;
 using namespace std;
 using namespace cv_bridge;
 
-GreenRecognition::GreenRecognition(std::string &image_path) {
+CircleDetection::CircleDetection(std::string &image_path) {
 
     cv::Mat bgr_image = imread(image_path);
 
@@ -28,11 +28,11 @@ GreenRecognition::GreenRecognition(std::string &image_path) {
 
 }
 
-GreenRecognition::GreenRecognition() {
+CircleDetection::CircleDetection() {
     minTargetRadius = 20;
 }
 
-GreenRecognition::GreenRecognition(int argc, char **argv, std::string node_name) {
+CircleDetection::CircleDetection(int argc, char **argv, std::string node_name) {
 
     // Setup handles
     ros::init(argc, argv, node_name);
@@ -45,13 +45,13 @@ GreenRecognition::GreenRecognition(int argc, char **argv, std::string node_name)
     // Setup subscriber
     std::string image_topic = "/robot/vision/filtered_image";
     int refresh_rate = 10;
-    image_sub = it.subscribe<GreenRecognition>(image_topic, refresh_rate,
-                                               &GreenRecognition::subscriberCallBack, this);
+    image_sub = it.subscribe<CircleDetection>(image_topic, refresh_rate,
+                                              &CircleDetection::filteredImageCallBack, this);
 
     // Setup publishers
     std::string output_topic = "/robot/vision/green_detected";
     uint32_t queue_size = 1;
-    boolean_pub = private_nh.advertise<std_msgs::Bool>(output_topic, queue_size);
+    is_green_detected_pub = private_nh.advertise<std_msgs::Bool>(output_topic, queue_size);
 
     // Get some params
     SB_getParam(private_nh, "minimum_target_radius", minTargetRadius, 50);
@@ -59,22 +59,22 @@ GreenRecognition::GreenRecognition(int argc, char **argv, std::string node_name)
 
 }
 
-void GreenRecognition::subscriberCallBack(const sensor_msgs::Image::ConstPtr &image) {
+void CircleDetection::filteredImageCallBack(const sensor_msgs::Image::ConstPtr &image) {
 
     // If something is seen tell the robot to move
     int numCircles = countCircles(rosToMat(image));
     std_msgs::Bool circle_detected;
     circle_detected.data = numCircles > 0;
-    boolean_pub.publish(circle_detected);
+    is_green_detected_pub.publish(circle_detected);
 }
 
-Mat GreenRecognition::rosToMat(const sensor_msgs::Image::ConstPtr &image) {
+Mat CircleDetection::rosToMat(const sensor_msgs::Image::ConstPtr &image) {
     CvImagePtr imagePtr;
     imagePtr = toCvCopy(image, image->encoding);
     return imagePtr->image;
 }
 
-int GreenRecognition::countCircles(const Mat &filtered_image) {
+int CircleDetection::countCircles(const Mat &filtered_image) {
 
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
@@ -88,6 +88,7 @@ int GreenRecognition::countCircles(const Mat &filtered_image) {
     } catch(cv::Exception) {
         bwImage = filtered_image;
     }
+    // Find contours of the black and white image
     cv::findContours(bwImage.clone(), contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
 
     size_t count = contours.size();
@@ -110,7 +111,7 @@ int GreenRecognition::countCircles(const Mat &filtered_image) {
     return center.size();
 }
 
-void GreenRecognition::showFilteredObjectsWindow(const Mat &filtered_image, std::vector<cv::Point2i> center,
+void CircleDetection::showFilteredObjectsWindow(const Mat &filtered_image, std::vector<cv::Point2i> center,
                                                  std::vector<int> radii) {
     size_t center_count = center.size();
     cv::Scalar green(0, 255, 0);
@@ -125,7 +126,7 @@ void GreenRecognition::showFilteredObjectsWindow(const Mat &filtered_image, std:
 
 }
 
-void GreenRecognition::check_if_image_exist(const cv::Mat &img, const std::string &path) {
+void CircleDetection::check_if_image_exist(const cv::Mat &img, const std::string &path) {
     if (img.empty()) {
         std::cout << "Error! Unable to load image: " << path << std::endl;
         std::exit(-1);

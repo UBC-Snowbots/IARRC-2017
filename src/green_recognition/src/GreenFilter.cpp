@@ -18,10 +18,10 @@ GreenFilter::GreenFilter(std::string &image_path){
     check_if_image_exist(bgr_image, image_path);
 
     Mat output_image;
-    snowbotsFilter testFilter = snowbotsFilter();
+    HSVFilter testFilter = HSVFilter();
     testFilter.filterImage(bgr_image, output_image);
 
-    GreenRecognition *greenRecognition = new GreenRecognition();
+    CircleDetection *greenRecognition = new CircleDetection();
 
     cvtColor(output_image, output_image, CV_GRAY2BGR);
     greenRecognition->countCircles(output_image);
@@ -54,7 +54,7 @@ GreenFilter::GreenFilter(int argc, char **argv, std::string node_name) {
     // Setup subscriber
     int refresh_rate = 10;
     image_sub = it.subscribe<GreenFilter>(image_topic, refresh_rate,
-                                          &GreenFilter::subscriberCallBack, this);
+                                          &GreenFilter::rawImageCallBack, this);
     // Setup publisher
     uint32_t queue_size = 1;
     filter_pub = it.advertise(output_topic, queue_size);
@@ -69,7 +69,7 @@ GreenFilter::GreenFilter(int argc, char **argv, std::string node_name) {
     setUpFilter();
 }
 
-void GreenFilter::subscriberCallBack(const sensor_msgs::Image::ConstPtr &image) {
+void GreenFilter::rawImageCallBack(const sensor_msgs::Image::ConstPtr &image) {
 
     imageInput = rosToMat(image);
 
@@ -125,7 +125,7 @@ void GreenFilter::setUpFilter() {
             if (iss >> lh >> hh >> ls >> hs >> lv >> hv) {
                 ROS_INFO("Filter file found");
                 ROS_INFO("Filter initializing with: %d %d %d %d %d %d", lh, hh, ls, hs, lv, hv);
-                filter = snowbotsFilter(lh, hh, ls, hs, lv, hv);
+                filter = HSVFilter(lh, hh, ls, hs, lv, hv);
                 filter_set = true;
             }
         }
@@ -133,7 +133,7 @@ void GreenFilter::setUpFilter() {
     if (!filter_set) {
         ROS_INFO("Filter file not found");
         ROS_INFO("Filter initialized with default values");
-        filter = snowbotsFilter(0, 155, 0, 155, 150, 255);
+        filter = HSVFilter(0, 155, 0, 155, 150, 255);
     }
     filter_file.close();
 
