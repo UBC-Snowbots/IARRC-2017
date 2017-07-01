@@ -38,7 +38,7 @@
 #include <fstream>
 
 // Snowbots
-#include <HSVFilter.h>
+#include "../../vision/include/HSVFilter.h"
 #include <sb_utils.h>
 #include <CircleDetection.h>
 

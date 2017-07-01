@@ -8,11 +8,16 @@ project(vision)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  rospy
-  std_msgs
-)
+        roscpp
+        rospy
+        image_transport
+        cv_bridge
+        )
 
+find_package(OpenCV REQUIRED)
+find_package(sb_utils REQUIRED)
+
+add_definitions(-std=c++14)
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -117,9 +122,23 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
-  ${catkin_INCLUDE_DIRS}
+        ${catkin_INCLUDE_DIRS}
+        ${sb_utils_INCLUDE_DIRS}
+        ${OpenCV_INCLUDE_DIRS}
+        ./include
 )
 
+add_executable(HSVFilter
+        src/HSVFilter.cpp
+        include/HSVFilter.h
+        )
+
+
+target_link_libraries(HSVFilter
+        ${catkin_LIBRARIES}
+        ${OpenCV_LIBS}
+        ${sb_utils_LIBRARIES}
+        )
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/beginner_tutorials.cpp
