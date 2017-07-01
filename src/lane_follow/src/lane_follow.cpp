@@ -6,8 +6,7 @@
  */
 
 #include <LaneFollow.h>
-#include <ros/ros.h>
-
+// #include <ros/ros.h>
 // temp headers
 #include <opencv2/opencv.hpp>
 
@@ -24,8 +23,9 @@ int main(int argc, char** argv) {
     // Once the node stops, return 0
     return 0;
      **/
+
     LineDetect ld;
-    std::string cameraFilePath = "/dev/video1";
+    std::string cameraFilePath = "/dev/video0";
     std::string window_name = "Processed Video";
     // resizable window;
     cv::VideoCapture capture(cameraFilePath);
@@ -35,15 +35,10 @@ int main(int argc, char** argv) {
     {
         capture >> image;
         if (image.empty())
-            continue;
+            break;
         auto discardedLines = ld.findLines(image);
 
 
     }
-
-
-
-
-
 }
 

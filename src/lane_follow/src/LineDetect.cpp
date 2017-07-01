@@ -45,10 +45,9 @@ Added image ROI to reduce false lines from things like trees/power lines
  */
 
 #include <LineDetect.h>
-#include <opencv2/opencv.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/objdetect/objdetect.hpp>
-#include <string>
 
 using namespace cv;
 
@@ -74,63 +73,53 @@ void LineDetect::setShift(int imgShift) {
     shift = imgShift;
 }
 
-cv::Mat LineDetect::getROI(cv::Mat& image) {
-    // set the ROI for the image
-    Rect roi(0, image.cols/3, image.cols-1, image.rows - image.cols/3);
-    Mat imageROI = image(roi);
-
-    // display the image
-    if (showSteps) {
-        namedWindow("ROI Image");
-        imshow("ROI Image", imageROI);
-        // imwrite("original.bmp", imageROI);
-    }
-
-    return imageROI;
-}
-
 std::vector<cv::Vec4i> LineDetect::findLines(cv::Mat& image) {
 
     std::vector<cv::Vec4i> lines;
 
-    namedWindow("Raw Image");
-    imshow("Raw Image", image);
+    // namedWindow("Raw Image");
+    // imshow("Raw Image", image);
 
-    cv::Mat imageROI = getROI(image);
+    cv::Mat imageROI = getGrayROI(image);
     cv::Mat imageContours = getBinaryMap(imageROI);
+
+    setAccResolution(1, CV_PI/180);
+    setMinVote(80);
+    setLineLengthAndGap(30, 10);
 
     cv::HoughLinesP(imageContours, lines, deltaRho, deltaTheta, minVote, minLength, maxGap);
 
     // Display the detected line image
     if (showSteps) {
-        cv::Mat imageLines = drawLines(lines, imageROI);
+        Mat imageLines(imageContours.size(), CV_8U, Scalar(0));
+        drawDetectedLines(imageLines, cv::Scalar(255), lines);
+
         namedWindow("Lines");
         imshow("Lines", imageLines);
     }
 
     if (showSteps)
         waitKey(10);
-    return lines;
 
+    return lines;
 }
 
-/**
-void LineDetect::drawDetectedLines(cv::Mat &image, cv::Scalar color) {
-
+void LineDetect::drawDetectedLines(cv::Mat& image, cv::Scalar color, std::vector<cv::Vec4i> lines) {
     // Draw the lines
-    std::vector<cv::Vec4i>::const_iterator iterator2 = lines.begin();
+    auto it = lines.begin();
 
-    while (iterator2 != lines.end()) {
+    while (it != lines.end()) {
 
-        cv::Point pt1((*iterator2)[0], (*iterator2)[1] + shift);
-        cv::Point pt2((*iterator2)[2], (*iterator2)[3] + shift);
+        cv::Point pt1((*it)[0], (*it)[1] + shift);
+        cv::Point pt2((*it)[2], (*it)[3] + shift);
 
         cv::line(image, pt1, pt2, color, 6);
         std::cout << "HoughP line: ("<< pt1 <<"," << pt2 << ")\n";
-        ++iterator2;
+        ++it;
     }
 }
 
+/**
 std::vector<cv::Vec4i> LineDetect::removeLinesOfInconsistentOrientations(
         const cv::Mat &orientations, double percentage, double delta) {
 
@@ -177,86 +166,45 @@ std::vector<cv::Vec4i> LineDetect::removeLinesOfInconsistentOrientations(
 }
 **/
 
-/**
-void LineDetect::getVideo() {
-
-    bool showSteps = true;
-    std::string cameraFilePath = "/dev/ttyUSB0";
-    std::string window_name = "Processed Video";
-    // resizable window;
-    namedWindow(window_name, CV_WINDOW_KEEPRATIO);
-    VideoCapture capture(cameraFilePath);
-
-    // if this fails, try to open as a video camera, through the use of integer param
-    if (!capture.isOpened())
-        capture.open(atoi(cameraFilePath.c_str()));
-
-    // get the width of frames of the video
-    double dWidth = capture.get(CV_CAP_PROP_FRAME_WIDTH);
-
-    // get the height of frames of the video
-    double dHeight = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
-
-    std::cout << "Frame Size = " << dWidth << "x" << dHeight << std::endl;
-
-    Size frameSize(static_cast<int>(dWidth), static_cast<int>(dHeight));
-
-    // initialize the VideoWriter object
-    VideoWriter oVideoWriter("LaneDetection.avi", CV_FOURCC('P', 'I', 'M', '1'), 20, frameSize, true);
-
-    Mat image = imread(cameraFilePath);
-    while (1) {
-        capture >> image;
-        if (image.empty())
-            break;
-        Mat gray;
-        cvtColor(image,gray,CV_RGB2GRAY);
-        std::vector<std::string> codes;
-        Mat corners;
-        findDataMatrix(gray, codes, corners);
-        drawDataMatrixCodes(image, codes, corners);
-
-    }
-
+cv::Mat LineDetect::getGrayROI(cv::Mat& image) {
     // set the ROI for the image
+    Mat gray;
+    cvtColor(image, gray, CV_RGB2GRAY);
     Rect roi(0, image.cols/3, image.cols-1, image.rows - image.cols/3);
-    Mat imgROI = image(roi);
+    Mat ROI = image(roi);
 
     // display the image
     if (showSteps) {
-        namedWindow("Original Image");
-        imshow("Original Image", imgROI);
-        imwrite("original.bmp", imgROI);
+        namedWindow("ROI Image");
+        imshow("ROI Image", ROI);
     }
-}
-**/
 
-cv::Mat LineDetect::getBinaryMap(cv::Mat& image) {
-    // Convert raw image to grayscale image
-    Mat gray;
-    cvtColor(image, gray, CV_RGB2GRAY);
+    return ROI;
+}
+
+cv::Mat LineDetect::getBinaryMap(cv::Mat& imageROI) {
     // Canny algorithm
     cv::Mat contours;
-    Canny(gray, contours, 50, 250);
-    houghVoteAdjust(contours, image);
+    Canny(imageROI, contours, 50, 250, 3);
     cv::Mat contoursInv;
-    threshold(image, contoursInv, 128, 255, THRESH_BINARY_INV);
+    threshold(contours, contoursInv, 128, 255, THRESH_BINARY_INV);
+
+    houghVoteAdjust(contours, imageROI);
 
     // display Canny image
     if (showSteps) {
-        namedWindow("Contours Inverse");
-        imshow("Contours Inverse", contoursInv);
-
         namedWindow("Contours");
         imshow("Contours", contours);
+
+        namedWindow("Contours Inverse");
+        imshow("Contours Inverse", contoursInv);
     }
 
     return contours;
 }
 
 void LineDetect::houghVoteAdjust(cv::Mat& contours, cv::Mat& imageROI) {
-
-    std::vector <Vec2f> lines;
+    std::vector<Vec2f> lines;
 
     // all lines are lost so reset
     if (houghVote < 1 or lines.size() > 2)
@@ -275,11 +223,10 @@ void LineDetect::houghVoteAdjust(cv::Mat& contours, cv::Mat& imageROI) {
 
 }
 
-cv::Mat LineDetect::drawLines(std::vector<cv::Vec4i> lines, cv::Mat& imageROI) {
-
+cv::Mat LineDetect::drawLines(std::vector<cv::Vec4i> lines, cv::Mat& imageContours) {
     // Draw the lines
     auto it = lines.begin();
-    Mat hough(imageROI.size(), CV_8U, Scalar(0));
+    Mat hough(imageContours.size(), CV_8U, Scalar(0));
     while (it != lines.end()) {
         // first element is distance rho
         float rho = (*it)[0];
@@ -303,54 +250,3 @@ cv::Mat LineDetect::drawLines(std::vector<cv::Vec4i> lines, cv::Mat& imageROI) {
 
     return result;
 }
-
-/**
-void LineDetect::andHoughPHough(cv::Mat& image, cv::Mat& imageROI) {
-
-    // bitwise AND of the two Hough images
-    bitwise_and(houghP, hough, houghP);
-    Mat houghPinv(image.size(), CV_8U, Scalar(0));
-    Mat dst(imgROI.size(), CV_8U, Scalar(0));
-    // threshold and invert to black lines
-    threshold(houghP, houghPinv, 150, 255, THRESH_BINARY_INV);
-
-    if (showSteps) {
-        namedWindow("Detected Lines with Bitwise");
-        imshow("Detected Lines with Bitwise", houghPinv);
-    }
-
-    Canny(houghPinv, contours, 100, 350);
-    li = ld.findLines(contours);
-
-    // Display Canny image
-    if (showSteps) {
-        namedWindow("Contours");
-        imshow("Contours2", contours);
-        imwrite("contours.bmp", contoursInv);
-    }
-
-    // Set probabilistic Hough parameters
-    ld.setLineLengthAndGap(5, 2);
-    ld.setMinVote(1);
-    ld.setShift(image.cols / 3);
-    ld.drawDetectedLines(image);
-
-    std::stringstream stream;
-    stream << "Lines Segments: " << lines.size();
-
-    putText(image, stream.str(), Point(10, image.rows - 10), 2, 0.8, Scalar(0, 0, 255), 0);
-    imshow(window_name, image);
-    imwrite("processed.bmp", image);
-
-    // Writes the frame into the file
-    oVideoWriter.write(image);
-
-    char key = (char) waitKey(10);
-    lines.clear();
-}
- **/
-
-
-
-
-

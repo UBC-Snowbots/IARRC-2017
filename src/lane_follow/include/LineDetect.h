@@ -29,7 +29,6 @@ Copyright (C) 2013 Jason Dorweiler, www.transistor.io
 #ifndef LANE_FOLLOW_LINEDETECT_H
 #define LANE_FOLLOW_LINEDETECT_H
 
-#include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/core/core.hpp>
 #include <iostream>
 #include <vector>
@@ -100,9 +99,9 @@ public:
     /**
      * Draws the detected lines on an image
      *
-     * @param address of raw image matrix, pixel color value of the lines
+     * @param address of binary map matrix, pixel color value of the lines, probabilistic Hough transform lines
      */
-	void drawDetectedLines(cv::Mat &image, cv::Scalar color=cv::Scalar(255));
+	void drawDetectedLines(cv::Mat &image, cv::Scalar color, std::vector<cv::Vec4i> lines);
 
     /**
      * Eliminates lines that do not have an orientation equals to the ones
@@ -121,14 +120,13 @@ public:
                                                                  double percentage, double delta);
 
     /**
-     * Reads in the image to process from the terminal
-     */
-    void getVideo();
-
-    /**
      * Gets binary map of image ROI using Canny algorithm
+     *
+     * @param address of image ROI matrix
+     *
+     * @return binary map matrix
      */
-    cv::Mat getBinaryMap(cv::Mat& image);
+    cv::Mat getBinaryMap(cv::Mat& imageROI);
 
     /**
      * Increases houghVote by 25 for the next frame if we found some lines
@@ -139,23 +137,23 @@ public:
     void houghVoteAdjust(cv::Mat& contours, cv::Mat& imageROI);
 
     /**
-     * Draws lane lines on the image ROI
-     */
-    cv::Mat drawLines(std::vector<cv::Vec4i> lines, cv::Mat& imageROI);
-
-    /**
-     * Performs a bitwise AND operation on both Hough images
+     * Draws lane lines on the binary map matrix
      *
-     * Regular Hough transform does not find endpoints and
-     * probabilistic Hough transform finds endpoints but several
-     * other unwanted lines, so bitwise AND to output the ideal lines
+     * @param Hough lines, address of binary map matrix
+     *
+     * @return filtered image matrix
+     *
      */
-    void andHoughPHough(cv::Mat& image, cv::Mat& imageROI);
+    cv::Mat drawLines(std::vector<cv::Vec4i> lines, cv::Mat& imageContours);
 
     /**
-     * Takes in raw image and gets ROI
+     * Gets grayscale ROI image
+     *
+     * @param address of raw image matrix
+     *
+     * @return grayscale ROI image
      */
-    cv::Mat getROI(cv::Mat& image);
+    cv::Mat getGrayROI(cv::Mat& image);
 
 private:
 
