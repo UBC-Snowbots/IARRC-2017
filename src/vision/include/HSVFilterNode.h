@@ -38,25 +38,25 @@
 #include <fstream>
 
 // Snowbots
-#include "../../vision/include/HSVFilter.h"
+#include "HSVFilter.h"
 #include <sb_utils.h>
 #include <CircleDetection.h>
 
 using namespace cv;
 
-class GreenFilter {
+class HSVFilterNode {
 
 public:
 
     /**
      * Constructor used for testing
      */
-    GreenFilter(std::string &image_path);
+    HSVFilterNode(std::string &image_path);
 
     /**
      * Constructor
      */
-    GreenFilter(int argc, char **argv, std::string node_name);
+    HSVFilterNode(int argc, char **argv, std::string node_name);
 
 private:
 

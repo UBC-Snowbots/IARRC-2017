@@ -131,6 +131,9 @@ include_directories(
 add_executable(HSVFilter
         src/HSVFilter.cpp
         include/HSVFilter.h
+        src/hsv_filter.cpp
+        src/HSVFilterNode.cpp
+        include/HSVFilterNode.h
         )
 
 

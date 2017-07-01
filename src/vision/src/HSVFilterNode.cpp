@@ -5,13 +5,13 @@
  *
  */
 
-#include <GreenFilter.h>
+#include "../include/HSVFilterNode.h"
 
 using namespace cv;
 using namespace std;
 using namespace cv_bridge;
 
-GreenFilter::GreenFilter(std::string &image_path){
+HSVFilterNode::HSVFilterNode(std::string &image_path){
     cv::Mat bgr_image = imread(image_path);
 
     // Check if the image can be loaded
@@ -32,9 +32,9 @@ GreenFilter::GreenFilter(std::string &image_path){
     imshow("Raw Image", bgr_image);
     waitKey(0);
 }
-GreenFilter::GreenFilter(int argc, char **argv, std::string node_name) {
+HSVFilterNode::HSVFilterNode(int argc, char **argv, std::string node_name) {
 
-    displayWindowName = "Snowbots - GreenFilter";
+    displayWindowName = "Snowbots - HSVFilterNode";
     receivedFirstImage = false;
 
     //ROS
@@ -53,8 +53,8 @@ GreenFilter::GreenFilter(int argc, char **argv, std::string node_name) {
 
     // Setup subscriber
     int refresh_rate = 10;
-    image_sub = it.subscribe<GreenFilter>(image_topic, refresh_rate,
-                                          &GreenFilter::rawImageCallBack, this);
+    image_sub = it.subscribe<HSVFilterNode>(image_topic, refresh_rate,
+                                          &HSVFilterNode::rawImageCallBack, this);
     // Setup publisher
     uint32_t queue_size = 1;
     filter_pub = it.advertise(output_topic, queue_size);
@@ -69,7 +69,7 @@ GreenFilter::GreenFilter(int argc, char **argv, std::string node_name) {
     setUpFilter();
 }
 
-void GreenFilter::rawImageCallBack(const sensor_msgs::Image::ConstPtr &image) {
+void HSVFilterNode::rawImageCallBack(const sensor_msgs::Image::ConstPtr &image) {
 
     imageInput = rosToMat(image);
 
@@ -101,13 +101,13 @@ void GreenFilter::rawImageCallBack(const sensor_msgs::Image::ConstPtr &image) {
     filter_pub.publish(output_message);
 }
 
-Mat GreenFilter::rosToMat(const sensor_msgs::Image::ConstPtr &image) {
+Mat HSVFilterNode::rosToMat(const sensor_msgs::Image::ConstPtr &image) {
     CvImagePtr imagePtr;
     imagePtr = toCvCopy(image, image->encoding);
     return imagePtr->image;
 }
 
-void GreenFilter::setUpFilter() {
+void HSVFilterNode::setUpFilter() {
 
     // Sets up filter update frequency
     publish_interval = ros::Duration(1 / frequency);
@@ -140,7 +140,7 @@ void GreenFilter::setUpFilter() {
     ROS_WARN("Waiting for first image");
 }
 
-void GreenFilter::updateFilter() {
+void HSVFilterNode::updateFilter() {
 
     // Color filter calibration
     if (isCalibratingManually)
@@ -168,7 +168,7 @@ void GreenFilter::updateFilter() {
     }
 }
 
-void GreenFilter::showRawAndFilteredImageWindow() {
+void HSVFilterNode::showRawAndFilteredImageWindow() {
     // Create one big mat for all our images
     cv::Size main_window_size(image_width * 2, image_height * 2);
     cv::Size sub_window_size(main_window_size.width / 2, main_window_size.height / 2);
@@ -197,7 +197,7 @@ void GreenFilter::showRawAndFilteredImageWindow() {
     resize(allBlack, image4Roi, sub_window_size);
 }
 
-void GreenFilter::check_if_image_exist(const cv::Mat &img, const std::string &path) {
+void HSVFilterNode::check_if_image_exist(const cv::Mat &img, const std::string &path) {
     if (img.empty()) {
         std::cout << "Error! Unable to load image: " << path << std::endl;
         std::exit(-1);

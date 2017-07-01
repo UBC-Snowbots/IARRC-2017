@@ -1,15 +1,15 @@
 #include <gtest/gtest.h>
 #include <CircleDetection.h>
-#include <GreenFilter.h>
+#include "../../vision/include/HSVFilterNode.h"
 
 TEST(realImage, GreenLight) {
     std::string image_path = "images/GreenLight.jpg";
-    GreenFilter *greenFilter = new GreenFilter(image_path);
+    HSVFilterNode *greenFilter = new HSVFilterNode(image_path);
 }
 
 TEST(realImage, RedLight) {
     std::string image_path = "images/RedLight.jpg";
-    GreenFilter *greenFilter = new GreenFilter(image_path);
+    HSVFilterNode *greenFilter = new HSVFilterNode(image_path);
 }
 
 TEST(filteredImage, oneCircle) {

@@ -41,25 +41,11 @@ add_executable(circle_detection
         include/CircleDetection.h
         )
 
-add_executable(green_filter
-        src/green_filter.cpp
-        src/GreenFilter.cpp
-        include/GreenFilter.h
-        include/CircleDetection.h
-        src/CircleDetection.cpp
-        )
-
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(sample_package_node
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(circle_detection
-        ${catkin_LIBRARIES}
-        ${OpenCV_LIBS}
-        ${sb_utils_LIBRARIES}
-        )
-
-target_link_libraries(green_filter
         ${catkin_LIBRARIES}
         ${OpenCV_LIBS}
         ${sb_utils_LIBRARIES}
@@ -77,6 +63,6 @@ target_link_libraries(green_filter
 
 if (CATKIN_ENABLE_TESTING)
     # gTest
-    catkin_add_gtest(green-recognition-test test/green-recognition-test.cpp ../vision/src/HSVFilter.cpp src/GreenFilter.cpp src/CircleDetection.cpp)
+    catkin_add_gtest(green-recognition-test test/green-recognition-test.cpp ../vision/src/HSVFilter.cpp ../vision/src/HSVFilterNode.cpp src/CircleDetection.cpp)
     target_link_libraries(green-recognition-test ${catkin_LIBRARIES})
 endif()
