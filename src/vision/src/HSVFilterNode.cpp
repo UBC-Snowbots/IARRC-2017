@@ -21,10 +21,10 @@ HSVFilterNode::HSVFilterNode(std::string &image_path){
     HSVFilter testFilter = HSVFilter();
     testFilter.filterImage(bgr_image, output_image);
 
-    CircleDetection *greenRecognition = new CircleDetection();
+    CircleDetection *circleDetection = new CircleDetection();
 
     cvtColor(output_image, output_image, CV_GRAY2BGR);
-    greenRecognition->countCircles(output_image);
+    circleDetection->countCircles(output_image);
 
     namedWindow("Filtered Objects", WINDOW_AUTOSIZE);
     imshow("Filtered Objects", output_image);
@@ -62,7 +62,7 @@ HSVFilterNode::HSVFilterNode(int argc, char **argv, std::string node_name) {
     // Get some params (not all though, we wait until we have an image to get the rest)
     SB_getParam(private_nh, "update_frequency", frequency, 5.0);
     SB_getParam(private_nh, "config_file", mfilter_file,
-                ros::package::getPath("green_recognition") + "/launch/filter_init.txt");
+                ros::package::getPath("circle_detection") + "/launch/filter_init.txt");
     SB_getParam(private_nh, "show_image_window", showWindow, true);
     SB_getParam(private_nh, "show_calibration_window", isCalibratingManually, false);
 

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-    <name>green_recognition</name>
+    <name>circle_detection</name>
     <version>0.0.0</version>
     <description>
         Package for recognition of green
@@ -8,8 +8,6 @@
 
     <!-- One maintainer tag required, multiple allowed, one person per tag -->
     <maintainer email="robyny3k@gmail.com">Robyn</maintainer>
-    <maintainer email="leri.ratu@gmail.com">Valerian</maintainer>
-    <maintainer email="gellis@alumni.ubc.ca">Gareth</maintainer>
 
 
     <!-- One license tag required, multiple allowed, one license per tag -->
