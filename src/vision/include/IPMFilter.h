@@ -5,11 +5,28 @@
  *
  */
 
+// OpenCV
 #include <opencv2/core/core.hpp>
-#include <stdio.h>
-#include <opencv2/highgui/highgui.hpp>
-#include <iostream>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
+// Image conversion
+#include <image_transport/image_transport.h>
+#include <cv_bridge/cv_bridge.h>
+
+// I/O
+#include <stdio.h>
+#include <iostream>
+
+// ROS
+#include <ros/ros.h>
+#include <ros/package.h>
+#include <ros/time.h>
+#include <ros/console.h>
+#include <sb_utils.h>
+
+// Objects
+#include <IPM.h>
 
 class IPMFilter {
 
@@ -34,7 +51,7 @@ private:
     /**
      * Initializator
      *
-     * @params the appropriate HSV ranges
+     * @params image information and where to apply the IPM
      */
     void createFilter(float ipm_base_width, float ipm_top_width,
                       float ipm_base_displacement, float ipm_top_displacement

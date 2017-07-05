@@ -8,30 +8,8 @@
 #include "../include/HSVFilterNode.h"
 
 using namespace cv;
-using namespace std;
 using namespace cv_bridge;
 
-HSVFilterNode::HSVFilterNode(std::string &image_path){
-    cv::Mat bgr_image = imread(image_path);
-
-    // Check if the image can be loaded
-    check_if_image_exist(bgr_image, image_path);
-
-    Mat output_image;
-    HSVFilter testFilter = HSVFilter();
-    testFilter.filterImage(bgr_image, output_image);
-
-    CircleDetection *greenRecognition = new CircleDetection();
-
-    cvtColor(output_image, output_image, CV_GRAY2BGR);
-    greenRecognition->countCircles(output_image);
-
-    namedWindow("Filtered Objects", WINDOW_AUTOSIZE);
-    imshow("Filtered Objects", output_image);
-    namedWindow("Raw Image", WINDOW_AUTOSIZE);
-    imshow("Raw Image", bgr_image);
-    waitKey(0);
-}
 HSVFilterNode::HSVFilterNode(int argc, char **argv, std::string node_name) {
 
     displayWindowName = "Snowbots - HSVFilterNode";
@@ -44,7 +22,7 @@ HSVFilterNode::HSVFilterNode(int argc, char **argv, std::string node_name) {
 
     // Set topics
     std::string image_topic = "/robot/vision/raw_image";
-    std::string output_topic = "/robot/vision/filtered_image";
+    std::string output_topic = "/vision/hsv_filtered_image";
     ROS_INFO("Image (Subscribe) Topic: %s", image_topic.c_str());
     ROS_INFO("Output (Publish) Topic: %s", output_topic.c_str());
 
@@ -115,12 +93,12 @@ void HSVFilterNode::setUpFilter() {
 
     // Check for filter initialization file
     ROS_INFO("Looking for filter file at: %s", mfilter_file.c_str());
-    fstream filter_file(mfilter_file, ios::in);
-    string line;
+    std::fstream filter_file(mfilter_file, std::ios::in);
+    std::string line;
     bool filter_set = false;
     if (filter_file.is_open()) {
         if (getline(filter_file, line)) {
-            istringstream iss(line);
+            std::istringstream iss(line);
             int lh, hh, ls, hs, lv, hv;
             if (iss >> lh >> hh >> ls >> hs >> lv >> hv) {
                 ROS_INFO("Filter file found");
@@ -154,9 +132,9 @@ void HSVFilterNode::updateFilter() {
         } else {
             ROS_INFO("Ending manual calibration");
             ROS_INFO("Saving filter state in %s", mfilter_file.c_str());
-            fstream filter_file(mfilter_file, ios::trunc | ios::out);
+            std::fstream filter_file(mfilter_file, std::ios::trunc | std::ios::out);
             filter_file << filter.getValues();
-            cout << filter.getValues();
+            std::cout << filter.getValues();
             filter_file.close();
             filter.stopManualCalibration();
         }
@@ -202,4 +180,27 @@ void HSVFilterNode::check_if_image_exist(const cv::Mat &img, const std::string &
         std::cout << "Error! Unable to load image: " << path << std::endl;
         std::exit(-1);
     }
+}
+
+// Test Constructors
+HSVFilterNode::HSVFilterNode(std::string &image_path){
+    cv::Mat bgr_image = imread(image_path);
+
+    // Check if the image can be loaded
+    check_if_image_exist(bgr_image, image_path);
+
+    Mat output_image;
+    HSVFilter testFilter = HSVFilter();
+    testFilter.filterImage(bgr_image, output_image);
+
+    CircleDetection *greenRecognition = new CircleDetection();
+
+    cvtColor(output_image, output_image, CV_GRAY2BGR);
+    greenRecognition->countCircles(output_image);
+
+    namedWindow("Filtered Objects", WINDOW_AUTOSIZE);
+    imshow("Filtered Objects", output_image);
+    namedWindow("Raw Image", WINDOW_AUTOSIZE);
+    imshow("Raw Image", bgr_image);
+    waitKey(0);
 }
