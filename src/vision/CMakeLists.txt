@@ -130,10 +130,20 @@ include_directories(
 
 add_executable(HSVFilter
         src/HSVFilter.cpp
-        include/HSVFilter.h
         src/hsv_filter.cpp
         src/HSVFilterNode.cpp
+        include/HSVFilter.h
         include/HSVFilterNode.h
+        )
+
+add_executable(IPMFilter
+        src/IPMFilter.cpp
+        src/ipm_filter.cpp
+        src/IPMFilterNode.cpp
+        src/IPM.cpp
+        include/IPMFilter.h
+        include/IPMFilterNode.h
+        include/IPM.h
         )
 
 
@@ -142,6 +152,13 @@ target_link_libraries(HSVFilter
         ${OpenCV_LIBS}
         ${sb_utils_LIBRARIES}
         )
+
+target_link_libraries(IPMFilter
+        ${catkin_LIBRARIES}
+        ${OpenCV_LIBS}
+        ${sb_utils_LIBRARIES}
+        )
+
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/beginner_tutorials.cpp
