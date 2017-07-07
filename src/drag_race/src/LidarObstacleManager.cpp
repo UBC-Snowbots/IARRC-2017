@@ -5,11 +5,17 @@
  */
 
 #include <LidarObstacleManager.h>
+#include <stack>
 
-LidarObstacleManager::LidarObstacleManager(double max_obstacle_merging_distance):
-        max_obstacle_merging_distance(max_obstacle_merging_distance) {}
+LidarObstacleManager::LidarObstacleManager(
+        double max_obstacle_merging_distance,
+        double cone_grouping_tolerance
+):
+        max_obstacle_merging_distance(max_obstacle_merging_distance),
+        cone_grouping_tolerance(cone_grouping_tolerance)
+{}
 
-void LidarObstacleManager::addScan(sensor_msgs::LaserScan &scan) {
+void LidarObstacleManager::addLaserScan(sensor_msgs::LaserScan &scan) {
     // Create an obstacle for every hit in the lidar scan
     std::vector<LidarObstacle> temp_obstacles;
     for (int i = 0; i < scan.ranges.size(); ++i) {
@@ -23,6 +29,8 @@ void LidarObstacleManager::addScan(sensor_msgs::LaserScan &scan) {
 }
 
 void LidarObstacleManager::addObstacle(LidarObstacle obstacle) {
+    // See if this obstacle is close enough to any other saved obstacle to be the same
+    // TODO: Should we be instead checking for the CLOSEST saved obstcle?
     for (LidarObstacle saved_obstacle : obstacles) {
         if (minDistanceBetweenObstacles(saved_obstacle, obstacle)
             < max_obstacle_merging_distance)
@@ -56,17 +64,82 @@ double LidarObstacleManager::minDistanceBetweenObstacles(
     return min_distance;
 }
 
-Line LidarObstacleManager::getLongestConeLine() {
-
-    // Get points for all our cones
-    using Neighbours = std::vector<std::shared_ptr<Point>>;
-    std::vector<std::pair<Point, Neighbours>> cone_points;
-    for (LidarObstacle obstacle : obstacles) {
-        if (obstacle.getObstacleType() == CONE) {
-            cone_points.emplace_back(obstacle.getCenter());
+std::vector<LineOfBestFit> LidarObstacleManager::getConeLines() {
+    // Get all our cones as points
+    std::vector<Point> points;
+    for (LidarObstacle obstacle : obstacles){
+        if (obstacle.getObstacleType() == CONE){
+            points.emplace_back(obstacle.getCenter());
         }
     }
 
-    // Find all neighbours for all cones recursively
-    for
+    // Get groups of lines
+    std::vector<std::vector<Point>> groups = getPointGroupings(points, cone_grouping_tolerance);
+
+    // Fit a line of best fit to each group
+    std::vector<LineOfBestFit> lines;
+    std::transform(groups.begin(), groups.end(), lines.begin(), getLineOfBestFit);
+
+    return lines;
 }
+
+std::vector<std::vector<Point>> LidarObstacleManager::getPointGroupings(std::vector<Point> points, double tolerance) {
+
+    std::vector<std::vector<Point>> groups;
+
+    // Go through every point
+    while(points.size() > 0) {
+        // Start the current group off with the last point
+        std::vector<Point> group;
+        std::stack<Point> to_visit;
+        to_visit.emplace(group.back());
+        group.pop_back();
+        do {
+            // Visit the first point in to_visit
+            Point curr_point = to_visit.top();
+            to_visit.pop();
+
+            // Figure out if there are any points within tolerance of the point we're visiting
+            for (int i = 0; i < points.size(); i++){
+                Point p = points[i];
+                if (distanceBetweenPoints(curr_point, p) < tolerance) {
+                    // Add point to to_visit and remove from the given list of points
+                    to_visit.emplace(p);
+                    points.erase(points.begin() + i);
+                }
+            }
+
+            // Add the current point to the group
+            group.emplace_back(curr_point);
+
+            // Keep going if we've got more points to visit
+        } while (to_visit.size() > 0);
+
+        groups.emplace_back(group);
+    }
+
+    return groups;
+}
+
+LineOfBestFit LidarObstacleManager::getLineOfBestFit(const std::vector<Point> &points) {
+    // Get line of best fit using linear regression formula
+    // http://www.statisticshowto.com/how-to-find-a-linear-regression-equation/
+
+    double x_sum = std::accumulate(points.begin(), points.end(), 0,
+                                   [](double accum, Point p){ return accum + p.x; });
+    double y_sum = std::accumulate(points.begin(), points.end(), 0,
+                                   [](double accum, Point p){ return accum + p.y; });
+    double x_squared_sum = std::accumulate(points.begin(), points.end(), 0,
+                                   [](double accum, Point p){ return accum + std::pow(p.x, 2.0); });
+    double x_y_product_sum = std::accumulate(points.begin(), points.end(), 0,
+                                           [](double accum, Point p){ return accum + p.x * p.y; });
+    double intercept = (y_sum * x_squared_sum - x_sum * x_y_product_sum) /
+            (points.size() * x_squared_sum - std::pow(x_sum, 2.0));
+    double slope = (points.size() * x_y_product_sum - x_sum * y_sum) /
+            (points.size() * x_squared_sum - std::pow(x_sum, 2.0));
+
+    // TODO: calculate correlation coeffecient and add it here
+
+    return LineOfBestFit(slope, intercept, 0);
+}
+

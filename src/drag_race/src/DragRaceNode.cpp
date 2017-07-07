@@ -38,16 +38,16 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
 
 void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr& scan) {
     // Clear any obstacles we already have
-    obstacle_manager.clear_obstacles();
+    obstacle_manager.clearObstacles();
 
     // Insert the scan we just received
-    obstacle_manager.insertScan(*scan);
+    obstacle_manager.addLaserScan(*scan);
 
     // Get the obstacles (do we really need to if the obstacle maanger is doing all the work:?)
     //std::vector<LidarObstacle> obstacles = obstacle_manager.get_obstacles();
 
     // Get the longest line of cones
-    ConeLine longest_cone_line = obstacle_manager.getLongestConeLine();
+    Line longest_cone_line = obstacle_manager.getLongestConeLine();
 
     // Determine what we need to do to stay at the desired distance from the wall
     geometry_msgs::Twist twist = determineDesiredMotion(longest_cone_line);
