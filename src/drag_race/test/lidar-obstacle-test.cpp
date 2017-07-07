@@ -18,6 +18,7 @@ protected:
         obstacle3 = LidarObstacle(0.15, 15);
         obstacle4 = LidarObstacle(readings1);
         obstacle5 = LidarObstacle(readings2);
+
     }
 
     std::vector<Reading> readings1, readings2;
@@ -42,8 +43,9 @@ TEST_F(LidarObstacleTest, ContstructorMinWallLengthDefaultTest) {
     EXPECT_EQ(default_min_wall_length, vector_constructor.getMinWallLength());
     EXPECT_EQ(52, length_vector_constructor.getMinWallLength());
 
-    EXPECT_EQ(EMPTY, empty_constructor.getObstacleType());
-    EXPECT_EQ(EMPTY, min_length_constructor.getObstacleType());
+    // CLion doesn't like these lines, but it compiles fine.
+    EXPECT_EQ(NONE, empty_constructor.getObstacleType());
+    EXPECT_EQ(NONE, min_length_constructor.getObstacleType());
 }
 
 TEST_F(LidarObstacleTest, ConstructorTest1){
@@ -81,6 +83,59 @@ TEST_F(LidarObstacleTest, mergeInReadingsTest){
     EXPECT_NEAR(0.1, readings[0].angle, 0.000001);
     EXPECT_NEAR(0.15, readings[1].angle, 0.000001);
     EXPECT_NEAR(0.2, readings[2].angle, 0.000001);
+}
+
+TEST_F(LidarObstacleTest, determineObstacleTypeTest){
+    LidarObstacle empty_obstacle = LidarObstacle();
+    LidarObstacle cone_obstacle = LidarObstacle(1, {{0,1},{M_PI/6,1}});
+    LidarObstacle wall_obstacle = LidarObstacle(1, {{0,1},{M_PI/2,1}});
+
+    // CLion doesn't like this line, but it compiles fine.
+    EXPECT_EQ(NONE, empty_obstacle.getObstacleType());
+    EXPECT_EQ(CONE, cone_obstacle.getObstacleType());
+    EXPECT_EQ(WALL, wall_obstacle.getObstacleType());
+
+    // Change the NONE to a CONE
+    empty_obstacle.mergeInLidarObstacle(cone_obstacle);
+    EXPECT_EQ(CONE, empty_obstacle.getObstacleType());
+}
+
+TEST_F(LidarObstacleTest, getLengthTest){
+    LidarObstacle long_wall({{-M_PI/4, 1}, {-M_PI/6, 20}, {M_PI/4, 1}});
+    LidarObstacle cone({{0,1}, {M_PI/3, 1}});
+
+    EXPECT_DOUBLE_EQ(std::sqrt(2), long_wall.getLength());
+    EXPECT_DOUBLE_EQ(1, cone.getLength());
+}
+
+TEST_F(LidarObstacleTest, getReadingsAsPoints){
+    LidarObstacle test_obstacle({{-M_PI/4, 0.5}, {M_PI * 0.7, 0.9}});
+    std::vector<Point> test_points =
+            {{0.3535533905932738, -0.35355339059327373},
+             {-0.5290067270632258, 0.7281152949374528}};
+    std::vector<Point> test_obstacle_points = test_obstacle.getReadingsAsPoints();
+    EXPECT_DOUBLE_EQ(test_points[0].x, test_obstacle_points[0].x);
+    EXPECT_DOUBLE_EQ(test_points[0].y, test_obstacle_points[0].y);
+    EXPECT_DOUBLE_EQ(test_points[1].x, test_obstacle_points[1].x);
+    EXPECT_DOUBLE_EQ(test_points[1].y, test_obstacle_points[1].y);
+}
+
+TEST_F(LidarObstacleTest, getCenterTest){
+    LidarObstacle test_obstacle = LidarObstacle(0, 1);
+    Point center = test_obstacle.getCenter();
+    EXPECT_DOUBLE_EQ(center.x, 1.0);
+    EXPECT_DOUBLE_EQ(center.y, 0.0);
+    LidarObstacle mergme = LidarObstacle(M_PI/2,1);
+    test_obstacle.mergeInLidarObstacle(mergme);
+    center = test_obstacle.getCenter();
+    EXPECT_DOUBLE_EQ(center.x, 0.5);
+    EXPECT_DOUBLE_EQ(center.y, 0.5);
+}
+
+TEST(PointTest, distanceBetweenPointsTest) {
+    Point p1{-0.35312, 341.1231251134}, p2{345345.242, -323423.23};
+
+    EXPECT_DOUBLE_EQ(473378.21709845297, distanceBetweenPoints(p1, p2));
 }
 
 //TODO

@@ -24,7 +24,7 @@ LidarObstacle::LidarObstacle(std::vector<Reading> readings) :
 
 LidarObstacle::LidarObstacle(double min_wall_length, std::vector<Reading> readings) :
     min_wall_length(min_wall_length),
-    obstacle_type(EMPTY)
+    obstacle_type(NONE)
 {
     this->mergeInReadings(readings);
 }
@@ -123,13 +123,13 @@ void LidarObstacle::updateCenter() {
 
 void LidarObstacle::determineObstacleType() {
     // TODO: Setup some sort of min number of readings to be considered a cone
-    // If this obstacle has no readings, then it's EMPTY
+    // If this obstacle has no readings, then it's NONE
     if (readings.size() == 0)
-        obstacle_type = EMPTY;
+        obstacle_type = NONE;
     // If the obstacle is long enough, then it's a WALL
     else if (getLength() > min_wall_length)
         obstacle_type = WALL;
-    else // If it's not EMPTY or a WALL, then it's a CONE
+    else // If it's not NONE or a WALL, then it's a CONE
         obstacle_type = CONE;
 }
 
@@ -170,5 +170,12 @@ Point LidarObstacle::pointFromReading(const Reading &reading) {
     double x = reading.range * std::cos(reading.angle);
     double y = reading.range * std::sin(reading.angle);
     return Point{x, y};
+}
+
+double distanceBetweenPoints(const Point& p1, const Point& p2) {
+    return std::sqrt(std::pow(p1.x - p2.x, 2.0) + std::pow(p1.y - p2.y, 2.0));
+}
+bool operator==(const Point& p1, const Point& p2){
+    return (p1.x == p2.x && p1.y == p2.y);
 }
 
