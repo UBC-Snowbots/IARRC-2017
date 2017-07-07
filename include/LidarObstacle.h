@@ -18,7 +18,7 @@ using angle_t = double;
 
 // Types of Obstacle
 enum ObstacleType {
-    EMPTY,
+    NONE,
     CONE,
     WALL
 };
@@ -32,10 +32,8 @@ struct Point {
     double x;
     double y;
 };
-// TODO: Test me
-double distanceBetweenPoints(const Point& p1, const Point& p2) {
-    return std::sqrt(std::pow(p1.x - p2.x, 2.0) + std::pow(p1.y - p2.y, 2.0));
-}
+double distanceBetweenPoints(const Point& p1, const Point& p2);
+bool operator==(const Point& p1, const Point& p2);
 
 class LidarObstacle {
 public:
@@ -172,7 +170,6 @@ public:
     /** 
      * Determines and sets what the obstacle type should be
      */
-    // TODO: test me
     void determineObstacleType();
 
     /**
@@ -183,7 +180,7 @@ public:
      *
      * @return the length of the obstacle
      */
-    // TODO: test me
+     // TODO: This is a terrible definition. A reading slightly to the right of the leftmost reading could have infited range
     double getLength();
 
     /**
@@ -198,7 +195,6 @@ public:
      *
      * @return readings composing this obstacle as 2D Points
      */
-     // TODO: test me
     std::vector<Point> getReadingsAsPoints();
 
     /**
@@ -207,7 +203,6 @@ public:
      * @param reading the reading to compute the point for
      * @return the point interpretation of the given reading
      */
-     // TODO: test me
     Point pointFromReading(const Reading& reading);
 
     /**
