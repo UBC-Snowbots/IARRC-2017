@@ -12,20 +12,45 @@
 
 // ROS Includes
 #include <sensor_msgs/LaserScan.h>
+
 // SB Includes
 #include <LidarObstacle.h>
 
-// A basic line of the form: `y = slope * x + intercept`
-struct Line {
-    float slope;
-    float intercept;
+class SlopeInterceptLine {
+public:
+    SlopeInterceptLine(double slope, double intercept) :
+        slope(slope), intercept(intercept) {};
+
+    double slope;
+    double intercept;
+};
+
+/**
+ * A line with a Correlation Coefficient
+ */
+class LineOfBestFit : SlopeInterceptLine {
+public:
+    LineOfBestFit(double slope, double intercept, double correlation) :
+            SlopeInterceptLine(slope, intercept), correlation(correlation) {};
+
+    double correlation;
+};
+
+struct FiniteLine {
+    double start_x;
+    double start_y;
+    double slope;
+    double length;
 };
 
 class LidarObstacleManager {
 public:
     // TODO: Constructor
     // Should take: `min_obstacle_merging_distance`
-    LidarObstacleManager(double max_obstacle_merging_distance);
+    LidarObstacleManager(
+            double max_obstacle_merging_distance,
+            double cone_grouping_tolerance
+    );
 
     /**
      * Finds a saves obstacles from the given scan
@@ -35,7 +60,7 @@ public:
      *
      * @param scan the scan to be merged in
      */
-    void addScan(sensor_msgs::LaserScan& scan);
+    void addLaserScan(sensor_msgs::LaserScan& scan);
 
     /**
      * Clears all saved obstacles
@@ -43,15 +68,31 @@ public:
     void clearObstacles();
 
     /**
-     * Gets the longest line of cones in the saved obstacles
-     *
-     * @return the longest line of cones in the saved obstacles
+     * Gets all lines of cones in the saved obstacles
+     * @return all lines of cones in the saved obstacles
      */
-    Line getLongestConeLine();
+    std::vector<LineOfBestFit> getConeLines();
+
+    /**
+     * Gets a line of best fit for a given group of points
+     *
+     * @param points the points to fit the line to
+     */
+    static LineOfBestFit getLineOfBestFit(const std::vector<Point> &points);
+
+    /**
+     * Finds groups of points within a larger group of points
+     *
+     * @param points the points to find the groups in
+     * @param tolerance the maximum distance between any two points in a group
+     *
+     * @return a vector of groups of points (as vectors)
+     */
+    std::vector<std::vector<Point>> getPointGroupings(std::vector<Point> points, double tolerance);
 
 private:
     /**
-     * Merges to adds the given obstacle to the already saved ones
+     * Merges or adds the given obstacle to the already saved ones
      *
      * @param obstacle the obstacle to be added
      */
@@ -71,6 +112,10 @@ private:
 
     // The maximum distance between two obstacles for them to be considered the same
     double max_obstacle_merging_distance;
+
+    // The maximum permitted distance between cones in the same group
+    double cone_grouping_tolerance;
+
 };
 
 #endif //DRAG_RACE_LIDAROBSTACLEMANAGER_H

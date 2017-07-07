@@ -32,8 +32,9 @@ struct Point {
     double x;
     double y;
 };
-bool operator==(const Point& p1, const Point& p2) {
-    return (p1.x == p2.x && p1.y == p2.y);
+// TODO: Test me
+double distanceBetweenPoints(const Point& p1, const Point& p2) {
+    return std::sqrt(std::pow(p1.x - p2.x, 2.0) + std::pow(p1.y - p2.y, 2.0));
 }
 
 class LidarObstacle {
