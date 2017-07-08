@@ -16,14 +16,15 @@
 #include <string>
 #include <stdio.h>
 
-struct Polynomial2D {
-    int d1;
-    int d2;
+struct Polynomial {
+    float a;
+    float b;
+    float c;
 };
 
 struct Point {
-    int x;
-    int y;
+    float x;
+    float y;
 };
 
 typedef std::vector<int> intVec;
@@ -35,10 +36,10 @@ public:
     int width;
 
     int getLeftSide() {
-        return (center - window.width/2);
+        return (center - width/2);
     }
     int getRightSide() {
-        return (center + window.width/2);
+        return (center + width/2);
     }
 
 };
@@ -53,15 +54,15 @@ public:
 
     // TODO doc functions
 
-    std::vector<Polynomial2D> getLines(cv::Mat& filteredImage);
+    std::vector<Polynomial> getLines(cv::Mat& filteredImage);
 
-    std::vector<int> getHistogram(cv::Mat& image);
+    intVec getHistogram(cv::Mat& image);
 
     std::pair<int, int> getHistogramPeak(std::vector<int> histogram);
 
-    std::vector<Polynomial2D> constructPolyLine(std::vector<Point> anchors, double accuracy);
+    Polynomial fitPolyLine(std::vector<Point> points);
 
-    cv::Mat& getWindowSlice(cv::Mat& image, Window window, int verticalSliceIndex);
+    cv::Mat getWindowSlice(cv::Mat& image, Window window, int verticalSliceIndex);
 
 private:
     int white;
