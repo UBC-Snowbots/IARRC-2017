@@ -3,6 +3,7 @@ project(better_lane_follow)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
+        cmake_modules
         roscpp
         rospy
         image_transport
@@ -11,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(OpenCV REQUIRED)
 find_package(sb_utils REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 add_definitions(-std=c++14)
 
@@ -30,6 +32,7 @@ include_directories(
     ${catkin_INCLUDE_DIRS}
     ${sb_utils_INCLUDE_DIRS}
     ${OpenCV_INCLUDE_DIRS}
+    ${Eigen_INCLUDE_DIRS}
     ./include
 )
 
