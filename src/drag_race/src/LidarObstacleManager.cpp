@@ -15,7 +15,7 @@ LidarObstacleManager::LidarObstacleManager(
         cone_grouping_tolerance(cone_grouping_tolerance)
 {}
 
-void LidarObstacleManager::addLaserScan(sensor_msgs::LaserScan &scan) {
+void LidarObstacleManager::addLaserScan(const sensor_msgs::LaserScan &scan) {
     // Create an obstacle for every hit in the lidar scan
     std::vector<LidarObstacle> temp_obstacles;
     for (int i = 0; i < scan.ranges.size(); ++i) {

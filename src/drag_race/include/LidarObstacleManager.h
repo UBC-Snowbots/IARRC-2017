@@ -67,7 +67,7 @@ public:
      *
      * @param scan the scan to be merged in
      */
-    void addLaserScan(sensor_msgs::LaserScan& scan);
+    void addLaserScan(const sensor_msgs::LaserScan& scan);
 
     /**
      * Clears all saved obstacles

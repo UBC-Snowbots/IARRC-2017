@@ -9,8 +9,8 @@ add_definitions(--std=c++14)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
-    roscpp
-    )
+        roscpp
+        )
 find_package(sb_utils REQUIRED)
 
 ## System dependencies are found with CMake's conventions
@@ -18,7 +18,7 @@ find_package(sb_utils REQUIRED)
 
 # TODO: Wait. Do we need this line if we're not "exporting" the headers from the package
 catkin_package(
-  INCLUDE_DIRS include
+        INCLUDE_DIRS include
 )
 
 ###########
@@ -28,13 +28,19 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-    ${sb_utils_INCLUDE_DIRS}
-    ${catkin_INCLUDE_DIRS}
-    ./include
-    )
+        ${sb_utils_INCLUDE_DIRS}
+        ${catkin_INCLUDE_DIRS}
+        ./include
+)
 
 ## Declare a C++ executable
 # add_executable(${PROJECT_NAME}_node src/drag_race_node.cpp)
+add_executable(drag_race
+        src/drag_race_node.cpp
+        src/DragRaceNode.cpp
+        include/DragRaceNode.h
+        include/LidarObstacle.h
+        include/LidarObstacleManager.h)
 
 # TODO: Perhaps rename to something like `drag_race_controller_node`
 #add_executable(drag_race_node 
@@ -63,19 +69,24 @@ if (CATKIN_ENABLE_TESTING)
 
     # Adding gtests to the package
     catkin_add_gtest(lidar-obstacle-manager-test
-        test/lidar-obstacle-manager-test.cpp
-        src/LidarObstacleManager.cpp
-        src/LidarObstacle.cpp)
+            test/lidar-obstacle-manager-test.cpp
+            src/LidarObstacleManager.cpp
+            src/LidarObstacle.cpp)
     target_link_libraries(lidar-obstacle-manager-test ${catkin_LIBRARIES})
 
-    catkin_add_gtest(lidar-obstacle-test 
-        test/lidar-obstacle-test.cpp
-        src/LidarObstacle)
+    catkin_add_gtest(lidar-obstacle-test
+            test/lidar-obstacle-test.cpp
+            src/LidarObstacle)
     target_link_libraries(lidar-obstacle-test ${catkin_LIBRARIES})
+
+    catkin_add_gtest(drag-race-controller-test
+            test/drag-race-controller-test.cpp
+            src/DragRaceNode.cpp)
+    target_link_libraries(drag-race-controller-test ${catkin_LIBRARIES})
 
     # TODO: Maybe some rostests?
 
-endif()
+endif ()
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
