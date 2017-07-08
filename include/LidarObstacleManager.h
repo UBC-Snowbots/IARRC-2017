@@ -18,16 +18,16 @@
 
 class SlopeInterceptLine {
 public:
-    SlopeInterceptLine(double slope, double x_intercept) :
-        slope(slope), x_intercept(x_intercept) {}
+    SlopeInterceptLine(double slope, double y_intercept) :
+        slope(slope), y_intercept(y_intercept) {}
 
     inline double getSlope() { return slope; }
-    inline double getXIntercept() { return x_intercept; }
-    inline double getYIntercept() { return -x_intercept/slope; }
+    inline double getYIntercept() { return y_intercept; }
+    inline double getXIntercept() { return -y_intercept/slope; }
 
 protected:
     double slope;
-    double x_intercept;
+    double y_intercept;
 };
 
 /**
@@ -35,8 +35,8 @@ protected:
  */
 class LineOfBestFit : public SlopeInterceptLine {
 public:
-    LineOfBestFit(double slope, double x_intercept, double correlation) :
-            SlopeInterceptLine(slope, x_intercept), correlation(correlation) {}
+    LineOfBestFit(double slope, double y_intercept, double correlation) :
+            SlopeInterceptLine(slope, y_intercept), correlation(correlation) {}
 
     double correlation;
 };
