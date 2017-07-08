@@ -27,7 +27,7 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
                                 (twist_topic, queue_size);
     
     // Get Params
-    //SB_getParam(nh, "")
+    SB_getParam(nh, "target_distance", target_distance, 1);
     
     // TODO: Setup the obstacle manager with given params
     
@@ -50,12 +50,52 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr& scan) {
     Line longest_cone_line = obstacle_manager.getLongestConeLine();
 
     // Determine what we need to do to stay at the desired distance from the wall
-    geometry_msgs::Twist twist = determineDesiredMotion(longest_cone_line);
+    geometry_msgs::Twist twist = determineDesiredMotion(longest_cone_line, target_distance);
 
     // Publish our desired twist message
     twist_publisher.publish(twist); 
 }
 
-geometry_msgs::Twist DragRaceNode::determineDesiredMotion( sensor_msgs::LaserScan& scan) {
+geometry_msgs::Twist DragRaceNode::determineDesiredMotion(Line longestConeLine, double targetDistance) {
+
+    // Determine angle of line.
+    double theta = atan(longestConeLine->slope);
+
+    double distanceError = targetDistance - determineDistanceFromLine(longestConeLine);
+
+    geometry_msgs::Twist command;
+
+    // Set components we don't care about to 0
+    command.linear.y = 0;
+    command.linear.z = 0;
+    command.angular.x= 0;
+    command.angular.y = 0;
+
+    // Figure out how fast we should be turning
+    command.angular.z = theta + distanceError;
+
+    // Figure out how fast we should be moving forward
+    command.linear.x = 1 / (theta + distanceError);
+
+    return command;
+}
+
+double DragRaceNode::determineDistanceFromLine(Line line) {
+    double negReciprocal = -1 / line->slope;
+
+    /* Find the intersection between the line and its perpendicular line. */
+
+    // Set the two sides equal then isolate x to one side.
+    double isolatedXSlope = negReciprocal - line->slope;
+
+    // Divide both sides by the isolated slope to get the x point intersection.
+    double xIntersection = line->x_intercept / isolatedXSlope;
+
+    // Plug in the xIntersection to get the y point intersection.
+    double yIntersection = negReciprocal * xIntersection;
+
+    // Return distance found
+    return sqrt(pow(xIntersection,2) + pow(yIntersection,2));
 
 }
+

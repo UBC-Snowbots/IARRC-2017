@@ -29,15 +29,18 @@ public:
 
     // TODO: doc comment
     // TODO: TEST ME!
-    static geometry_msgs::Twist determineDesiredMotion(geometry_msgs::LaserScan& scan);
+    static geometry_msgs::Twist determineDesiredMotion(Line longestConeLine, double targetDistance);
 
 private:
     // TODO: Doc comment
     void scanCallBack(const sensor_msgs::LaserScan::ConstPtr& scan);
 
+    double determineDistanceFromLine(Line line);
+
     // Manages obstacles, including the cones and wall
     LidarObstacleManager obstacle_manager;
 
+    double target_distance;
     // Subscribes to the LaserScan
     ros::Subscriber scan_subscriber;
     ros::Publisher twist_publisher;
