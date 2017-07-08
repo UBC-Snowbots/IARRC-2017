@@ -19,7 +19,6 @@
 struct Polynomial2D {
     int d1;
     int d2;
-    int d3;
 };
 
 struct Point {
@@ -27,10 +26,21 @@ struct Point {
     int y;
 };
 
-// TODO refactor this to a class with functions for getting the left and right sides
-struct Window {
+typedef std::vector<int> intVec;
+
+class Window {
+
+public:
     int center;
     int width;
+
+    int getLeftSide() {
+        return (center - window.width/2);
+    }
+    int getRightSide() {
+        return (center + window.width/2);
+    }
+
 };
 
 class LineDetect {
@@ -43,20 +53,17 @@ public:
 
     // TODO doc functions
 
-    std::vector<Polynomial2D> getLines(cv::Mat& binaryImage);
+    std::vector<Polynomial2D> getLines(cv::Mat& filteredImage);
 
-    std::vector<int> getHistogram(cv::Mat& windowImage);
-
-    // TODO typedef histogram
+    std::vector<int> getHistogram(cv::Mat& image);
 
     std::pair<int, int> getHistogramPeak(std::vector<int> histogram);
 
-    Polynomial2D constructPolyLine(std::vector<Point> points);
+    std::vector<Polynomial2D> constructPolyLine(std::vector<Point> anchors, double accuracy);
 
-    cv::Mat& getWindowMat(Window window, int verticalSliceIndex);
+    cv::Mat& getWindowSlice(cv::Mat& image, Window window, int verticalSliceIndex);
 
 private:
-
     int white;
 
     int initialLineDetectThreshold;
@@ -64,6 +71,8 @@ private:
     int initialWindowWidth;
 
     int numVerticalSlice;
+
+    float degree;
 
 };
 

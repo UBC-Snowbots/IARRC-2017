@@ -3,8 +3,6 @@
  * Created On: April 23, 2017
  * Description: Takes in an image feed and generates lane lines.
  * Usage:
- * Subscribes to:
- * Publishes to:
  */
 
 #include <LineDetect.h>
@@ -15,15 +13,16 @@
 LineDetect::LineDetect() : initalLineDetectThreshold(200),
                            white(255),
                            initialWindowWidth(10),
-                           numVerticalSlice(10) {}
+                           numVerticalSlice(10),
+                           degree(3) {}
 
-std::vector<int> LineDetect::getHistogram(cv::Mat& windowImage) {
+intVec LineDetect::getHistogram(cv::Mat& image) {
 
-    std::vector<int> histogram(windowImage.cols, 0);
+    intVec histogram(image.cols, 0);
 
-    for (int j = 0; j < windowImage.rows; j++) {
-        for (int i = 0; i < windowImage.cols; i++) {
-            int pixelValue = (int)windowImage.at<uchar>(i, j);
+    for (int j = 0; j < image.rows; j++) {
+        for (int i = 0; i < image.cols; i++) {
+            int pixelValue = (int)image.at<uchar>(i, j);
             if (pixelValue == white) {
                 histogram[i]++;
             }
@@ -33,9 +32,9 @@ std::vector<int> LineDetect::getHistogram(cv::Mat& windowImage) {
     return histogram;
 }
 
-std::vector<Polynomial2D> getLines(cv::Mat& binaryImage) {
+std::vector<Polynomial2D> LineDetect::getLines(cv::Mat& filteredImage) {
 
-    std::vector<int> baseHistogram = getHistogram(binaryImage);
+    intVec baseHistogram = LineDetect::getHistogram(filteredImage);
     std::vector<Window> windows;
 
     for (int i = 0; i < baseHistogram.size; i++) {
@@ -47,34 +46,88 @@ std::vector<Polynomial2D> getLines(cv::Mat& binaryImage) {
 
     std::vector<std::vector<Point>> linePoints( windows.size, {} );
 
-    // TODO refactor into functions
     for (int verticalSliceIndex = 0; verticalSliceIndex < numVerticalSlice; verticalSliceIndex++) {
         for (int windowIndex = 0; windowIndex < windows.size; windowIndex++) {
             Window window = windows.at(windowIndex);
-            Point point{window.center, (int)verticalSliceIndex*binaryImage.rows/numVerticalSlice};
+            Point point{window.center, (int)verticalSliceIndex*filteredImage.rows/numVerticalSlice};
             linePoints[windowIndex].emplace_back(point);
-            // TODO replace with getWindowMat
-            cv::Mat windowMat = binaryImage(cv::Range( window.center - window.width/2, window.center + window.width/2),
-                                              cv::Range((int)verticalSliceIndex*binaryImage.rows/numVerticalSlice,
-                                                        (int)(verticalSliceIndex+1)*binaryImage.rows/numVerticalSlice));
 
-            std::vector<int> windowHistogram = getHistogram(windowMat);
-            std::pair<int, int> peak = getHistogramPeak(windowHistogram);
+            cv::Mat windowSlice = LineDetect::getWindowSlice(filteredImage, window, verticalSliceIndex);
+
+            intVec windowHistogram = LineDetect::getHistogram(windowSlice);
+            std::pair<int, int> peak = LineDetect::getHistogramPeak(windowHistogram);
 
             window.center = peak.second + (window.center - window.width/2);
-
         }
     }
 
-    std::vector<Polynomial2D> polyLines;
+    std::vector<Polynomial2D> polyLines = LineDetect::contructPolyLine(linePoints, degree);
+
+    /*
     for (std::vector<Point> points : linePoints) {
-        Polynomial2D polyPoints = constructPolyLine(points);
-        polyLines.emplace_back(polyPoints);
+        Polynomial2D polyPoint = LineDetect::constructPolyLine(points);
+        polyLines.emplace_back(polyPoint);
     }
+     */
 
     return polyLines;
 }
 
+cv::Mat LineDetect::getWindowSlice(cv::Mat& image, Window window, int verticalSliceIndex) {
+
+    cv::Mat windowSlice = image(cv::Range(window.getLeftSide(), window.getRightSide()),
+                                cv::Range((int)verticalSliceIndex*image.rows/numVerticalSlice,
+                                          (int)(verticalSliceIndex+1)*image.rows/numVerticalSlice));
+
+    return windowSlice;
+}
+
+std::pair<int, int> LineDetect::getHistogramPeak(intVec histogram) {
+
+    std::pair<int, int> peak(0, 0);
+
+    for (int i = 0; i < (histogram.size/2); i++) {
+        if (histogram[i] > peak.first)
+            peak.first = histogram[i];
+    }
+
+    for (int i = histogram.size/2; i < histogram.size; i++) {
+        if (histogram[i] > peak.second)
+            peak.second = histogram[i];
+    }
+
+    return peak;
+}
+
+std::vector<Polynomial2D> LineDetect::constructPolyLine(std::vector<Point> anchors, float accuracy) {
+
+    if (anchors.size() <= 2)
+        return anchors;
+
+    std::vector<Polynomial2D> polyLines;
+    polyLines.push_back(anchors[0]);
+
+    for (float i = 0.f; i < 1.f; i += 1.f/accuracy) {
+        std::vector<Point> temp;
+        for (unsigned int j = 1; j < anchors.size(); ++j)
+            temp.push_back(Point(interpolate(anchors[j-1].x, anchors[j].x, i),
+                                        interpolate(anchors[j-1].y, anchors[j].y, i)));
+
+        while(temp.size() > 1) {
+            std::vector<Point> temp2;
+
+            for (unsigned int j = 1; j < temp.size(); ++j)
+                temp2.push_back(Point(interpolate(temp[j-1].x, temp[j].x, i),
+                                      interpolate(temp[j-1].y, temp[j].y, i)));
+            temp = temp2;
+        }
+
+        polyLines.push_back(temp[0]);
+    }
+
+    return polyLines;
+
+}
 
 
 

@@ -46,7 +46,6 @@ public:
 
     /**
      * Default accumulator resolution is 1 pixel by 1 degree
-     *
      * no gap, no minimum length
      */
     LineDetect() : showSteps(true),
