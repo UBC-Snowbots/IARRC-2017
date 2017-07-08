@@ -54,7 +54,7 @@ public:
      *
      * @param image to be parsed
      */
-    int countCircles(const Mat &filtered_image);
+    int countCircles(const Mat &filtered_image, bool displayCircles = true);
 
 private:
 

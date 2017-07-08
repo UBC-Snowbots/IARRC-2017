@@ -12,7 +12,7 @@ TEST(realImage, GreenLight) {
     testFilter.filterImage(bgr_image, filtered_image);
 
     CircleDetection *circleDetection = new CircleDetection();
-    int numCircles = circleDetection->countCircles(filtered_image);
+    int numCircles = circleDetection->countCircles(filtered_image, false);
 
     EXPECT_EQ(1, numCircles);
 }
@@ -27,7 +27,7 @@ TEST(realImage, noCircle) {
     testFilter.filterImage(bgr_image, filtered_image);
 
     CircleDetection *circleDetection = new CircleDetection();
-    int numCircles = circleDetection->countCircles(filtered_image);
+    int numCircles = circleDetection->countCircles(filtered_image, false);
 
     EXPECT_EQ(0, numCircles);
 }
@@ -38,7 +38,7 @@ TEST(filteredImage, oneCircle) {
     cv::Mat bgr_image = imread(image_path);
     
     CircleDetection *circleDetection = new CircleDetection();
-    int numCircles = circleDetection->countCircles(bgr_image);
+    int numCircles = circleDetection->countCircles(bgr_image, false);
 
     EXPECT_EQ(1, numCircles);
 }

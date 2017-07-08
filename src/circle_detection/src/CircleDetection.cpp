@@ -74,7 +74,7 @@ Mat CircleDetection::rosToMat(const sensor_msgs::Image::ConstPtr &image) {
     return imagePtr->image;
 }
 
-int CircleDetection::countCircles(const Mat &filtered_image) {
+int CircleDetection::countCircles(const Mat &filtered_image, bool displayCircles) {
 
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
@@ -105,8 +105,10 @@ int CircleDetection::countCircles(const Mat &filtered_image) {
         }
     }
 
-    // Displays a window with the detected objects being circled
-    showFilteredObjectsWindow(filtered_image, center, radii);
+    if (displayCircles) {
+        // Displays a window with the detected objects being circled
+        showFilteredObjectsWindow(filtered_image, center, radii);
+    }
 
     return center.size();
 }
