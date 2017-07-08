@@ -203,7 +203,7 @@ public:
      * @param reading the reading to compute the point for
      * @return the point interpretation of the given reading
      */
-    Point pointFromReading(const Reading& reading);
+    static Point pointFromReading(const Reading& reading);
 
     /**
      * Gets the center of the obstacle
@@ -232,7 +232,6 @@ private:
     // The type of the obstacle
     ObstacleType obstacle_type;
 
-    // TODO: Test that this stays properly updated
     // The center of the obstacle
     Point center;
 

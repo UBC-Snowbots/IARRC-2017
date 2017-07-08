@@ -18,20 +18,25 @@
 
 class SlopeInterceptLine {
 public:
-    SlopeInterceptLine(double slope, double intercept) :
-        slope(slope), intercept(intercept) {};
+    SlopeInterceptLine(double slope, double x_intercept) :
+        slope(slope), x_intercept(x_intercept) {}
 
+    inline double getSlope() { return slope; }
+    inline double getXIntercept() { return x_intercept; }
+    inline double getYIntercept() { return -x_intercept/slope; }
+
+protected:
     double slope;
-    double intercept;
+    double x_intercept;
 };
 
 /**
  * A line with a Correlation Coefficient
  */
-class LineOfBestFit : SlopeInterceptLine {
+class LineOfBestFit : public SlopeInterceptLine {
 public:
-    LineOfBestFit(double slope, double intercept, double correlation) :
-            SlopeInterceptLine(slope, intercept), correlation(correlation) {};
+    LineOfBestFit(double slope, double x_intercept, double correlation) :
+            SlopeInterceptLine(slope, x_intercept), correlation(correlation) {}
 
     double correlation;
 };
@@ -45,12 +50,14 @@ struct FiniteLine {
 
 class LidarObstacleManager {
 public:
-    // TODO: Constructor
-    // Should take: `min_obstacle_merging_distance`
-    LidarObstacleManager(
-            double max_obstacle_merging_distance,
-            double cone_grouping_tolerance
-    );
+    LidarObstacleManager(double max_obstacle_merging_distance, double cone_grouping_tolerance);
+
+    /**
+     * Merges or adds the given obstacle to the already saved ones
+     *
+     * @param obstacle the obstacle to be added
+     */
+    void addObstacle(LidarObstacle obstacle);
 
     /**
      * Finds a saves obstacles from the given scan
@@ -66,6 +73,12 @@ public:
      * Clears all saved obstacles
      */
     void clearObstacles();
+
+    /**
+     * Gets all obstacles
+     * @return all saved obstacles
+     */
+     std::vector<LidarObstacle> getObstacles();
 
     /**
      * Gets all lines of cones in the saved obstacles
@@ -90,14 +103,6 @@ public:
      */
     std::vector<std::vector<Point>> getPointGroupings(std::vector<Point> points, double tolerance);
 
-private:
-    /**
-     * Merges or adds the given obstacle to the already saved ones
-     *
-     * @param obstacle the obstacle to be added
-     */
-    void addObstacle(LidarObstacle obstacle);
-
     /**
      * Determines the minimum distance between two obstacles
      *
@@ -105,7 +110,9 @@ private:
      * @param obstacle2
      * @return the minimum distance between obstacle1 and obstacle2
      */
-    double minDistanceBetweenObstacles(LidarObstacle obstacle1, LidarObstacle obstacle2);
+    static double minDistanceBetweenObstacles(LidarObstacle obstacle1, LidarObstacle obstacle2);
+
+private:
 
     // All the obstacles we currently have
     std::vector<LidarObstacle> obstacles;

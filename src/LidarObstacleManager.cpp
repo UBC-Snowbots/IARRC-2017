@@ -28,16 +28,21 @@ void LidarObstacleManager::addLaserScan(sensor_msgs::LaserScan &scan) {
     }
 }
 
+std::vector<LidarObstacle> LidarObstacleManager::getObstacles() {
+    return obstacles;
+}
+
 void LidarObstacleManager::addObstacle(LidarObstacle obstacle) {
     // See if this obstacle is close enough to any other saved obstacle to be the same
     // TODO: Should we be instead checking for the CLOSEST saved obstcle?
     for (LidarObstacle saved_obstacle : obstacles) {
         if (minDistanceBetweenObstacles(saved_obstacle, obstacle)
-            < max_obstacle_merging_distance)
+            < max_obstacle_merging_distance) {
             saved_obstacle.mergeInLidarObstacle(obstacle);
-        else
-            obstacles.emplace_back(obstacle);
+            return;
+        }
     }
+    obstacles.emplace_back(obstacle);
 }
 
 double LidarObstacleManager::minDistanceBetweenObstacles(
@@ -92,8 +97,8 @@ std::vector<std::vector<Point>> LidarObstacleManager::getPointGroupings(std::vec
         // Start the current group off with the last point
         std::vector<Point> group;
         std::stack<Point> to_visit;
-        to_visit.emplace(group.back());
-        group.pop_back();
+        to_visit.emplace(points.back());
+        points.pop_back();
         do {
             // Visit the first point in to_visit
             Point curr_point = to_visit.top();
@@ -125,13 +130,13 @@ LineOfBestFit LidarObstacleManager::getLineOfBestFit(const std::vector<Point> &p
     // Get line of best fit using linear regression formula
     // http://www.statisticshowto.com/how-to-find-a-linear-regression-equation/
 
-    double x_sum = std::accumulate(points.begin(), points.end(), 0,
+    double x_sum = std::accumulate(points.begin(), points.end(), 0.0,
                                    [](double accum, Point p){ return accum + p.x; });
-    double y_sum = std::accumulate(points.begin(), points.end(), 0,
+    double y_sum = std::accumulate(points.begin(), points.end(), 0.0,
                                    [](double accum, Point p){ return accum + p.y; });
-    double x_squared_sum = std::accumulate(points.begin(), points.end(), 0,
+    double x_squared_sum = std::accumulate(points.begin(), points.end(), 0.0,
                                    [](double accum, Point p){ return accum + std::pow(p.x, 2.0); });
-    double x_y_product_sum = std::accumulate(points.begin(), points.end(), 0,
+    double x_y_product_sum = std::accumulate(points.begin(), points.end(), 0.0,
                                            [](double accum, Point p){ return accum + p.x * p.y; });
     double intercept = (y_sum * x_squared_sum - x_sum * x_y_product_sum) /
             (points.size() * x_squared_sum - std::pow(x_sum, 2.0));
