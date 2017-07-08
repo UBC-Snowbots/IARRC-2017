@@ -63,6 +63,6 @@ target_link_libraries(circle_detection
 
 if (CATKIN_ENABLE_TESTING)
     # gTest
-    catkin_add_gtest(green-recognition-test test/green-recognition-test.cpp ../vision/src/HSVFilter.cpp ../vision/src/HSVFilterNode.cpp src/CircleDetection.cpp)
+    catkin_add_gtest(green-recognition-test test/green-recognition-test.cpp ../vision/src/HSVFilter.cpp ../vision/src/HSVFilterNode.cpp src/CircleDetection.cpp WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test)
     target_link_libraries(green-recognition-test ${catkin_LIBRARIES})
 endif()
