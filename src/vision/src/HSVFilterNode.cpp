@@ -181,26 +181,3 @@ void HSVFilterNode::check_if_image_exist(const cv::Mat &img, const std::string &
         std::exit(-1);
     }
 }
-
-// Test Constructors
-HSVFilterNode::HSVFilterNode(std::string &image_path){
-    cv::Mat bgr_image = imread(image_path);
-
-    // Check if the image can be loaded
-    check_if_image_exist(bgr_image, image_path);
-
-    Mat output_image;
-    HSVFilter testFilter = HSVFilter();
-    testFilter.filterImage(bgr_image, output_image);
-
-    CircleDetection *greenRecognition = new CircleDetection();
-
-    cvtColor(output_image, output_image, CV_GRAY2BGR);
-    greenRecognition->countCircles(output_image);
-
-    namedWindow("Filtered Objects", WINDOW_AUTOSIZE);
-    imshow("Filtered Objects", output_image);
-    namedWindow("Raw Image", WINDOW_AUTOSIZE);
-    imshow("Raw Image", bgr_image);
-    waitKey(0);
-}

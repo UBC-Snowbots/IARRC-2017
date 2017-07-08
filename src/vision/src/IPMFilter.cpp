@@ -9,7 +9,7 @@
 
 using namespace cv;
 
-void IPMFilter::IPMFilter(float ipm_base_width, float ipm_top_width,
+IPMFilter::IPMFilter(float ipm_base_width, float ipm_top_width,
                           float ipm_base_displacement, float ipm_top_displacement,
                           float image_height, float image_width) {
     x1 = image_width/2 - ipm_base_width/2 * image_width;

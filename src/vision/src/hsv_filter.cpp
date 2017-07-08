@@ -5,15 +5,14 @@
  *              then publishes the new filtered image.
  */
 
-#include <CircleDetection.h>
 #include <ros/ros.h>
 #include "../include/HSVFilterNode.h"
 
 int main(int argc, char** argv) {
     // Setup your ROS node
-    std::string node_name = "green_filter";
+    std::string node_name = "hsv_filter";
     // Create an instance of your class
-    HSVFilterNode green_filter(argc, argv, node_name);
+    HSVFilterNode hsv_filter(argc, argv, node_name);
     // Start up ROS, this will continue to run until the node is killed
     ros::spin();
     // Once the node stops, return 0

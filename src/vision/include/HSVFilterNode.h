@@ -40,18 +40,12 @@
 // Snowbots
 #include "HSVFilter.h"
 #include <sb_utils.h>
-#include <CircleDetection.h>
 
 using namespace cv;
 
 class HSVFilterNode {
 
 public:
-
-    /**
-     * Constructor used for testing
-     */
-    HSVFilterNode(std::string &image_path);
 
     /**
      * Constructor

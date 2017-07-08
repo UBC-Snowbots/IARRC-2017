@@ -54,7 +54,7 @@ private:
      * @params image information and where to apply the IPM
      */
     void createFilter(float ipm_base_width, float ipm_top_width,
-                      float ipm_base_displacement, float ipm_top_displacement
+                      float ipm_base_displacement, float ipm_top_displacement,
                       float image_height, float image_width);
 
     // Corners of the portion of the image to be filtered

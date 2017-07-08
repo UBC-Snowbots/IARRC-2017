@@ -40,7 +40,7 @@ IPMFilterNode::IPMFilterNode(int argc, char **argv, std::string node_name) {
     SB_getParam(private_nh, "ipm_top_displacement", ipm_top_displacement, (float) 0.25);
 }
 
-void IPMFilterNode::IPMFilterNode() { };
+IPMFilterNode::IPMFilterNode() { };
 
 void IPMFilterNode::filteredImageCallBack(const sensor_msgs::ImageConstPtr &msg) {
     ros::NodeHandle private_nh("~");
