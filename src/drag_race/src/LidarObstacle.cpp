@@ -106,12 +106,10 @@ void LidarObstacle::mergeInReadings(std::vector<Reading>& new_readings) {
 
 void LidarObstacle::updateCenter() {
     // Create points for all readings
-    std::vector<Point> points;
-    for(Reading reading : readings){
-        points.emplace_back(pointFromReading(reading));
-    }
+    std::vector<Point> points = getReadingsAsPoints();
+
     // Average Points to get new center
-    Point averaged_point;
+    Point averaged_point{0, 0};
     for (Point p : points){
         averaged_point.x += p.x;
         averaged_point.y += p.y;

@@ -123,13 +123,13 @@ TEST_F(LidarObstacleTest, getReadingsAsPoints){
 TEST_F(LidarObstacleTest, getCenterTest){
     LidarObstacle test_obstacle = LidarObstacle(0, 1);
     Point center = test_obstacle.getCenter();
-    EXPECT_DOUBLE_EQ(center.x, 1.0);
-    EXPECT_DOUBLE_EQ(center.y, 0.0);
-    LidarObstacle mergme = LidarObstacle(M_PI/2,1);
-    test_obstacle.mergeInLidarObstacle(mergme);
+    EXPECT_DOUBLE_EQ(1.0, center.x);
+    EXPECT_DOUBLE_EQ(0.0, center.y);
+    LidarObstacle merge_me = LidarObstacle(M_PI/2,1);
+    test_obstacle.mergeInLidarObstacle(merge_me);
     center = test_obstacle.getCenter();
-    EXPECT_DOUBLE_EQ(center.x, 0.5);
-    EXPECT_DOUBLE_EQ(center.y, 0.5);
+    EXPECT_DOUBLE_EQ(0.5, center.x);
+    EXPECT_DOUBLE_EQ(0.5, center.y);
 }
 
 TEST(PointTest, distanceBetweenPointsTest) {
@@ -137,9 +137,6 @@ TEST(PointTest, distanceBetweenPointsTest) {
 
     EXPECT_DOUBLE_EQ(473378.21709845297, distanceBetweenPoints(p1, p2));
 }
-
-//TODO
-//TEST_F(LidarObstacleTest, getType)
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
