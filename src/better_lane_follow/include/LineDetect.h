@@ -35,10 +35,10 @@ public:
     int width;
 
     int getLeftSide() {
-        return (center - window.width/2);
+        return (center - width/2);
     }
     int getRightSide() {
-        return (center + window.width/2);
+        return (center + width/2);
     }
 
 };
@@ -53,15 +53,15 @@ public:
 
     // TODO doc functions
 
-    std::vector<Polynomial2D> getLines(cv::Mat& filteredImage);
+    std::vector<Point> getLines(cv::Mat& filteredImage);
 
     std::vector<int> getHistogram(cv::Mat& image);
 
     std::pair<int, int> getHistogramPeak(std::vector<int> histogram);
 
-    std::vector<Polynomial2D> constructPolyLine(std::vector<Point> anchors, double accuracy);
+    std::vector<Point> constructPolyLine(std::vector<Point> anchors, float accuracy);
 
-    cv::Mat& getWindowSlice(cv::Mat& image, Window window, int verticalSliceIndex);
+    cv::Mat getWindowSlice(cv::Mat& image, Window window, int verticalSliceIndex);
 
 private:
     int white;
