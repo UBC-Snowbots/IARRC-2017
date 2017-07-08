@@ -29,8 +29,8 @@ public:
 
     // TODO: doc comment
     static geometry_msgs::Twist determineDesiredMotion(LineOfBestFit *longestConeLine, double targetDistance,
-                                                       bool lineToTheRight, double theta_scaling_factor,
-                                                       double angular_speed_factor, double linear_speed_factor,
+                                                       bool lineToTheRight, double theta_scaling_multiplier,
+                                                       double angular_speed_multiplier, double linear_speed_multiplier,
                                                        double angular_vel_cap, double linear_vel_cap);
 
 private:
@@ -55,9 +55,9 @@ private:
     double linear_vel_cap;
 
     // Scaling
-    double theta_scaling_factor;
-    double angular_speed_factor;
-    double linear_speed_factor;
+    double theta_scaling_multiplier;
+    double angular_speed_multiplier;
+    double linear_speed_multiplier;
 
     // Subscribes to the LaserScan
     ros::Subscriber scan_subscriber;

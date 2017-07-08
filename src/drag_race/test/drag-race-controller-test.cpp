@@ -18,9 +18,9 @@ double angular_vel_cap = 1.0;
 double linear_vel_cap = 1.0;
 
 // Scaling
-double theta_scaling_factor = 0.1;
-double angular_speed_factor = 1.0;
-double linear_speed_factor = 1.0;
+double theta_scaling_multiplier = 0.1;
+double angular_speed_multiplier = 1.0;
+double linear_speed_multiplier = 1.0;
 
 // Line values
 // Slopes
@@ -36,16 +36,16 @@ double correlation = 1.0;
 TEST(LeftLineTest, angleRightMoreThanTargetDistance) {
     LineOfBestFit *testLine = new LineOfBestFit(right_angle_slope, line_to_the_left, correlation);
     geometry_msgs::Twist testCommand = DragRaceNode::determineDesiredMotion(testLine, more_than_target_distance, false,
-                                                                            theta_scaling_factor, angular_speed_factor,
-                                                                            linear_speed_factor, angular_vel_cap, linear_vel_cap);
+                                                                            theta_scaling_multiplier, angular_speed_multiplier,
+                                                                            linear_speed_multiplier, angular_vel_cap, linear_vel_cap);
     EXPECT_GE(testCommand.angular.z, 0);
 }
 
 TEST(LeftLineTest, angleLeftMoreThanTargetDistance) {
     LineOfBestFit *testLine = new LineOfBestFit(left_angle_slope, line_to_the_left, correlation);
     geometry_msgs::Twist testCommand = DragRaceNode::determineDesiredMotion(testLine, more_than_target_distance, false,
-                                                                            theta_scaling_factor, angular_speed_factor,
-                                                                            linear_speed_factor, angular_vel_cap,
+                                                                            theta_scaling_multiplier, angular_speed_multiplier,
+                                                                            linear_speed_multiplier, angular_vel_cap,
                                                                             linear_vel_cap);
     EXPECT_GE(testCommand.angular.z, 0);
 }
@@ -53,8 +53,8 @@ TEST(LeftLineTest, angleLeftMoreThanTargetDistance) {
 TEST(LeftLineTest, angleRightLessThanTargetDistance) {
     LineOfBestFit *testLine = new LineOfBestFit(right_angle_slope, line_to_the_left, correlation);
     geometry_msgs::Twist testCommand = DragRaceNode::determineDesiredMotion(testLine, less_than_target_distance, false,
-                                                                            theta_scaling_factor, angular_speed_factor,
-                                                                            linear_speed_factor, angular_vel_cap,
+                                                                            theta_scaling_multiplier, angular_speed_multiplier,
+                                                                            linear_speed_multiplier, angular_vel_cap,
                                                                             linear_vel_cap);
     EXPECT_GE(0, testCommand.angular.z);
 }
@@ -62,8 +62,8 @@ TEST(LeftLineTest, angleRightLessThanTargetDistance) {
 TEST(LeftLineTest, angleLeftLessThanTargetDistance) {
     LineOfBestFit *testLine = new LineOfBestFit(left_angle_slope, line_to_the_left, correlation);
     geometry_msgs::Twist testCommand = DragRaceNode::determineDesiredMotion(testLine, less_than_target_distance, false,
-                                                                            theta_scaling_factor, angular_speed_factor,
-                                                                            linear_speed_factor, angular_vel_cap,
+                                                                            theta_scaling_multiplier, angular_speed_multiplier,
+                                                                            linear_speed_multiplier, angular_vel_cap,
                                                                             linear_vel_cap);
     EXPECT_GE(0, testCommand.angular.z);
 }
@@ -71,8 +71,8 @@ TEST(LeftLineTest, angleLeftLessThanTargetDistance) {
 TEST(RightLineTest, angleRightMoreThanTargetDistance) {
     LineOfBestFit *testLine = new LineOfBestFit(right_angle_slope, line_to_the_right, correlation);
     geometry_msgs::Twist testCommand = DragRaceNode::determineDesiredMotion(testLine, more_than_target_distance, true,
-                                                                            theta_scaling_factor, angular_speed_factor,
-                                                                            linear_speed_factor, angular_vel_cap,
+                                                                            theta_scaling_multiplier, angular_speed_multiplier,
+                                                                            linear_speed_multiplier, angular_vel_cap,
                                                                             linear_vel_cap);
     EXPECT_GE(0, testCommand.angular.z);
 }
@@ -80,8 +80,8 @@ TEST(RightLineTest, angleRightMoreThanTargetDistance) {
 TEST(RightLineTest, angleLeftMoreThanTargetDistance) {
     LineOfBestFit *testLine = new LineOfBestFit(left_angle_slope, line_to_the_right, correlation);
     geometry_msgs::Twist testCommand = DragRaceNode::determineDesiredMotion(testLine, more_than_target_distance, true,
-                                                                            theta_scaling_factor, angular_speed_factor,
-                                                                            linear_speed_factor, angular_vel_cap,
+                                                                            theta_scaling_multiplier, angular_speed_multiplier,
+                                                                            linear_speed_multiplier, angular_vel_cap,
                                                                             linear_vel_cap);
     EXPECT_GE(0, testCommand.angular.z);
 }
@@ -89,8 +89,8 @@ TEST(RightLineTest, angleLeftMoreThanTargetDistance) {
 TEST(RightLineTest, angleRightLessThanTargetDistance) {
     LineOfBestFit *testLine = new LineOfBestFit(right_angle_slope, line_to_the_right, correlation);
     geometry_msgs::Twist testCommand = DragRaceNode::determineDesiredMotion(testLine, less_than_target_distance, true,
-                                                                            theta_scaling_factor, angular_speed_factor,
-                                                                            linear_speed_factor, angular_vel_cap,
+                                                                            theta_scaling_multiplier, angular_speed_multiplier,
+                                                                            linear_speed_multiplier, angular_vel_cap,
                                                                             linear_vel_cap);
     EXPECT_GE(testCommand.angular.z, 0);
 }
@@ -98,8 +98,8 @@ TEST(RightLineTest, angleRightLessThanTargetDistance) {
 TEST(RightLineTest, angleLeftLessThanTargetDistance) {
     LineOfBestFit *testLine = new LineOfBestFit(left_angle_slope, line_to_the_right, correlation);
     geometry_msgs::Twist testCommand = DragRaceNode::determineDesiredMotion(testLine, less_than_target_distance, true,
-                                                                            theta_scaling_factor, angular_speed_factor,
-                                                                            linear_speed_factor, angular_vel_cap,
+                                                                            theta_scaling_multiplier, angular_speed_multiplier,
+                                                                            linear_speed_multiplier, angular_vel_cap,
                                                                             linear_vel_cap);
     EXPECT_GE(testCommand.angular.z, 0);
 }

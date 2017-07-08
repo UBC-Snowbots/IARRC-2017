@@ -30,9 +30,9 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
     SB_getParam(nh, "target_distance", target_distance, 1.0);
     SB_getParam(nh, "angular_vel_cap", angular_vel_cap, 1.0);
     SB_getParam(nh, "linear_vel_cap", linear_vel_cap, 1.0);
-    SB_getParam(nh, "theta_scaling_factor", theta_scaling_factor, 1.0);
-    SB_getParam(nh, "angular_speed_factor", angular_speed_factor, 1.0);
-    SB_getParam(nh, "linear_speed_factor", linear_speed_factor, 1.0);
+    SB_getParam(nh, "theta_scaling_multiplier", theta_scaling_multiplier, 1.0);
+    SB_getParam(nh, "angular_speed_multiplier", angular_speed_multiplier, 1.0);
+    SB_getParam(nh, "linear_speed_multiplier", linear_speed_multiplier, 1.0);
     SB_getParam(nh, "line_to_the_right", line_to_the_right, true);
 
     // TODO: Setup the obstacle manager with given params
@@ -58,7 +58,7 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan) {
     LineOfBestFit *longest_cone_line = new LineOfBestFit(0, 1, 0);
     // Determine what we need to do to stay at the desired distance from the wall
     geometry_msgs::Twist twist = determineDesiredMotion(longest_cone_line, target_distance, line_to_the_right,
-                                                        theta_scaling_factor, angular_speed_factor, linear_speed_factor,
+                                                        theta_scaling_multiplier, angular_speed_multiplier, linear_speed_multiplier,
                                                         angular_vel_cap, linear_vel_cap);
 
     // Publish our desired twist message
@@ -66,8 +66,8 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan) {
 }
 
 geometry_msgs::Twist DragRaceNode::determineDesiredMotion(LineOfBestFit *longestConeLine, double targetDistance,
-                                                          bool lineToTheRight, double theta_scaling_factor,
-                                                          double angular_speed_factor, double linear_speed_factor,
+                                                          bool lineToTheRight, double theta_scaling_multiplier,
+                                                          double angular_speed_multiplier, double linear_speed_multiplier,
                                                           double angular_vel_cap, double linear_vel_cap) {
 
     // Determine angle of line.
@@ -84,7 +84,7 @@ geometry_msgs::Twist DragRaceNode::determineDesiredMotion(LineOfBestFit *longest
     command.angular.y = 0;
 
     // Figure out how fast we should be turning
-    command.angular.z = (theta_scaling_factor * theta + distanceError) * angular_speed_factor;
+    command.angular.z = (theta_scaling_multiplier * theta + distanceError) * angular_speed_multiplier;
     // Limit the angular velocity
     if (fabs(command.angular.z) > angular_vel_cap)
         command.angular.z = angular_vel_cap * command.angular.z / fabs(command.angular.z);
@@ -93,7 +93,7 @@ geometry_msgs::Twist DragRaceNode::determineDesiredMotion(LineOfBestFit *longest
         command.angular.z *= -1;
 
     // Figure out how fast we should be moving forward
-    command.linear.x = linear_speed_factor / fabs(command.angular.z);
+    command.linear.x = linear_speed_multiplier / fabs(command.angular.z);
 
     // Limit the linear velocity
     if (command.linear.x > linear_vel_cap)
