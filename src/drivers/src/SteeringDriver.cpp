@@ -83,6 +83,7 @@ void SteeringDriver::twistCallback(const geometry_msgs::Twist::ConstPtr twist_ms
     for (double val : linear) arduino << (char)val;
     for (double val : angular) arduino << (char)val;
 
+    // TODO: We should be logging to ROS_INFO here
     std::cout << "Sending Message: ";
     for (double val : linear) std::cout << val << " / ";
     for (double val : angular) std::cout << val << " / ";
