@@ -132,11 +132,14 @@ TEST_F(LidarObstacleManagerTest, getPointGroupingsTest){
     std::vector<std::vector<Point>> groups = obstacle_manager_1.getPointGroupings(points, 1.1);
     // We expect 4 groups of points
     ASSERT_EQ(4, groups.size());
+
     // Get the group sizes
     std::vector<int> sizes;
     sizes.resize(groups.size());
     std::transform(groups.begin(), groups.end(), sizes.begin(),
                    [](auto group) { return group.size(); });
+    // We don't care what order we get the groups in, so sort in ascending order
+    // (`getPointGroupings` returning groups in a different order should not break this test)
     std::sort(sizes.begin(), sizes.end());
     EXPECT_EQ(std::vector<int>({1,1,2,3}), sizes);
 }
@@ -161,6 +164,19 @@ TEST_F(LidarObstacleManagerTest, getLineOfBestFitNegativeSlopeTest){
     LineOfBestFit line = LidarObstacleManager::getLineOfBestFit(points);
     EXPECT_DOUBLE_EQ(2, line.getXIntercept());
     EXPECT_DOUBLE_EQ(-0.5, line.getSlope());
+}
+
+TEST_F(LidarObstacleManagerTest, getLineOfBestFitRandomPoints){
+    std::vector<Point> points = {
+            {12.13,41.44},
+            {7865.653,6234.54},
+            {0,-100},
+            {10,20},
+            {9699.454,10344.334},
+    };
+    LineOfBestFit line = LidarObstacleManager::getLineOfBestFit(points);
+    EXPECT_DOUBLE_EQ(0.96926393150821, line.getSlope());
+    EXPECT_DOUBLE_EQ(101.27209579732, line.getYIntercept());
 }
 
 // TODO
