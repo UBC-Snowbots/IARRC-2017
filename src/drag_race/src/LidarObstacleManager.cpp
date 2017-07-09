@@ -138,13 +138,13 @@ LineOfBestFit LidarObstacleManager::getLineOfBestFit(const std::vector<Point> &p
                                    [](double accum, Point p){ return accum + std::pow(p.x, 2.0); });
     double x_y_product_sum = std::accumulate(points.begin(), points.end(), 0.0,
                                            [](double accum, Point p){ return accum + p.x * p.y; });
-    double intercept = (y_sum * x_squared_sum - x_sum * x_y_product_sum) /
+    double y_intercept = (y_sum * x_squared_sum - x_sum * x_y_product_sum) /
             (points.size() * x_squared_sum - std::pow(x_sum, 2.0));
     double slope = (points.size() * x_y_product_sum - x_sum * y_sum) /
             (points.size() * x_squared_sum - std::pow(x_sum, 2.0));
 
     // TODO: calculate correlation coeffecient and add it here
 
-    return LineOfBestFit(slope, intercept, 0);
+    return LineOfBestFit(slope, y_intercept, 0);
 }
 
