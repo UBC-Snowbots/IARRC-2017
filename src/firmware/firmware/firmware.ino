@@ -54,8 +54,8 @@ int angular_y = MAPPED_STRAIGHT_ANGLE;
 int angular_z = MAPPED_STRAIGHT_ANGLE;
 
 // motor pins
-const int MOTOR_PIN = 10;
-const int DIRECTION_PIN = 11;
+const int MOTOR_PIN = A2;
+const int DIRECTION_PIN = A0;
 
 // defines start of buffer
 const char BUFFER_HEAD = 'B';
