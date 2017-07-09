@@ -32,6 +32,8 @@ private:
     // TODO: Doc comment
     void scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan);
 
+    LineOfBestFit *getBestLine(std::vector<LineOfBestFit*> lines, bool lineToTheRight);
+
     // Manages obstacles, including the cones and wall
     LidarObstacleManager *obstacle_manager;
 

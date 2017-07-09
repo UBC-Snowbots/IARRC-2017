@@ -69,4 +69,15 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan) {
     twist_publisher.publish(twist);
 }
 
+LineOfBestFit *DragRaceNode::getBestLine(std::vector<LineOfBestFit*> lines, bool lineToTheRight) {
+    LineOfBestFit *bestLine = new LineOfBestFit(NULL, NULL, 0);
 
+    for (unsigned i = 0; i < lines.size(); i++) {
+        // Only check lines that are on the proper side.
+        if (lineToTheRight && (lines[i]->getYIntercept() < 0) && (fabs(lines[i]->correlation) > fabs(bestLine->correlation))) {
+            bestLine = lines[i]; // If correlation is stronger than the current best, update best line.
+        } else if (!lineToTheRight && (lines[i]->getYIntercept() >= 0) && (fabs(lines[i]->correlation) > fabs(bestLine->correlation))) {
+            bestLine = lines[i]; // If correlation is stronger than the current best, update best line.
+        }
+    }
+}
