@@ -96,7 +96,6 @@ void loop() {
 void serial_read(){
   // BUFFER_HEAD identifies the start of the buffer
 	if ( Serial.available() >= BUFFER_SIZE && Serial.read() == BUFFER_HEAD ) {
-    Serial.println("Got message");
 		linear_x = Serial.read();
 		linear_y = Serial.read();
 		linear_z = Serial.read();
@@ -106,6 +105,7 @@ void serial_read(){
 		previousMillis = currentMillis;
    
    #ifdef DEBUG
+    Serial.println("Got message");
     Serial.println(linear_x);
     Serial.println(linear_y);
     Serial.println(linear_z);
