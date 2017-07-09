@@ -8,17 +8,10 @@
 #ifndef DRAG_RACE_CONTROLLER_H
 #define DRAG_RACE_CONTROLLER_H
 
-// STD Includes
-#include <iostream>
-
 // ROS Includes
-#include <ros/ros.h>
-#include <std_msgs/String.h>
-#include <sensor_msgs/LaserScan.h>
 #include <geometry_msgs/Twist.h>
 
 // SB Includes
-#include <sb_utils.h>
 #include <LidarObstacleManager.h>
 
 class DragRaceController {

@@ -70,7 +70,7 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan) {
 }
 
 LineOfBestFit *DragRaceNode::getBestLine(std::vector<LineOfBestFit *> lines, bool lineToTheRight) {
-    LineOfBestFit *bestLine = new LineOfBestFit(NULL, NULL, 0);
+    LineOfBestFit *bestLine = new LineOfBestFit(0, 0, 0);
 
     for (size_t i = 0; i < lines.size(); i++) {
         // Only check lines where the y-intercept is on the correct side.

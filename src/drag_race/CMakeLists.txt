@@ -10,6 +10,7 @@ add_definitions(--std=c++14)
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
         roscpp
+        rospy
         )
 find_package(sb_utils REQUIRED)
 
@@ -18,7 +19,7 @@ find_package(sb_utils REQUIRED)
 
 # TODO: Wait. Do we need this line if we're not "exporting" the headers from the package
 catkin_package(
-        INCLUDE_DIRS include
+     #   INCLUDE_DIRS include
 )
 
 ###########
@@ -43,13 +44,11 @@ add_executable(drag_race
         include/DragRaceNode.h
         include/LidarObstacle.h
         include/LidarObstacleManager.h)
-
+target_link_libraries(drag_race
+        ${catkin_LIBRARIES}
+        ${sb_utils_LIBRARIES}
+        )
 # TODO: Perhaps rename to something like `drag_race_controller_node`
-#add_executable(drag_race_node 
-#    src/drag_race_node.cpp 
-#    src/DragRaceNode.cpp
-#    src/LidarObstacleManager.cpp
-#    )
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
