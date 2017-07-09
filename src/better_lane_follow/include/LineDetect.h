@@ -17,14 +17,15 @@
 #include <stdio.h>
 
 struct Polynomial {
-    float a;
-    float b;
-    float c;
+    double a;
+    double b;
+    double c;
+    double d;
 };
 
 struct Point {
-    float x;
-    float y;
+    double x;
+    double y;
 };
 
 typedef std::vector<int> intVec;
@@ -58,23 +59,22 @@ public:
 
     intVec getHistogram(cv::Mat& image);
 
-    std::pair<int, int> getHistogramPeak(std::vector<int> histogram);
-
-    Polynomial fitPolyLine(std::vector<Point> points);
-
     cv::Mat getWindowSlice(cv::Mat& image, Window window, int verticalSliceIndex);
+
+    std::pair<int, int> getHistogramPeakPosition(intVec histogram);
+
+    Polynomial fitPolyLine(std::vector<Point> points, int order);
 
 private:
     int white;
 
     int initialLineDetectThreshold;
 
-    int initialWindowWidth;
+    int windowWidth;
 
     int numVerticalSlice;
 
-    float degree;
-
+    int degree;
 };
 
 #endif

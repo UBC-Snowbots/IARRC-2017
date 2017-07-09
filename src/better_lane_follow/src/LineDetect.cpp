@@ -6,13 +6,14 @@
  */
 
 #include <LineDetect.h>
+#include <Eigen/QR>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/objdetect/objdetect.hpp>
 
 LineDetect::LineDetect() : initialLineDetectThreshold(200),
                            white(255),
-                           initialWindowWidth(10),
+                           windowWidth(10),
                            numVerticalSlice(10),
                            degree(3) {}
 
@@ -39,35 +40,34 @@ std::vector<Polynomial> LineDetect::getLines(cv::Mat& filteredImage) {
 
     for (int i = 0; i < baseHistogram.size(); i++) {
         if (baseHistogram[i] > initialLineDetectThreshold) {
-            Window window{i, initialWindowWidth};
+            Window window{i, windowWidth};
             windows.emplace_back(window);
         }
     }
 
-    std::vector<std::vector<Point>> linePoints( windows.size(), std::vector<Point>(windows.size()) );
+    std::vector<std::vector<Point>> linePoints( windows.size(), std::vector<Point>(numVerticalSlice) );
 
     for (int verticalSliceIndex = 0; verticalSliceIndex < numVerticalSlice; verticalSliceIndex++) {
         for (int windowIndex = 0; windowIndex < windows.size(); windowIndex++) {
             Window window = windows.at(windowIndex);
-            Point point{window.center, verticalSliceIndex*filteredImage.rows/numVerticalSlice};
+            Point point{(double)window.center, (double)(verticalSliceIndex*filteredImage.rows/numVerticalSlice)};
             linePoints[windowIndex].emplace_back(point);
 
             cv::Mat windowSlice = LineDetect::getWindowSlice(filteredImage, window, verticalSliceIndex);
-
             intVec windowHistogram = LineDetect::getHistogram(windowSlice);
-            std::pair<int, int> peak = LineDetect::getHistogramPeak(windowHistogram);
+            std::pair<int, int> peak = LineDetect::getHistogramPeakPosition(windowHistogram);
 
-            window.center = peak.second + (window.center - window.width/2);
+            window.center = windowIndex ? window.center = peak.second : peak.first /*+ (window.center - window.width/2)*/;
         }
     }
 
     std::vector<Polynomial> polyLines;
     Polynomial polyPoints;
+
     for (std::vector<Point> points : linePoints) {
-        polyPoints = LineDetect::fitPolyLine(points);
+        polyPoints = LineDetect::fitPolyLine(points, degree);
         polyLines.emplace_back(polyPoints);
     }
-    
 
     return polyLines;
 }
@@ -81,25 +81,61 @@ cv::Mat LineDetect::getWindowSlice(cv::Mat& image, Window window, int verticalSl
     return windowSlice;
 }
 
-std::pair<int, int> LineDetect::getHistogramPeak(intVec histogram) {
+std::pair<int, int> LineDetect::getHistogramPeakPosition(intVec histogram) {
 
     std::pair<int, int> peak(0, 0);
+    int peakValue = 0;
 
-    for (int i = 0; i < (histogram.size() / 2); i++) {
-        if (histogram[i] > peak.first)
-            peak.first = histogram[i];
+    for (int i = 0; i < (int)(histogram.size()/2.0); i++) {
+        if (histogram[i] > peakValue) {
+            peakValue = histogram[i];
+            peak.first = i;
+        }
     }
 
-    for (int i = histogram.size() / 2; i < histogram.size(); i++) {
-        if (histogram[i] > peak.second)
-            peak.second = histogram[i];
+    peakValue = 0;
+
+    for (int i = (int)(histogram.size()/2.0); i < histogram.size(); i++) {
+        if (histogram[i] > peakValue) {
+            peakValue = histogram[i];
+            peak.second = i;
+        }
     }
 
     return peak;
 }
 
-Polynomial LineDetect::fitPolyLine(std::vector<Point> points) {
+Polynomial LineDetect::fitPolyLine(std::vector<Point> points, int order) {
 
+    int moreOrder = order + 1;
+    assert(points.size() >= moreOrder);
+
+    std::vector<double> xv(points.size(), 0);
+    std::vector<double> yv(points.size(), 0);
+
+    for (size_t i = 0; i < points.size(); i++) {
+        xv[i] = points[i].x;
+        yv[i] = points[i].y;
+    }
+
+    Eigen::MatrixXd A(xv.size(), moreOrder);
+    Eigen::VectorXd yvMapped = Eigen::VectorXd::Map(&yv.front(), yv.size());
+    Eigen::VectorXd result;
+
+    // create matrix
+    for (size_t i = 0; i < points.size(); i++)
+        for (size_t j = 0; j < moreOrder; j++)
+            A(i, j) = pow((xv.at(i)), j);
+
+    // solve for linear least squares fit
+    result = A.householderQr().solve(yvMapped);
+
+    std::vector<double> coeffs(moreOrder, 0);
+
+    for (size_t i = 0; i < moreOrder; i++)
+        coeffs[i] = result[i];
+    //std::vector<double> coeffs(result.data(), result.data() + result.rows() * result.cols());
+    return Polynomial{coeffs[0], coeffs[1], coeffs[2], coeffs[3]};
 }
 
 
