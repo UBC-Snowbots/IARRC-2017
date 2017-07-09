@@ -39,7 +39,7 @@
 #define MAPPED_STRAIGHT_ANGLE 90
 
 // Robot will keep executing the last command unless the period exceeds the INTERVAL
-#define INTERVAL 5000
+#define INTERVAL 500
 
 void serial_read();
 void convert();
