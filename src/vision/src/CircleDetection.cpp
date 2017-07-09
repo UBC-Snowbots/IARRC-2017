@@ -127,6 +127,7 @@ void CircleDetection::showFilteredObjectsWindow(const Mat &filtered_image, std::
 
     namedWindow("Filtered Objects", WINDOW_AUTOSIZE);
     imshow("Filtered Objects", filtered_image);
+    waitKey(20);
 
 }
 
