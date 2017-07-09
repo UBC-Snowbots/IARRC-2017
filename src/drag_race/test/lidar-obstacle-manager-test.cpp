@@ -179,6 +179,22 @@ TEST_F(LidarObstacleManagerTest, getLineOfBestFitRandomPoints){
     EXPECT_DOUBLE_EQ(-0.76208438348419327, line.correlation);
 }
 
+TEST_F(LidarObstacleManagerTest, getLineOfBestFitRandomPoints2){
+    std::vector<Point> points = {
+            {0,-1},
+            {1,-0.5},
+            {2,2.3},
+            {3,-3},
+            {3,-8},
+            {4,9},
+            {5,100}
+    };
+    LineOfBestFit line = LidarObstacleManager::getLineOfBestFit(points);
+    EXPECT_DOUBLE_EQ(-22.617741935483881, line.getYIntercept());
+    EXPECT_DOUBLE_EQ(14.284677419354843, line.getSlope());
+    EXPECT_DOUBLE_EQ(0.64214088713774, line.correlation);
+}
+
 // TODO
 // TEST(SlopeInterceptLineTest, testGetXIntercept){}
 
