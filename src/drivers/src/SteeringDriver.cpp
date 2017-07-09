@@ -73,9 +73,12 @@ void SteeringDriver::twistCallback(const geometry_msgs::Twist::ConstPtr twist_ms
             twist_msg->angular.z,
     };
 
+    // Invert the angular speeds, because ROS coordinate systems.
+    for (double& val : angular) val *= -1;
+
     // Map the twist message values to ones the arduino can understand
-    for (double& val : linear) map(val, -max_abs_linear_speed, max_abs_linear_speed, 0, 255);
-    for (double& val : angular) map(val, -max_abs_angular_speed, max_abs_angular_speed, 0, 255);
+    for (double& val : linear) map(val, -max_abs_linear_speed, max_abs_linear_speed, 1, 255);
+    for (double& val : angular) map(val, -max_abs_angular_speed, max_abs_angular_speed, 1, 255);
 
     // Send the message over to the arduino
     arduino << "B";
