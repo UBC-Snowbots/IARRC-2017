@@ -6,8 +6,8 @@
  *              boolean
  */
 
-#ifndef GREEN_RECOGNITION_H
-#define GREEN_RECOGNITION_H
+#ifndef CIRCLE_DETECTION_H
+#define CIRCLE_DETECTION_H
 
 // OpenCV
 #include <opencv2/imgproc/imgproc.hpp>
@@ -76,7 +76,7 @@ private:
      *  Displays a window with the detected objects being circled
      */
     void showFilteredObjectsWindow(const Mat &filtered_image, std::vector<cv::Point2i> center,
-                                   std::vector<int> radii);
+                                   std::vector<float> radii);
 
     /**
      * Determines whether path contains an image.
@@ -90,9 +90,9 @@ private:
     image_transport::Subscriber image_sub;
 
     /**
-     * Publishes the recommended twist message
+     * Publishes true when activity is detected
      */
-    ros::Publisher is_green_detected_pub;
+    ros::Publisher activity_publisher;
 
     // Minimum radius needed to be considered an object
     int minTargetRadius;

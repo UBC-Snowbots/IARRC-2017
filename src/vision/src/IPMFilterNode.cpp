@@ -26,12 +26,11 @@ IPMFilterNode::IPMFilterNode(int argc, char **argv, std::string node_name) {
     image_transport::ImageTransport it(nh);
 
     // Setup subscriber
-    int refresh_rate = 10;
-    image_sub = it.subscribe<IPMFilterNode>(image_topic, refresh_rate,
-                                            &IPMFilterNode::filteredImageCallBack, this);
+    uint32_t queue_size = 1;
+    image_sub = it.subscribe(image_topic, queue_size,
+                             &IPMFilterNode::filteredImageCallBack, this);
 
     // Setup publisher
-    uint32_t queue_size = 1;
     ipm_filter_pub = it.advertise(output_topic, queue_size);
 
     SB_getParam(private_nh, "ipm_base_width", ipm_base_width, (float) 1);
@@ -43,8 +42,8 @@ IPMFilterNode::IPMFilterNode(int argc, char **argv, std::string node_name) {
 IPMFilterNode::IPMFilterNode() { };
 
 void IPMFilterNode::filteredImageCallBack(const sensor_msgs::ImageConstPtr &msg) {
-    ros::NodeHandle private_nh("~");
     if (!receivedFirstImage) {
+        ros::NodeHandle private_nh("~");
         ROS_INFO("First image received! (IPM)");
         receivedFirstImage = true;
         //Obtains parameters of image and IPM points from the param server

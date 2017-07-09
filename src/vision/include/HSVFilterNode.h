@@ -84,8 +84,6 @@ private:
      */
     Mat rosToMat(const sensor_msgs::Image::ConstPtr& image);
 
-    void check_if_image_exist(const cv::Mat &img, const std::string &path);
-
     /**
      * Subscribes to the raw camera image node
      */

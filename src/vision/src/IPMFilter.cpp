@@ -9,9 +9,20 @@
 
 using namespace cv;
 
+
+
 IPMFilter::IPMFilter(float ipm_base_width, float ipm_top_width,
                           float ipm_base_displacement, float ipm_top_displacement,
                           float image_height, float image_width) {
+    createFilter(ipm_base_width, ipm_top_width,
+                 ipm_base_displacement, ipm_top_displacement,
+                 image_height, image_width);
+
+}
+
+void IPMFilter::createFilter(float ipm_base_width, float ipm_top_width,
+                             float ipm_base_displacement, float ipm_top_displacement,
+                             float image_height, float image_width){
     x1 = image_width/2 - ipm_base_width/2 * image_width;
     y1 = (1 - ipm_base_displacement) * image_height;
     x2 = image_width/2 + ipm_base_width/2 * image_width;
@@ -41,7 +52,6 @@ void IPMFilter::filterImage(const cv::Mat &input, cv::Mat &output) {
     if(!input.empty()) {
         Mat workingImage;
         input.copyTo(workingImage);
-
         // Applies the IPM to the image
         ipm.applyHomography(workingImage, output);
     }

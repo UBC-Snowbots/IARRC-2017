@@ -49,9 +49,9 @@ CircleDetection::CircleDetection(int argc, char **argv, std::string node_name) {
                                               &CircleDetection::filteredImageCallBack, this);
 
     // Setup publishers
-    std::string output_topic = "/robot/vision/green_detected";
+    std::string output_topic = "/robot/vision/activity_detected";
     uint32_t queue_size = 1;
-    is_green_detected_pub = private_nh.advertise<std_msgs::Bool>(output_topic, queue_size);
+    activity_publisher = private_nh.advertise<std_msgs::Bool>(output_topic, queue_size);
 
     // Get some params
     SB_getParam(private_nh, "minimum_target_radius", minTargetRadius, 50);
@@ -65,7 +65,7 @@ void CircleDetection::filteredImageCallBack(const sensor_msgs::Image::ConstPtr &
     int numCircles = countCircles(rosToMat(image));
     std_msgs::Bool circle_detected;
     circle_detected.data = numCircles > 0;
-    is_green_detected_pub.publish(circle_detected);
+    activity_publisher.publish(circle_detected);
 }
 
 Mat CircleDetection::rosToMat(const sensor_msgs::Image::ConstPtr &image) {
@@ -79,7 +79,7 @@ int CircleDetection::countCircles(const Mat &filtered_image, bool displayCircles
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
     vector<cv::Point2i> center;
-    vector<int> radii;
+    vector<float> radii;
 
     // Convert grayscale image to black and white image
     cv::Mat bwImage;
@@ -96,7 +96,7 @@ int CircleDetection::countCircles(const Mat &filtered_image, bool displayCircles
     for (int i = 0; i < count; i++) {
         cv::Point2f c;
         float r;
-        cv::minEnclosingCircle((Mat) contours[i], c, r);
+        cv::minEnclosingCircle(contours[i], c, r);
 
         // Only count circles with large enough radius
         if (r >= minTargetRadius) {
@@ -110,17 +110,19 @@ int CircleDetection::countCircles(const Mat &filtered_image, bool displayCircles
         showFilteredObjectsWindow(filtered_image, center, radii);
     }
 
-    return center.size();
+    // Complains about fitting a long to an int
+    // non-issue
+    return (int) center.size();
 }
 
 void CircleDetection::showFilteredObjectsWindow(const Mat &filtered_image, std::vector<cv::Point2i> center,
-                                                 std::vector<int> radii) {
+                                                 std::vector<float> radii) {
     size_t center_count = center.size();
     cv::Scalar green(0, 255, 0);
 
     // Draw green circles around object
     for (int i = 0; i < center_count; i++) {
-        cv::circle(filtered_image, center[i], radii[i], green, 3);
+        cv::circle(filtered_image, center[i], (int) radii[i], green, 3);
     }
 
     namedWindow("Filtered Objects", WINDOW_AUTOSIZE);

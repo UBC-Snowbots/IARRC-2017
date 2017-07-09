@@ -23,24 +23,21 @@ HSVFilterNode::HSVFilterNode(int argc, char **argv, std::string node_name) {
     // Set topics
     std::string image_topic = "/robot/vision/raw_image";
     std::string output_topic = "/vision/hsv_filtered_image";
-    ROS_INFO("Image (Subscribe) Topic: %s", image_topic.c_str());
-    ROS_INFO("Output (Publish) Topic: %s", output_topic.c_str());
 
     // Setup image transport
     image_transport::ImageTransport it(nh);
 
     // Setup subscriber
-    int refresh_rate = 10;
-    image_sub = it.subscribe<HSVFilterNode>(image_topic, refresh_rate,
+    uint32_t queue_size = 1;
+    image_sub = it.subscribe(image_topic, queue_size,
                                           &HSVFilterNode::rawImageCallBack, this);
     // Setup publisher
-    uint32_t queue_size = 1;
     filter_pub = it.advertise(output_topic, queue_size);
 
     // Get some params (not all though, we wait until we have an image to get the rest)
     SB_getParam(private_nh, "update_frequency", frequency, 5.0);
     SB_getParam(private_nh, "config_file", mfilter_file,
-                ros::package::getPath("circle_detection") + "/launch/filter_init.txt");
+                ros::package::getPath("vision") + "/launch/filter_init.txt");
     SB_getParam(private_nh, "show_image_window", showWindow, true);
     SB_getParam(private_nh, "show_calibration_window", isCalibratingManually, false);
 
@@ -48,13 +45,6 @@ HSVFilterNode::HSVFilterNode(int argc, char **argv, std::string node_name) {
 }
 
 void HSVFilterNode::rawImageCallBack(const sensor_msgs::Image::ConstPtr &image) {
-
-    imageInput = rosToMat(image);
-
-    // Filter out non-green colors
-    Mat filteredImage;
-    filter.filterImage(imageInput, filteredImage);
-    filterOutput = filteredImage;
 
     if (!receivedFirstImage) {
         ROS_INFO("First image received!");
@@ -64,11 +54,19 @@ void HSVFilterNode::rawImageCallBack(const sensor_msgs::Image::ConstPtr &image) 
         receivedFirstImage = true;
     }
 
+    imageInput = rosToMat(image);
+
+    // Filter out non-green colors
+    Mat filteredImage;
+    filter.filterImage(imageInput, filteredImage);
+    filterOutput = filteredImage;
+
     // If enough time has passed update filter and show image
     if ((ros::Time::now() - last_published) > publish_interval) {
         last_published = ros::Time::now();
-        if (showWindow)
+        if (showWindow) {
             showRawAndFilteredImageWindow();
+        }
         updateFilter();
     }
 
@@ -115,7 +113,7 @@ void HSVFilterNode::setUpFilter() {
     }
     filter_file.close();
 
-    ROS_WARN("Waiting for first image");
+    ROS_INFO("Waiting for first image");
 }
 
 void HSVFilterNode::updateFilter() {
@@ -148,8 +146,8 @@ void HSVFilterNode::updateFilter() {
 
 void HSVFilterNode::showRawAndFilteredImageWindow() {
     // Create one big mat for all our images
-    cv::Size main_window_size(image_width * 2, image_height * 2);
-    cv::Size sub_window_size(main_window_size.width / 2, main_window_size.height / 2);
+    cv::Size main_window_size(image_width * 2, image_height);
+    cv::Size sub_window_size(main_window_size.width/2, main_window_size.height);
     cv::Mat main_image(main_window_size, CV_8UC3);
 
     // Copy all our images to the big Mat we just created (in 4 sub-windows)
@@ -159,25 +157,11 @@ void HSVFilterNode::showRawAndFilteredImageWindow() {
     resize(imageInput, image1Roi, sub_window_size);
 
     // Image 2
+    Mat filterOutputBGR;
+    cvtColor(filterOutput, filterOutputBGR, CV_GRAY2BGR);
     cv::Mat image2Roi(main_image, cv::Rect(sub_window_size.width, 0, sub_window_size.width, sub_window_size.height));
-    resize(filterOutput, image2Roi, sub_window_size);
+    resize(filterOutputBGR, image2Roi, sub_window_size);
 
-    // Image 3 & 4: We only have 2 images, so just make the last two all black to stop flickering
-    cv::Mat allBlack(sub_window_size, CV_8UC3, 3);
+    cv::imshow(displayWindowName, main_image);
 
-    // Image 3
-    cv::Mat image3Roi(main_image, cv::Rect(0, sub_window_size.height, sub_window_size.width, sub_window_size.height));
-    resize(allBlack, image3Roi, sub_window_size);
-
-    // Image 4
-    cv::Mat image4Roi(main_image, cv::Rect(sub_window_size.width, sub_window_size.height, sub_window_size.width,
-                                           sub_window_size.height));
-    resize(allBlack, image4Roi, sub_window_size);
-}
-
-void HSVFilterNode::check_if_image_exist(const cv::Mat &img, const std::string &path) {
-    if (img.empty()) {
-        std::cout << "Error! Unable to load image: " << path << std::endl;
-        std::exit(-1);
-    }
 }
