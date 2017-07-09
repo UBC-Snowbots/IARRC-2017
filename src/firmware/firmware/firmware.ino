@@ -22,8 +22,10 @@
 #include <stdlib.h>
 #include <Servo.h>
 
-// Uncomment this to enable debug logging - messages sent will be echoed back
-//#define DEBUG
+// Uncomment this to enable debug message logging - messages sent over serial will be echoed back
+//#define DEBUG_MESSAGES
+// Uncomment this to enable PWM debug logging - PWM signals will be echoed
+//#define DEBUG_PWM
 
 #define BAUD_RATE 9600
 
@@ -38,8 +40,9 @@
 #define UNMAPPED_STOP_SPEED 128
 #define MAPPED_STRAIGHT_ANGLE 90
 
-// Robot will keep executing the last command unless the period exceeds the INTERVAL
-#define INTERVAL 500
+// Robot will keep executing the last command unless the period exceeds the SAFETY_TIMEOUT
+// SAFETY_TIMEOUT is in ms
+#define SAFETY_TIMEOUT 500
 
 void serial_read();
 void convert();
@@ -61,15 +64,19 @@ const int DIRECTION_PIN = A0;
 const char BUFFER_HEAD = 'B';
 
 // max and min linear speeds and stopping condition
-const int LINEAR_MAX = 255;
-const int LINEAR_MIN = 80;
-const int LINEAR_STOP = 0;
+const int LINEAR_MAX = 256;
+const int LINEAR_MIN = 0;
+const int LINEAR_STOP = 128;
 
 // max and min angular speeds and stopping condition
 // the angle ranges from 33 to 147
 const int ANGULAR_MAX = 145;
 const int ANGULAR_MIN = 35;
 const int ANGULAR_STOP = 90;
+
+// The minimum and maximum PWM signals to send
+const int MIN_PWM = 2000;
+const int MAX_PWM = 1000;
 
 unsigned long previousMillis = 0;
 unsigned long currentMillis = 0;
@@ -84,7 +91,7 @@ void setup() {
 	direction_motor.attach(DIRECTION_PIN);
 
 	// arm the motor
-	motor.writeMicroseconds(1500);
+	motor.writeMicroseconds(2000);
  }
 
 void loop() {
@@ -104,18 +111,18 @@ void serial_read(){
 		angular_z = Serial.read();
 		previousMillis = currentMillis;
    
-   #ifdef DEBUG
+   #ifdef DEBUG_MESSAGES
     Serial.println("Got message");
-    Serial.println(linear_x);
-    Serial.println(linear_y);
-    Serial.println(linear_z);
-    Serial.println(angular_x);
-    Serial.println(angular_y);
-    Serial.println(angular_z);
+    Serial.print("Linear X:"); Serial.println(linear_x);
+    Serial.print("Linear Y:"); Serial.println(linear_y);
+    Serial.print("Linear Z:"); Serial.println(linear_z);
+    Serial.print("Angular X:"); Serial.println(angular_x);
+    Serial.print("Angular Y:"); Serial.println(angular_y);
+    Serial.print("Angular Z:"); Serial.println(angular_z);
    #endif
 	} else {
 	  currentMillis = millis();
-    if(currentMillis - previousMillis > INTERVAL){
+    if(currentMillis - previousMillis > SAFETY_TIMEOUT){
 	    linear_x = UNMAPPED_STOP_SPEED;
     }
 	}
@@ -135,13 +142,22 @@ void convert() {
 }
 
 void drive(int linear_speed, int angular_speed){
-	int velocity = 1500;
-	int angle = 1500;
+  // Default velocity and angle to the midpoint in the PWM range
+	int velocity = (MAX_PWM - MIN_PWM)/2;
+	int angle = (MAX_PWM - MIN_PWM)/2;
 
-	velocity = map(linear_speed, 0, 255, 1000, 2000); 
-	angle = map(angular_speed, 0, 180, 1000, 2000);
+	velocity = map(linear_speed, LINEAR_MIN, LINEAR_MAX, MIN_PWM, MAX_PWM); 
+	angle = map(angular_speed, ANGULAR_MIN, ANGULAR_MAX, MIN_PWM, MAX_PWM);
 
 	motor.writeMicroseconds(velocity);
 	direction_motor.writeMicroseconds(angle);
+
+  #ifdef DEBUG_PWM
+    Serial.print(velocity);Serial.print(" / ");
+    Serial.print(angle);Serial.print(" / ");
+    Serial.print(linear_speed);Serial.print(" / ");
+    Serial.print(angular_speed);Serial.print(" / ");
+    Serial.println();
+  #endif
 }
 
