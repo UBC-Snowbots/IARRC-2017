@@ -27,7 +27,20 @@ class DragRaceNode {
 public:
     DragRaceNode(int argc, char **argv, std::string node_name);
 
-    // TODO: doc comment
+    /**
+     * Determines the optimal movement to stay within target distance of
+     * the given line.
+     *
+     * @param longestConeLine
+     * @param targetDistance
+     * @param lineToTheRight
+     * @param theta_scaling_multiplier
+     * @param angular_speed_multiplier
+     * @param linear_speed_multiplier
+     * @param angular_vel_cap
+     * @param linear_vel_cap
+     * @return the optimal angular and linear acceleration.
+     */
     static geometry_msgs::Twist determineDesiredMotion(LineOfBestFit *longestConeLine, double targetDistance,
                                                        bool lineToTheRight, double theta_scaling_multiplier,
                                                        double angular_speed_multiplier, double linear_speed_multiplier,
@@ -37,9 +50,13 @@ private:
     // TODO: Doc comment
     void scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan);
 
+    /**
+     * Finds the minimum distance from given line and the origin.
+     *
+     * @param line
+     * @return the minimum distance from given line and the origin.
+     */
     static double determineDistanceFromLine(LineOfBestFit *line);
-
-    static double determineAngularVelocity(double theta, double distanceError);
 
     // Manages obstacles, including the cones and wall
     LidarObstacleManager *obstacle_manager;
