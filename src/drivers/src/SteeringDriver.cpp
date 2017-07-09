@@ -58,8 +58,6 @@ SteeringDriver::SteeringDriver(int argc, char **argv, std::string node_name) {
 
 
 void SteeringDriver::twistCallback(const geometry_msgs::Twist::ConstPtr twist_msg) {
-    // TODO: delete me
-    ROS_INFO("TWIST RECEIVED");
 
     // Get our own copies of the linear and angular components of the twist message
     std::vector<double> linear = {
@@ -85,6 +83,8 @@ void SteeringDriver::twistCallback(const geometry_msgs::Twist::ConstPtr twist_ms
     for (double val : linear) arduino << (char)val;
     for (double val : angular) arduino << (char)val;
 
+    std::cout << "Sending Message: ";
     for (double val : linear) std::cout << val << " / ";
     for (double val : angular) std::cout << val << " / ";
+    std::cout << std::endl;
 }
