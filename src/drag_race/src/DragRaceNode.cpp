@@ -35,6 +35,11 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
     SB_getParam(nh, "linear_speed_multiplier", linear_speed_multiplier, 1.0);
     SB_getParam(nh, "line_to_the_right", line_to_the_right, true);
 
+    // Setup drag race controller with given params
+    dragRaceController = new DragRaceController(target_distance, line_to_the_right, theta_scaling_multiplier,
+                                                angular_speed_multiplier, linear_speed_multiplier, angular_vel_cap,
+                                                linear_vel_cap);
+
     // TODO: Setup the obstacle manager with given params
 
     // TODO: Get our current location (relative to the walls) (and just keep trying until we can succesfully get it)
@@ -56,70 +61,12 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan) {
 //    Line longest_cone_line = obstacle_manager->getLongestConeLine();
     // TODO: get an actual line
     LineOfBestFit *longest_cone_line = new LineOfBestFit(0, 1, 0);
+
     // Determine what we need to do to stay at the desired distance from the wall
-    geometry_msgs::Twist twist = determineDesiredMotion(longest_cone_line, target_distance, line_to_the_right,
-                                                        theta_scaling_multiplier, angular_speed_multiplier, linear_speed_multiplier,
-                                                        angular_vel_cap, linear_vel_cap);
+    geometry_msgs::Twist twist = dragRaceController->determineDesiredMotion(longest_cone_line);
 
     // Publish our desired twist message
     twist_publisher.publish(twist);
 }
 
-geometry_msgs::Twist DragRaceNode::determineDesiredMotion(LineOfBestFit *longestConeLine, double targetDistance,
-                                                          bool lineToTheRight, double theta_scaling_multiplier,
-                                                          double angular_speed_multiplier, double linear_speed_multiplier,
-                                                          double angular_vel_cap, double linear_vel_cap) {
-
-    // Determine angle of line.
-    double theta = atan(longestConeLine->getSlope());
-
-
-    double distanceError = targetDistance - determineDistanceFromLine(longestConeLine);
-    if(!lineToTheRight)
-        distanceError *= -1.0;
-
-    geometry_msgs::Twist command;
-
-    // Set components we don't care about to 0
-    command.linear.y = 0;
-    command.linear.z = 0;
-    command.angular.x = 0;
-    command.angular.y = 0;
-
-    // Figure out how fast we should be turning
-    command.angular.z = (theta_scaling_multiplier * theta + distanceError) * angular_speed_multiplier;
-    printf("Distance: %f, Theta: %f\n", distanceError, theta * theta_scaling_multiplier);
-    // Limit the angular velocity
-    if (fabs(command.angular.z) > angular_vel_cap)
-        command.angular.z = angular_vel_cap * command.angular.z / fabs(command.angular.z);
-
-
-    // Figure out how fast we should be moving forward
-    command.linear.x = linear_speed_multiplier / fabs(command.angular.z);
-
-    // Limit the linear velocity
-    if (command.linear.x > linear_vel_cap)
-        command.linear.x = linear_vel_cap;
-
-    return command;
-}
-
-double DragRaceNode::determineDistanceFromLine(LineOfBestFit *line) {
-    double negReciprocal = -1 / line->getSlope();
-
-    /* Find the intersection between the line and its perpendicular line. */
-
-    // Set the two sides equal then isolate x to one side.
-    double isolatedXSlope = negReciprocal - line->getSlope();
-
-    // Divide both sides by the isolated slope to get the x point intersection.
-    double xIntersection = line->getYIntercept() / isolatedXSlope;
-
-    // Plug in the xIntersection to get the y point intersection.
-    double yIntersection = negReciprocal * xIntersection;
-
-    // Return distance found
-    return sqrt(pow(xIntersection, 2) + pow(yIntersection, 2));
-
-}
 

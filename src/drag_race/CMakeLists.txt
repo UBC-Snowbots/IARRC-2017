@@ -38,6 +38,8 @@ include_directories(
 add_executable(drag_race
         src/drag_race_node.cpp
         src/DragRaceNode.cpp
+        src/DragRaceController.cpp
+        include/DragRaceController.h
         include/DragRaceNode.h
         include/LidarObstacle.h
         include/LidarObstacleManager.h)
@@ -81,7 +83,8 @@ if (CATKIN_ENABLE_TESTING)
 
     catkin_add_gtest(drag-race-controller-test
             test/drag-race-controller-test.cpp
-            src/DragRaceNode.cpp)
+            src/DragRaceNode.cpp
+            src/DragRaceController.cpp)
     target_link_libraries(drag-race-controller-test ${catkin_LIBRARIES})
 
     # TODO: Maybe some rostests?
