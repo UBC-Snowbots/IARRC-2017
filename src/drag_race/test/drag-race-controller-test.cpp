@@ -10,7 +10,7 @@
  */
 
 double more_than_target_distance = 0.0;
-double less_than_target_distance = 0.25;
+double less_than_target_distance = 0.65;
 
 // Velocity limits
 double angular_vel_cap = 1.0;
@@ -23,8 +23,8 @@ double linear_speed_multiplier = 1.0;
 
 // Line values
 // Slopes
-double right_angle_slope = 3.0;
-double left_angle_slope = -3.0;
+double right_angle_slope = -3.0;
+double left_angle_slope = 3.0;
 
 // X-Intercepts
 double line_to_the_right = -1.0;
