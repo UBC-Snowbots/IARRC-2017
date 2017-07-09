@@ -3,7 +3,6 @@
 
 # import the necessary packages
 from __future__ import print_function
-from pyimagesearch.basicmotiondetector import BasicMotionDetector
 from pyimagesearch.panorama import Stitcher
 from imutils.video import VideoStream
 import numpy as np
@@ -16,24 +15,24 @@ import rospy
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 
-#The following code attempts to stitche 3 images from 3 cameras, and would potentially be improved #to stitche an input numbers of images in the future
+#The following code attempts to stitche 3 images from 3 cameras, and would potentially be improved 
+#to stitche an input numbers of images in the future
 
-# ialize the video streams and allow them to warmup
+# Inialize the video streams and allow them to warmup
 print("[INFO] starting cameras...")
 midStream = VideoStream(src=2).start()
 leftStream = VideoStream(src=3).start()
 rightStream = VideoStream(src=1).start()
 time.sleep(1.0)
 
-# initialize the image stitcher, motion detector, and total
-# number of frames read
+# initialize the image stitcher, and total number of frames read
 stitcher = Stitcher()
-motion = BasicMotionDetector(minArea=500)
 total = 0
 
-#declares that my node is publishing to the 'ImgStitcher' topic, using type Image; 
-#queue_size = 10 limits the queued msg number to be less than 10
-ImgStitcher = rospy.Publisher('ImgStitcher', Image, queue_size=10) 
+# declares that my node is publishing to the 'ImgStitcher' topic, using type Image; 
+# queue_size = 1 limits the queued msg number to be less than 1
+# Aka only publish the most recent image
+ImgStitcher = rospy.Publisher('ImgStitcher', Image, queue_size=1) 
 
 #initialize the publisher node called 'ImgPublusher'
 rospy.init_node('ImgPublisher')
