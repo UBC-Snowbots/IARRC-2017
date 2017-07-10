@@ -1,8 +1,8 @@
 /*
  * Created by: Raad Khan
- * Created On: April 23, 2017
+ * Created On: July 1, 2017
  * Description: Takes in an image feed and generates lane lines.
- * Usage:
+ * Usage: LaneFollow node instantiates this class to generate lane lines
  */
 
 #include <LineDetect.h>
@@ -130,12 +130,7 @@ Polynomial LineDetect::fitPolyLine(std::vector<Point> points, int order) {
     // solve for linear least squares fit
     result = A.householderQr().solve(yvMapped);
 
-    std::vector<double> coeffs(moreOrder, 0);
-
-    for (size_t i = 0; i < moreOrder; i++)
-        coeffs[i] = result[i];
-    //std::vector<double> coeffs(result.data(), result.data() + result.rows() * result.cols());
-    return Polynomial{coeffs[0], coeffs[1], coeffs[2], coeffs[3]};
+    return Polynomial{result[0], result[1], result[2], result[3]};
 }
 
 Point LineDetect::getIntersection(Polynomial leftLine, Polynomial rightLine)

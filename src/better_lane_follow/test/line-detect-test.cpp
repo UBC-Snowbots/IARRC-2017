@@ -1,7 +1,7 @@
 /*
- * Created By: Gareth Ellis
- * Created On: July 16th, 2016
- * Description: TODO
+ * Created By: Raad Khan
+ * Created On: July 9, 2017
+ * Description: Tests LineDetect class functions
  */
 
 #include <LineDetect.h>
@@ -128,18 +128,41 @@ TEST(LineDetect, fitPolyLineLeftTest){
     Point testPoint1{2.0, 0.0};
     Point testPoint2{3.0, 1.0};
     Point testPoint3{4.0, 2.0};
-    Point testPoint4{4.0, 3.0};
+    Point testPoint4{5.0, 3.0};
+    Point testPoint5{6.0, 2.0};
 
-    std::vector<Point> testPoints = {testPoint1, testPoint2, testPoint3, testPoint4};
+    std::vector<Point> testPoints = {testPoint1, testPoint2, testPoint3, testPoint4, testPoint5};
     int testOrder = 3;
 
     LineDetect testLineDetect;
     Polynomial testPolynomial = testLineDetect.fitPolyLine(testPoints, testOrder);
-    Polynomial expectedPolynomial{2.0, 3.0, 4.0, 5.0};
+    Polynomial expectedPolynomial{3.60000, -4.54762, 1.71429, -0.16666};
 
-    EXPECT_EQ(expectedPolynomial.a, testPolynomial.a);
+    EXPECT_NEAR(expectedPolynomial.a, testPolynomial.a, 0.00001);
+    EXPECT_NEAR(expectedPolynomial.b, testPolynomial.b, 0.00001);
+    EXPECT_NEAR(expectedPolynomial.c, testPolynomial.c, 0.00001);
+    EXPECT_NEAR(expectedPolynomial.d, testPolynomial.d, 0.00001);
+}
 
-    // Point point{(double)window.center, (double)(verticalSliceIndex*filteredImage.rows/numVerticalSlice)};
+TEST(LineDetect, fitPolyLineRightTest){
+
+    Point testPoint1{5.0, 2.0};
+    Point testPoint2{6.0, 0.0};
+    Point testPoint3{7.0, 3.0};
+    Point testPoint4{8.0, 1.0};
+    Point testPoint5{9.0, 3.0};
+
+    std::vector<Point> testPoints = {testPoint1, testPoint2, testPoint3, testPoint4, testPoint5};
+    int testOrder = 3;
+
+    LineDetect testLineDetect;
+    Polynomial testPolynomial = testLineDetect.fitPolyLine(testPoints, testOrder);
+    Polynomial expectedPolynomial{36.37143, -14.66666, 1.96429, -0.08333};
+
+    EXPECT_NEAR(expectedPolynomial.a, testPolynomial.a, 0.00001);
+    EXPECT_NEAR(expectedPolynomial.b, testPolynomial.b, 0.00001);
+    EXPECT_NEAR(expectedPolynomial.c, testPolynomial.c, 0.00001);
+    EXPECT_NEAR(expectedPolynomial.d, testPolynomial.d, 0.00001);
 }
 
 int main(int argc, char **argv) {
