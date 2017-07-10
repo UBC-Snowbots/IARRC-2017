@@ -130,12 +130,7 @@ Polynomial LineDetect::fitPolyLine(std::vector<Point> points, int order) {
     // solve for linear least squares fit
     result = A.householderQr().solve(yvMapped);
 
-    std::vector<double> coeffs(moreOrder, 0);
-
-    for (size_t i = 0; i < moreOrder; i++)
-        coeffs[i] = result[i];
-    //std::vector<double> coeffs(result.data(), result.data() + result.rows() * result.cols());
-    return Polynomial{coeffs[0], coeffs[1], coeffs[2], coeffs[3]};
+    return Polynomial{result[0], result[1], result[2], result[3]};
 }
 
 
