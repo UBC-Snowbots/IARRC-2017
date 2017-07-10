@@ -22,6 +22,7 @@
 #include <geometry_msgs/Twist.h>
 #include <sensor_msgs/Image.h>
 #include <LineDetect.h>
+#include "sb_utils.h"
 
 class LaneFollow {
 
@@ -41,6 +42,32 @@ private:
      */
     void subscriberCallBack(const sensor_msgs::ImageConstPtr &msg);
 
+    // Angle of POI of detected lane lines relative to the robot
+    int angle_theta;
+
+    /**
+     * Computes the average of 1/x and sqrt(y), multiplied by their respective scaling factors
+     *
+     * @param x
+     * @param y
+     * @param x_scale the value to multiply the x value by
+     * @param y_scale the value to multiply the y value by
+     *
+     * @return the average of: [x_scale * 1/x] and [y_scale * sqrt(y)]
+     */
+    double magicFunction(double x, double y, double x_scale, double y_scale);
+
+    // Instantiate LineDetect class which generates the lane lines
+    LineDetect ld;
+
+    // Velocity limits
+    double angular_vel_cap;
+    double linear_vel_cap;
+
+    // Scaling
+    double angular_speed_multiplier;
+    double linear_speed_multiplier;
+
     /**
      * Subscribes to the raw camera image node
      */
@@ -56,40 +83,6 @@ private:
      */
     ros::Publisher twist_pub;
 
-    // Angle of POI of detected lane lines relative to the robot
-    int angle_theta;
-
-    /**
-     * Calculates the angle of POI of detected lane lines
-     * with respect to the robot's position
-     *
-     * @param address of the filtered image matrix
-     *
-     * @return angle_theta
-     */
-    int angleDetermine(const cv::Mat& img);
-
-    /**
-     * Computes the average of 1/x and sqrt(y), multiplied by their respective scaling factors
-     *
-     * @param x
-     * @param y
-     * @param x_scale the value to multiply the x value by
-     * @param y_scale the value to multiply the y value by
-     *
-     * @return the average of: [x_scale * 1/x] and [y_scale * sqrt(y)]
-     */
-     double magicFunction(double x, double y, double x_scale, double y_scale);
-
-    /**
-     *
-     * @param lane lines detected by LineDetect class
-     * @return
-     */
-    std::vector<cv::Vec4i> extendLines( std::vector<cv::Vec4i> lines );
-
-    // Instantiate LineDetect class which generates the lane lines
-    LineDetect ld;
 };
 
 #endif

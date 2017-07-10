@@ -154,4 +154,16 @@ Point LineDetect::getIntersection(Polynomial leftLine, Polynomial rightLine)
     return point;
 }
 
+double LineDetect::getAngleFromOriginToPoint(Point point) {
+    double dy = point.y;
+    double dx = point.x;
 
+    double angle = atan(dy/dx);
+
+    // If the endpoint is behind and to the left
+    if(dx < 0 && dy > 0) angle += M_PI;
+    // If the endpoint is behind and to the right
+    else if (dx < 0 && dy < 0) angle -= M_PI;
+
+    return angle;
+}

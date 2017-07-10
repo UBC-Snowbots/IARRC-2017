@@ -63,7 +63,9 @@ public:
 
     Polynomial fitPolyLine(std::vector<Point> points, int order);
 
-    Point getIntersection(Polynomial leftLine, Polynomial rightLine);
+    static Point getIntersection(Polynomial leftLine, Polynomial rightLine);
+    static double getAngleFromOriginToPoint(Point point);
+
 private:
     int white;
 
