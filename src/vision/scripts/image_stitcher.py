@@ -15,8 +15,8 @@ import rospy
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 
-#The following code attempts to stitche 3 images from 3 cameras, and would potentially be improved 
-#to stitche an input numbers of images in the future
+# The following code attempts to stitch 3 images from 3 cameras, and would potentially be improved 
+# to stitch an input number of images in the future
 
 # Inialize the video streams and allow them to warmup
 print("[INFO] starting cameras...")
@@ -34,7 +34,7 @@ total = 0
 # Aka only publish the most recent image
 ImgStitcher = rospy.Publisher('ImgStitcher', Image, queue_size=1) 
 
-#initialize the publisher node called 'ImgPublusher'
+#initialize the publisher node called 'ImgPublisher'
 rospy.init_node('ImgPublisher')
 
 rate = rospy.Rate(10) # 10hz
@@ -55,8 +55,6 @@ while not rospy.is_shutdown():
 	# IMPORTANT: you might have to change this line of code
 	# depending on how your cameras are oriented; frames
 	# should be supplied in left-to-right order
-	#result_1 = stitcher.stitch([mid, right])        
-        #result_2 = stitcher.stitch([left, mid])
 	result_3 = stitcher.stitch([left, mid, right])
 
 	# no homograpy could be computed
@@ -76,9 +74,6 @@ while not rospy.is_shutdown():
 	rate.sleep()
 
 	# show the output images
-	#cv2.imshow("Result", result_3)
-	#cv2.imshow("result_1", result_1)
-	#cv2.imshow("result_2", result_2)
 	cv2.imshow("result_3", result_3)
 	cv2.imshow("Middle Frame", mid)
 	cv2.imshow("Left Frame", left)
