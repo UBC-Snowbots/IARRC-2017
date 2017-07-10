@@ -1,7 +1,7 @@
 /*
- * Created By: Gareth Ellis
- * Created On: July 16th, 2016
- * Description: TODO
+ * Created By: Raad Khan
+ * Created On: July 9, 2017
+ * Description: Tests LineDetect class functions
  */
 
 #include <LineDetect.h>

@@ -1,8 +1,8 @@
 /*
  * Created by: Raad Khan
- * Created On: April 23, 2017
+ * Created On: July 1, 2017
  * Description: Takes in an image feed and generates lane lines.
- * Usage:
+ * Usage: LaneFollow node instantiates this class to generate lane lines
  */
 
 #include <LineDetect.h>
