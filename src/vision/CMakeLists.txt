@@ -40,6 +40,9 @@ add_executable(IPMFilter
         include/IPM.h
         )
 
+add_executable(camera
+        src/camera_init.cpp)
+
 add_executable(circle_detection
         src/circle_detection.cpp
         src/CircleDetection.cpp
@@ -62,6 +65,11 @@ target_link_libraries(circle_detection
         ${catkin_LIBRARIES}
         ${OpenCV_LIBS}
         ${sb_utils_LIBRARIES}
+        )
+
+target_link_libraries(camera
+        ${catkin_LIBRARIES}
+        ${OpenCV_LIBS}
         )
 
 if (CATKIN_ENABLE_TESTING)

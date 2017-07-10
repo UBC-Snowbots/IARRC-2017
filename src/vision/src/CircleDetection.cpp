@@ -119,14 +119,16 @@ void CircleDetection::showFilteredObjectsWindow(const Mat &filtered_image, std::
                                                  std::vector<float> radii) {
     size_t center_count = center.size();
     cv::Scalar green(0, 255, 0);
+    cv::Mat colorImage;
+    cv::cvtColor(filtered_image, colorImage, CV_GRAY2BGR);
 
     // Draw green circles around object
     for (int i = 0; i < center_count; i++) {
-        cv::circle(filtered_image, center[i], (int) radii[i], green, 3);
+        cv::circle(colorImage, center[i], (int) radii[i], green, 3);
     }
 
     namedWindow("Filtered Objects", WINDOW_AUTOSIZE);
-    imshow("Filtered Objects", filtered_image);
+    imshow("Filtered Objects", colorImage);
     waitKey(20);
 
 }
