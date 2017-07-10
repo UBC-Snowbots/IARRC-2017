@@ -138,7 +138,25 @@ Polynomial LineDetect::fitPolyLine(std::vector<Point> points, int order) {
     return Polynomial{coeffs[0], coeffs[1], coeffs[2], coeffs[3]};
 }
 
+Point LineDetect::getIntersection(Polynomial leftLine, Polynomial rightLine)
+{
+    // Isolate slopes
+    double combinedSlope = leftLine.c - rightLine.c;
 
+    // Isolate y-intercepts
+    double combinedYIntercepts = rightLine.d - leftLine.d;
 
+    // Solve for x
+    double x = combinedYIntercepts / combinedSlope;
+
+    // Solve for y
+    double y = leftLine.c * x + leftLine.d;
+
+    Point point;
+    point.x = x;
+    point.y = y;
+
+    return point;
+}
 
 
