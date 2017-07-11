@@ -59,7 +59,7 @@ struct FiniteLine {
 
 class LidarObstacleManager {
 public:
-    LidarObstacleManager(double max_obstacle_merging_distance, double cone_grouping_tolerance);
+    LidarObstacleManager(double max_obstacle_merging_distance, double max_distance_from_robot_accepted, double cone_grouping_tolerance);
 
     /**
      * Merges or adds the given obstacle to the already saved ones
@@ -159,6 +159,9 @@ private:
 
     // The maximum distance between two obstacles for them to be considered the same
     double max_obstacle_merging_distance;
+
+    // The maximum distance a line can have from the robot on the y-axis before being thrown out
+    double max_distance_from_robot_accepted;
 
     // The maximum permitted distance between cones in the same group
     double cone_grouping_tolerance;
