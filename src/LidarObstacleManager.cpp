@@ -10,10 +10,9 @@
 LidarObstacleManager::LidarObstacleManager(
         double max_obstacle_merging_distance,
         double cone_grouping_tolerance
-):
+) :
         max_obstacle_merging_distance(max_obstacle_merging_distance),
-        cone_grouping_tolerance(cone_grouping_tolerance)
-{}
+        cone_grouping_tolerance(cone_grouping_tolerance) { }
 
 void LidarObstacleManager::addLaserScan(const sensor_msgs::LaserScan &scan) {
     // Create an obstacle for every hit in the lidar scan
@@ -60,11 +59,11 @@ double LidarObstacleManager::minDistanceBetweenObstacles(
 
     // Compare every point to.... *shudders slightly* every other point..
     double min_distance = -1;
-    for (Point p1 : obstacle1_points){
-        for (Point p2 : obstacle2_points){
+    for (Point p1 : obstacle1_points) {
+        for (Point p2 : obstacle2_points) {
             double dx = p1.x - p2.x;
             double dy = p1.y - p2.y;
-            double distance = std::sqrt(std::pow(dx,2.0) + std::pow(dy,2.0));
+            double distance = std::sqrt(std::pow(dx, 2.0) + std::pow(dy, 2.0));
             if (min_distance < 0 || distance < min_distance)
                 min_distance = distance;
         };
@@ -76,8 +75,8 @@ double LidarObstacleManager::minDistanceBetweenObstacles(
 std::vector<LineOfBestFit> LidarObstacleManager::getConeLines() {
     // Get all our cones as points
     std::vector<Point> points;
-    for (LidarObstacle obstacle : obstacles){
-        if (obstacle.getObstacleType() == CONE){
+    for (LidarObstacle obstacle : obstacles) {
+        if (obstacle.getObstacleType() == CONE) {
             points.emplace_back(obstacle.getCenter());
         }
     }
@@ -97,7 +96,7 @@ std::vector<std::vector<Point>> LidarObstacleManager::getPointGroupings(std::vec
     std::vector<std::vector<Point>> groups;
 
     // Go through every point
-    while(points.size() > 0) {
+    while (points.size() > 0) {
         // Start the current group off with the last point
         std::vector<Point> group;
         std::stack<Point> to_visit;
@@ -109,7 +108,7 @@ std::vector<std::vector<Point>> LidarObstacleManager::getPointGroupings(std::vec
             to_visit.pop();
 
             // Figure out if there are any points within tolerance of the point we're visiting
-            for (int i = 0; i < points.size(); i++){
+            for (int i = 0; i < points.size(); i++) {
                 Point p = points[i];
                 if (distanceBetweenPoints(curr_point, p) < tolerance) {
                     // Add point to to_visit and remove from the given list of points
@@ -135,21 +134,37 @@ LineOfBestFit LidarObstacleManager::getLineOfBestFit(const std::vector<Point> &p
     // http://www.statisticshowto.com/how-to-find-a-linear-regression-equation/
 
     double x_sum = std::accumulate(points.begin(), points.end(), 0.0,
-                                   [](double accum, Point p){ return accum + p.x; });
+                                   [](double accum, Point p) { return accum + p.x; });
     double y_sum = std::accumulate(points.begin(), points.end(), 0.0,
-                                   [](double accum, Point p){ return accum + p.y; });
+                                   [](double accum, Point p) { return accum + p.y; });
     double x_squared_sum = std::accumulate(points.begin(), points.end(), 0.0,
-                                   [](double accum, Point p){ return accum + std::pow(p.x, 2.0); });
+                                           [](double accum, Point p) { return accum + std::pow(p.x, 2.0); });
     double x_y_product_sum = std::accumulate(points.begin(), points.end(), 0.0,
-                                           [](double accum, Point p){ return accum + p.x * p.y; });
+                                             [](double accum, Point p) { return accum + p.x * p.y; });
     double y_intercept = (y_sum * x_squared_sum - x_sum * x_y_product_sum) /
-            (points.size() * x_squared_sum - std::pow(x_sum, 2.0));
+                         (points.size() * x_squared_sum - std::pow(x_sum, 2.0));
     double slope = (points.size() * x_y_product_sum - x_sum * y_sum) /
-            (points.size() * x_squared_sum - std::pow(x_sum, 2.0));
+                   (points.size() * x_squared_sum - std::pow(x_sum, 2.0));
 
-    // TODO: calculate correlation coeffecient and add it here
+    // Calculate means
+    double x_mean = x_sum / points.size();
+    double y_mean = y_sum / points.size();
 
-    return LineOfBestFit(slope, y_intercept, 0);
+    // Calculate Variances
+    double x_var = std::accumulate(points.begin(), points.end(), 0.0,
+                                   [x_mean](double accum, Point p) { return accum + std::pow((x_mean - p.x), 2.0); })
+                   / (points.size() - 1);
+    double y_var = std::accumulate(points.begin(), points.end(), 0.0,
+                                   [y_mean](double accum, Point p) { return accum + std::pow((y_mean - p.y), 2.0); })
+                   / (points.size() - 1);
+    // Calculate standard deviations
+    double x_sd = sqrt(x_var);
+    double y_sd = sqrt(y_var);
+
+    // Calculate correlation coefficient using Slope = r*Sy/Sx
+    double r = slope * x_sd / y_sd;
+
+    return LineOfBestFit(slope, y_intercept, r);
 }
 
 visualization_msgs::Marker LidarObstacleManager::getObstacleRVizMarkers() {

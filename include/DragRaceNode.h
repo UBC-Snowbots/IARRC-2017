@@ -27,16 +27,32 @@ class DragRaceNode {
 public:
     DragRaceNode(int argc, char **argv, std::string node_name);
 
-    // TODO: doc comment
-    // TODO: TEST ME!
-    static geometry_msgs::Twist determineDesiredMotion(sensor_msgs::LaserScan& scan);
-
 private:
     // TODO: Doc comment
-    void scanCallBack(const sensor_msgs::LaserScan::ConstPtr& scan);
+    void scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan);
+
+    LineOfBestFit *getBestLine(std::vector<LineOfBestFit*> lines, bool lineToTheRight);
 
     // Manages obstacles, including the cones and wall
     LidarObstacleManager obstacle_manager;
+
+    // Manages line handling and movement
+    DragRaceController *dragRaceController;
+
+    // How far from the target line the robot should be
+    double target_distance;
+
+    // Where the target line is
+    bool line_to_the_right;
+
+    // Velocity limits
+    double angular_vel_cap;
+    double linear_vel_cap;
+
+    // Scaling
+    double theta_scaling_multiplier;
+    double angular_speed_multiplier;
+    double linear_speed_multiplier;
 
     // Subscribes to the LaserScan
     ros::Subscriber scan_subscriber;
@@ -45,4 +61,5 @@ private:
     // Publishes the obstacles so we can see them in RViz
     ros::Publisher obstacle_debug_publisher;
 };
+
 #endif //DRAG_RACE_NODE_DRAG_RACE_H
