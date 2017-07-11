@@ -8,15 +8,14 @@
 
 DragRaceController::DragRaceController(double targetDistance, bool lineToTheRight, double theta_scaling_multiplier,
                                        double angular_speed_multiplier, double linear_speed_multiplier,
-                                       double angular_vel_cap, double linear_vel_cap) {
-    this->target_distance = targetDistance;
-    this->line_to_the_right = lineToTheRight;
-    this->theta_scaling_multiplier = theta_scaling_multiplier;
-    this->angular_speed_multiplier = angular_speed_multiplier;
-    this->angular_vel_cap = angular_vel_cap;
-    this->linear_vel_cap = linear_vel_cap;
-    this->linear_speed_multiplier = linear_speed_multiplier;
-}
+                                       double angular_vel_cap, double linear_vel_cap) :
+        target_distance(targetDistance),
+        line_to_the_right(lineToTheRight),
+        theta_scaling_multiplier(theta_scaling_multiplier),
+        angular_speed_multiplier(angular_speed_multiplier),
+        linear_speed_multiplier(linear_speed_multiplier),
+        angular_vel_cap(angular_vel_cap),
+        linear_vel_cap(linear_vel_cap) { }
 
 geometry_msgs::Twist DragRaceController::determineDesiredMotion(LineOfBestFit *longestConeLine) {
 
