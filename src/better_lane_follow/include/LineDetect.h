@@ -14,17 +14,14 @@
 #include <string>
 #include <stdio.h>
 
+using namespace cv;
+
 struct Polynomial {
     // ax^3 + bx^2 + cx + d
     double a;
     double b;
     double c;
     double d;
-};
-
-struct Point {
-    double x;
-    double y;
 };
 
 typedef std::vector<int> intVec;
@@ -53,21 +50,21 @@ public:
 
     // TODO doc functions
 
-    std::vector<Polynomial> getLines(cv::Mat& filteredImage);
+    std::vector<Polynomial> getLines(Mat& filteredImage);
 
-    intVec getHistogram(cv::Mat& image);
+    intVec getHistogram(Mat& image);
 
-    cv::Mat getWindowSlice(cv::Mat& image, Window window, int verticalSliceIndex);
+    Mat getWindowSlice(Mat& image, Window window, int verticalSliceIndex);
 
     std::pair<int, int> getHistogramPeakPosition(intVec histogram);
 
-    Polynomial fitPolyLine(std::vector<Point> points, int order);
+    Polynomial fitPolyLine(std::vector<Point2d> points, int order);
 
-    static cv::Point getIntersection(Polynomial leftLine, Polynomial rightLine);
+    static Point2d getIntersection(Polynomial leftLine, Polynomial rightLine);
 
-    static cv::Point moveAwayFromLine(Polynomial line, double targetXDistance, double targetYDistance);
+    static Point2d moveAwayFromLine(Polynomial line, double targetXDistance, double targetYDistance);
 
-    static double getAngleFromOriginToPoint(cv::Point point);
+    static double getAngleFromOriginToPoint(Point2d point);
 
     static double cubicFormula(double a, double b, double c, double d);
 
