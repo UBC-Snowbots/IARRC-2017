@@ -59,6 +59,7 @@ struct FiniteLine {
 
 class LidarObstacleManager {
 public:
+    LidarObstacleManager();
     LidarObstacleManager(double max_obstacle_merging_distance, double cone_grouping_tolerance);
 
     /**
