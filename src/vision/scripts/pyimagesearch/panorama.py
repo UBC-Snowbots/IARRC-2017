@@ -8,36 +8,66 @@ class Stitcher:
 		# determine if we are using OpenCV v3.X and initialize the
 		# cached homography matrix
 		self.isv3 = imutils.is_cv3()
+		self.cachedH_l = None
+		self.cachedH_r = None
 		self.cachedH = None
-
-	def stitch(self, images, ratio=0.75, reprojThresh=4.0):
+		
+	def stitch(self, images, direction=1, ratio=0.75, reprojThresh=4.0):
 		# unpack the images
-		(imageB, imageA) = images
+		if direction == 0:
+			(imageB, imageA) = images
+		else:
+			(imageC, imageB, imageA) = images
 
 		# if the cached homography matrix is None, then we need to
 		# apply keypoint matching to construct it
-		if self.cachedH is None:
+		if self.cachedH_l is None and self.cachedH_r is None:
+		#if self.cachedH is None:
 			# detect keypoints and extract
 			(kpsA, featuresA) = self.detectAndDescribe(imageA)
 			(kpsB, featuresB) = self.detectAndDescribe(imageB)
+			(kpsC, featuresC) = self.detectAndDescribe(imageC)
 
 			# match features between the two images
-			M = self.matchKeypoints(kpsA, kpsB,
+			M_r = self.matchKeypoints(kpsA, kpsB,
 				featuresA, featuresB, ratio, reprojThresh)
+			
+			M_l = self.matchKeypoints(kpsC, kpsB,
+				featuresC, featuresB, ratio, reprojThresh)
+
+			#Move the left transforamtion 400 cols to the right in order to 
+			#stitch it to the middle one
+			Offset = np.array([[1, 0,  400],
+				  	   [0, 1,   0 ],
+				  	   [0, 0,   1 ]])
+
+			M_l_offset = M_l[1].dot(Offset) 
 
 			# if the match is None, then there aren't enough matched
 			# keypoints to create a panorama
-			if M is None:
+			if M_r is None or M_l is None:
 				return None
 
 			# cache the homography matrix
-			self.cachedH = M[1]
+			self.cachedH_l = M_l_offset
+			self.cachedH_r = M_r[1]
+			#self.cachedH_l_inv = M_l_inv[1]
 
+			
 		# apply a perspective transform to stitch the images together
 		# using the cached homography matrix
-		result = cv2.warpPerspective(imageA, self.cachedH,
+		#.shape returns a tuple of number of rows, columns and channels
+		#warp right imageA and left imageC to match the middle imageB
+		result_l = cv2.warpPerspective(imageC, self.cachedH_l,
+			(imageC.shape[1] + imageB.shape[1], imageC.shape[0]))
+		result_r = cv2.warpPerspective(imageA, self.cachedH_r, 
 			(imageA.shape[1] + imageB.shape[1], imageA.shape[0]))
-		result[0:imageB.shape[0], 0:imageB.shape[1]] = imageB
+		result = cv2.warpPerspective(imageA, self.cachedH_r,
+			(imageA.shape[1] * 3, imageA.shape[0]))
+	
+		result[0:result_l.shape[0], 400: result_l.shape[1]*3] = result_r
+		result[0:result_l.shape[0], 0:800] = result_l
+		result[0:300, 400:800] = imageB
 
 		# return the stitched image
 		return result
