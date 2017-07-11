@@ -9,7 +9,7 @@
 #include <DragRaceNode.h>
 
 DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name):
-    obstacle_manager(0.4, 1),
+    obstacle_manager(0.4, 1)
 {
     // Setup NodeHandles
     ros::init(argc, argv, node_name);
@@ -41,15 +41,9 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name):
     SB_getParam(nh, "line_to_the_right", line_to_the_right, true);
 
     // Setup drag race controller with given params
-    dragRaceController = new DragRaceController(target_distance, line_to_the_right, theta_scaling_multiplier,
-                                                angular_speed_multiplier, linear_speed_multiplier, angular_vel_cap,
-                                                linear_vel_cap);
-
-    // TODO: Setup the obstacle manager with given params
-
-    // TODO: Get our current location (relative to the walls) (and just keep trying until we can succesfully get it)
-
-    // TODO: Save our current position (relative to the walls) so that we can can try and maintain it)
+    drag_race_controller = DragRaceController(target_distance, line_to_the_right, theta_scaling_multiplier,
+                                           angular_speed_multiplier, linear_speed_multiplier, angular_vel_cap,
+                                           linear_vel_cap);
 }
 
 void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr& scan) {
@@ -63,30 +57,25 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr& scan) {
     // Broadcast a visualisable representation so we can see obstacles in RViz
     obstacle_debug_publisher.publish(obstacle_manager.getObstacleRVizMarkers());
 
-
-    // Get the obstacles (do we really need to if the obstacle maanger is doing all the work:?)
-    //std::vector<LidarObstacle> obstacles = obstacle_manager.get_obstacles();
-
-    // Get the longest line of cones
-//    Line longest_cone_line = obstacle_manager->getLongestConeLine();
-    // TODO: get an actual line
-    LineOfBestFit *longest_cone_line = new LineOfBestFit(0, 1, 0);
+    // Get the best line for us
+    std::vector<LineOfBestFit> lines = obstacle_manager.getConeLines();
+    LineOfBestFit best_line = getBestLine(lines, line_to_the_right);
 
     // Determine what we need to do to stay at the desired distance from the wall
-    geometry_msgs::Twist twist = dragRaceController->determineDesiredMotion(longest_cone_line);
+    geometry_msgs::Twist twist = drag_race_controller.determineDesiredMotion(best_line);
 
     // Publish our desired twist message
     twist_publisher.publish(twist);
 }
 
-LineOfBestFit *DragRaceNode::getBestLine(std::vector<LineOfBestFit *> lines, bool lineToTheRight) {
-    LineOfBestFit *bestLine = new LineOfBestFit(0, 0, 0);
+LineOfBestFit DragRaceNode::getBestLine(std::vector<LineOfBestFit> lines, bool lineToTheRight) {
+    LineOfBestFit bestLine(0, 0, 0);
 
     for (size_t i = 0; i < lines.size(); i++) {
         // Only check lines where the y-intercept is on the correct side.
-        if ((lineToTheRight && lines[i]->getYIntercept() < 0) || (!lineToTheRight && lines[i]->getYIntercept() >= 0)) {
+        if ((lineToTheRight && lines[i].getYIntercept() < 0) || (!lineToTheRight && lines[i].getYIntercept() >= 0)) {
             // If correlation is stronger than the current best, update best line.
-            if (fabs(lines[i]->correlation) > fabs(bestLine->correlation))
+            if (fabs(lines[i].correlation) > fabs(bestLine.correlation))
                 bestLine = lines[i];
         }
     }

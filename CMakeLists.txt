@@ -37,17 +37,19 @@ include_directories(
 # add_executable(${PROJECT_NAME}_node src/drag_race_node.cpp)
 
 # TODO: Perhaps rename to something like `drag_race_controller_node`
-add_executable(drag_race
+add_executable(drag_race_node
         src/drag_race_node.cpp
         src/DragRaceNode.cpp
-        src/DragRaceController.cpp)
+        src/DragRaceController.cpp
+        src/LidarObstacleManager.cpp
+        src/LidarObstacle.cpp)
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
 
-target_link_libraries(drag_race
+target_link_libraries(drag_race_node
         ${catkin_LIBRARIES}
         ${sb_utils_LIBRARIES}
         )

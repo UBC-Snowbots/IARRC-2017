@@ -11,6 +11,7 @@
 
 // STD Includes
 #include <iostream>
+#include <vector>
 
 // ROS Includes
 // TODO: Sort me for neatness
@@ -22,6 +23,7 @@
 // SB Includes
 #include <sb_utils.h>
 #include <LidarObstacleManager.h>
+#include <DragRaceController.h>
 
 class DragRaceNode {
 public:
@@ -31,13 +33,13 @@ private:
     // TODO: Doc comment
     void scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan);
 
-    LineOfBestFit *getBestLine(std::vector<LineOfBestFit*> lines, bool lineToTheRight);
+    LineOfBestFit getBestLine(std::vector<LineOfBestFit> lines, bool lineToTheRight);
 
     // Manages obstacles, including the cones and wall
     LidarObstacleManager obstacle_manager;
 
     // Manages line handling and movement
-    DragRaceController *dragRaceController;
+    DragRaceController drag_race_controller;
 
     // How far from the target line the robot should be
     double target_distance;

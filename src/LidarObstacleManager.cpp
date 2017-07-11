@@ -86,6 +86,7 @@ std::vector<LineOfBestFit> LidarObstacleManager::getConeLines() {
 
     // Fit a line of best fit to each group
     std::vector<LineOfBestFit> lines;
+    lines.reserve(groups.size());
     std::transform(groups.begin(), groups.end(), lines.begin(), getLineOfBestFit);
 
     return lines;
@@ -102,7 +103,7 @@ std::vector<std::vector<Point>> LidarObstacleManager::getPointGroupings(std::vec
         std::stack<Point> to_visit;
         to_visit.emplace(points.back());
         points.pop_back();
-        do {
+        while (to_visit.size() > 0) {
             // Visit the first point in to_visit
             Point curr_point = to_visit.top();
             to_visit.pop();
@@ -121,7 +122,7 @@ std::vector<std::vector<Point>> LidarObstacleManager::getPointGroupings(std::vec
             group.emplace_back(curr_point);
 
             // Keep going if we've got more points to visit
-        } while (to_visit.size() > 0);
+        }
 
         groups.emplace_back(group);
     }

@@ -6,6 +6,8 @@
  */
 #include "DragRaceController.h"
 
+DragRaceController::DragRaceController(){};
+
 DragRaceController::DragRaceController(double targetDistance, bool lineToTheRight, double theta_scaling_multiplier,
                                        double angular_speed_multiplier, double linear_speed_multiplier,
                                        double angular_vel_cap, double linear_vel_cap) :
@@ -17,10 +19,10 @@ DragRaceController::DragRaceController(double targetDistance, bool lineToTheRigh
         angular_vel_cap(angular_vel_cap),
         linear_vel_cap(linear_vel_cap) { }
 
-geometry_msgs::Twist DragRaceController::determineDesiredMotion(LineOfBestFit *longestConeLine) {
+geometry_msgs::Twist DragRaceController::determineDesiredMotion(LineOfBestFit longestConeLine) {
 
     // Determine angle of line.
-    double theta = atan(longestConeLine->getSlope());
+    double theta = atan(longestConeLine.getSlope());
 
 
     double distanceError = target_distance - determineDistanceFromLine(longestConeLine);
@@ -56,16 +58,16 @@ geometry_msgs::Twist DragRaceController::determineDesiredMotion(LineOfBestFit *l
     return command;
 }
 
-double DragRaceController::determineDistanceFromLine(LineOfBestFit *line) {
-    double negReciprocal = -1 / line->getSlope();
+double DragRaceController::determineDistanceFromLine(LineOfBestFit line) {
+    double negReciprocal = -1 / line.getSlope();
 
     /* Find the intersection between the line and its perpendicular line. */
 
     // Set the two sides equal then isolate x to one side.
-    double isolatedXSlope = negReciprocal - line->getSlope();
+    double isolatedXSlope = negReciprocal - line.getSlope();
 
     // Divide both sides by the isolated slope to get the x point intersection.
-    double xIntersection = line->getYIntercept() / isolatedXSlope;
+    double xIntersection = line.getYIntercept() / isolatedXSlope;
 
     // Plug in the xIntersection to get the y point intersection.
     double yIntersection = negReciprocal * xIntersection;
