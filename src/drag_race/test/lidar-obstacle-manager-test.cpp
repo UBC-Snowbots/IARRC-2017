@@ -153,6 +153,7 @@ TEST_F(LidarObstacleManagerTest, getLineOfBestFitPositiveSlopeTest){
     LineOfBestFit line = LidarObstacleManager::getLineOfBestFit(points);
     EXPECT_DOUBLE_EQ(0, line.getXIntercept());
     EXPECT_DOUBLE_EQ(0.5, line.getSlope());
+    EXPECT_DOUBLE_EQ(1, line.correlation);
 }
 
 TEST_F(LidarObstacleManagerTest, getLineOfBestFitNegativeSlopeTest){
@@ -164,9 +165,40 @@ TEST_F(LidarObstacleManagerTest, getLineOfBestFitNegativeSlopeTest){
     LineOfBestFit line = LidarObstacleManager::getLineOfBestFit(points);
     EXPECT_DOUBLE_EQ(2, line.getXIntercept());
     EXPECT_DOUBLE_EQ(-0.5, line.getSlope());
+    EXPECT_DOUBLE_EQ(-1, line.correlation);
 }
 
 TEST_F(LidarObstacleManagerTest, getLineOfBestFitRandomPoints){
+    std::vector<Point> points = {
+            {0,1},
+            {1,0.5},
+            {2,2},
+            {3,-4},
+            {3,-5},
+    };
+    LineOfBestFit line = LidarObstacleManager::getLineOfBestFit(points);
+    EXPECT_DOUBLE_EQ(2.2352941176470589, line.getYIntercept());
+    EXPECT_DOUBLE_EQ(-1.8529411764705883, line.getSlope());
+    EXPECT_DOUBLE_EQ(-0.76208438348419327, line.correlation);
+}
+
+TEST_F(LidarObstacleManagerTest, getLineOfBestFitRandomPoints2){
+    std::vector<Point> points = {
+            {0,-1},
+            {1,-0.5},
+            {2,2.3},
+            {3,-3},
+            {3,-8},
+            {4,9},
+            {5,100}
+    };
+    LineOfBestFit line = LidarObstacleManager::getLineOfBestFit(points);
+    EXPECT_DOUBLE_EQ(-22.617741935483881, line.getYIntercept());
+    EXPECT_DOUBLE_EQ(14.284677419354843, line.getSlope());
+    EXPECT_DOUBLE_EQ(0.64214088713774, line.correlation);
+}
+
+TEST_F(LidarObstacleManagerTest, getLineOfBestFitRandomPoints3){
     std::vector<Point> points = {
             {12.13,41.44},
             {7865.653,6234.54},
@@ -175,8 +207,9 @@ TEST_F(LidarObstacleManagerTest, getLineOfBestFitRandomPoints){
             {9699.454,10344.334},
     };
     LineOfBestFit line = LidarObstacleManager::getLineOfBestFit(points);
-    EXPECT_DOUBLE_EQ(0.96926393150821, line.getSlope());
-    EXPECT_DOUBLE_EQ(101.27209579732, line.getYIntercept());
+    EXPECT_DOUBLE_EQ(0.96926393150820644, line.getSlope());
+    EXPECT_DOUBLE_EQ(-101.27209579731976, line.getYIntercept());
+    EXPECT_DOUBLE_EQ(0.98463989293624832, line.correlation);
 }
 
 // TODO
