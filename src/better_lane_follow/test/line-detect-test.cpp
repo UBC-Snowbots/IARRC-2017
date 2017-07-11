@@ -135,11 +135,11 @@ TEST(LineDetect, fitPolyLineLeftTest) {
 
     LineDetect testLineDetect;
     Polynomial testPolynomial = testLineDetect.fitPolyLine(testPoints, testOrder);
-    Polynomial expectedPolynomial{-3.18182, 2.16364, -0.27273};
+    Polynomial expectedPolynomial{0, -0.27273, 2.16364, -3.18182};
 
-    EXPECT_NEAR(expectedPolynomial.a, testPolynomial.a, 0.00001);
     EXPECT_NEAR(expectedPolynomial.b, testPolynomial.b, 0.00001);
     EXPECT_NEAR(expectedPolynomial.c, testPolynomial.c, 0.00001);
+    EXPECT_NEAR(expectedPolynomial.d, testPolynomial.d, 0.00001);
 }
 
 TEST(LineDetect, fitPolyLineRightTest) {
@@ -155,7 +155,7 @@ TEST(LineDetect, fitPolyLineRightTest) {
 
     LineDetect testLineDetect;
     Polynomial testPolynomial = testLineDetect.fitPolyLine(testPoints, testOrder);
-    Polynomial expectedPolynomial{-34.99999, 14.08333, -1.83333, 0.08333};
+    Polynomial expectedPolynomial{0.08333, -1.83333, 14.08333, -34.99999};
 
     EXPECT_NEAR(expectedPolynomial.a, testPolynomial.a, 0.00001);
     EXPECT_NEAR(expectedPolynomial.b, testPolynomial.b, 0.00001);

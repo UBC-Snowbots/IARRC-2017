@@ -15,6 +15,7 @@
 #include <stdio.h>
 
 struct Polynomial {
+    // ax^3 + bx^2 + cx + d
     double a;
     double b;
     double c;

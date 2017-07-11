@@ -131,15 +131,15 @@ Polynomial LineDetect::fitPolyLine(std::vector<Point> points, int order) {
     // solve for linear least squares fit
     result = A.householderQr().solve(yvMapped);
 
-    if (result.size() == 3)
-        return Polynomial{result[0], result[1], result[2], result[3]};
+    if (result.size() == 4)
+        return Polynomial{result[3], result[2], result[1], result[0]};
     else
-        return Polynomial{result[0], result[1], result[2], 0};
+        return Polynomial{0, result[2], result[1], result[0]};
 }
 
 cv::Point LineDetect::getIntersection(Polynomial leftLine, Polynomial rightLine) {
-    // Isolate slopes
 
+    // Isolate slopes
     double bCombinedSlope = leftLine.b - rightLine.b;
 
     double cCombinedSlope = leftLine.c - rightLine.c;
@@ -172,7 +172,6 @@ double LineDetect::cubicFormula(double a, double b, double c, double d) {
 
     return w + x + p;
 }
-
 
 double LineDetect::getAngleFromOriginToPoint(cv::Point point) {
     double dy = point.y;
