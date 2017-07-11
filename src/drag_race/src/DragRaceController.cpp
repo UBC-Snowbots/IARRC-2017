@@ -25,7 +25,7 @@ geometry_msgs::Twist DragRaceController::determineDesiredMotion(LineOfBestFit *l
 
 
     double distanceError = target_distance - determineDistanceFromLine(longestConeLine);
-    if(!line_to_the_right)
+    if (!line_to_the_right)
         distanceError *= -1.0;
 
     geometry_msgs::Twist command;
@@ -38,14 +38,17 @@ geometry_msgs::Twist DragRaceController::determineDesiredMotion(LineOfBestFit *l
 
     // Figure out how fast we should be turning
     command.angular.z = (theta_scaling_multiplier * theta + distanceError) * angular_speed_multiplier;
-    printf("Distance: %f, Theta: %f\n", distanceError, theta * theta_scaling_multiplier);
+    //printf("Distance: %f, Theta: %f\n", distanceError, theta * theta_scaling_multiplier);
     // Limit the angular velocity
     if (fabs(command.angular.z) > angular_vel_cap)
         command.angular.z = angular_vel_cap * command.angular.z / fabs(command.angular.z);
 
 
     // Figure out how fast we should be moving forward
-    command.linear.x = linear_speed_multiplier / fabs(command.angular.z);
+    if (command.angular.z != 0)
+        command.linear.x = linear_speed_multiplier / fabs(command.angular.z);
+    else
+        command.linear.x = linear_vel_cap;
 
     // Limit the linear velocity
     if (command.linear.x > linear_vel_cap)

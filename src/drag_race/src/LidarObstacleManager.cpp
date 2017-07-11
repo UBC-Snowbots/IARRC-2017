@@ -12,7 +12,7 @@ LidarObstacleManager::LidarObstacleManager(
         double cone_grouping_tolerance
 ) :
         max_obstacle_merging_distance(max_obstacle_merging_distance),
-        cone_grouping_tolerance(cone_grouping_tolerance) {}
+        cone_grouping_tolerance(cone_grouping_tolerance) { }
 
 void LidarObstacleManager::addLaserScan(const sensor_msgs::LaserScan &scan) {
     // Create an obstacle for every hit in the lidar scan
@@ -148,11 +148,11 @@ LineOfBestFit LidarObstacleManager::getLineOfBestFit(const std::vector<Point> &p
 
     // Calculate Variances
     double x_var = std::accumulate(points.begin(), points.end(), 0.0,
-                                [x_mean](double accum, Point p) { return accum + std::pow((x_mean - p.x), 2.0); })
-                / points.size();
+                                   [x_mean](double accum, Point p) { return accum + std::pow((x_mean - p.x), 2.0); })
+                   / (points.size() - 1);
     double y_var = std::accumulate(points.begin(), points.end(), 0.0,
-                                [y_mean](double accum, Point p) { return accum + std::pow((y_mean - p.y), 2.0); })
-                / points.size();
+                                   [y_mean](double accum, Point p) { return accum + std::pow((y_mean - p.y), 2.0); })
+                   / (points.size() - 1);
     // Calculate standard deviations
     double x_sd = sqrt(x_var);
     double y_sd = sqrt(y_var);
