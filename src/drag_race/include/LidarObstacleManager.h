@@ -66,7 +66,7 @@ public:
     LidarObstacleManager();
 
     LidarObstacleManager(double max_obstacle_merging_distance, double cone_grouping_tolerance,
-                         double max_distance_from_robot_accepted);
+                         double max_distance_from_robot_accepted, double min_wall_length);
 
     /**
      * Merges or adds the given obstacle to the already saved ones
@@ -172,6 +172,9 @@ private:
 
     // The maximum permitted distance between cones in the same group
     double cone_grouping_tolerance;
+
+    // The mimimum length of an obstacle before it's considered a wall
+    double min_wall_length;
 
 };
 

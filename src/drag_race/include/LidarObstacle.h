@@ -49,6 +49,7 @@ public:
      *
      * @param min_wall_length the minimum length for the obstacle to be considered a wall
      */
+    // TODO: default constructors suck (not really but still...). we should require min_wall_length
     LidarObstacle(double min_wall_length);
 
     /**

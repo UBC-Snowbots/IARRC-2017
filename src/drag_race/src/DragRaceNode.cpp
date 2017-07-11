@@ -43,10 +43,11 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
     SB_getParam(nh, "angular_speed_multiplier", angular_speed_multiplier, 1.0);
     SB_getParam(nh, "linear_speed_multiplier", linear_speed_multiplier, 1.0);
     SB_getParam(nh, "line_to_the_right", line_to_the_right, false);
-    double max_obstacle_merging_distance, cone_grouping_tolerance;
-    SB_getParam(nh, "max_obstacle_merging_distance", max_obstacle_merging_distance, 1.3);
-    SB_getParam(nh, "cone_grouping_tolerance", cone_grouping_tolerance, 0.3);
-    SB_getParam(nh, "max_distance_from_robot_accepted", max_distance_from_robot_accepted, 1.0);
+    double max_obstacle_merging_distance, cone_grouping_tolerance, min_wall_length;
+    SB_getParam(nh, "max_obstacle_merging_distance", max_obstacle_merging_distance, 0.3);
+    SB_getParam(nh, "cone_grouping_tolerance", cone_grouping_tolerance, 1.3);
+    SB_getParam(nh, "max_distance_from_robot_accepted", max_distance_from_robot_accepted, 1.5);
+    SB_getParam(nh, "min_wall_length", min_wall_length, 0.4);
 
     // Setup drag race controller with given params
     drag_race_controller = DragRaceController(target_distance, line_to_the_right, theta_scaling_multiplier,
@@ -55,7 +56,7 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
 
     // Setup the obstacle manager with given params
     obstacle_manager = LidarObstacleManager(max_obstacle_merging_distance, cone_grouping_tolerance,
-                                            max_distance_from_robot_accepted);
+                                            max_distance_from_robot_accepted, min_wall_length);
 }
 
 void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr& scan) {
