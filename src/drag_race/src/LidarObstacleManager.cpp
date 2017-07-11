@@ -47,7 +47,7 @@ void LidarObstacleManager::clearObstacles(){
 void LidarObstacleManager::addObstacle(LidarObstacle obstacle) {
     // See if this obstacle is close enough to any other saved obstacle to be the same
     // TODO: Should we be instead checking for the CLOSEST saved obstcle?
-    for (LidarObstacle saved_obstacle : obstacles) {
+    for (LidarObstacle& saved_obstacle : obstacles) {
         if (minDistanceBetweenObstacles(saved_obstacle, obstacle)
             < max_obstacle_merging_distance) {
             saved_obstacle.mergeInLidarObstacle(obstacle);

@@ -10,7 +10,7 @@
 class LidarObstacleManagerTest : public testing::Test {
 protected:
     LidarObstacleManagerTest() :
-            obstacle_manager_1(0.2, 2)
+            obstacle_manager_1(0.2, 2, 1, 0.4)
             {}
 
     virtual void SetUp(){
@@ -84,6 +84,13 @@ TEST_F(LidarObstacleManagerTest, minDistanceBetweenObstaclesTest){
     double distance = LidarObstacleManager::minDistanceBetweenObstacles(cone1, cone2);
     EXPECT_LE(0.93, distance);
     EXPECT_GE(1.07, distance);
+}
+
+TEST_F(LidarObstacleManagerTest, minDistanceBetweenObstaclesTest2){
+    LidarObstacle obstacle1({ {0, 1}, {M_PI/2, 100} });
+    LidarObstacle obstacle2({ {M_PI, 1}, {-M_PI/2, 100} });
+
+    EXPECT_DOUBLE_EQ(2.0, LidarObstacleManager::minDistanceBetweenObstacles(obstacle1, obstacle2));
 }
 
 TEST_F(LidarObstacleManagerTest, addObstacleTest){
