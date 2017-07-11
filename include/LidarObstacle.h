@@ -28,6 +28,7 @@ struct Reading {
     distance_t range;
 };
 
+// TODO: We should just use geometry_msgs::Point
 struct Point {
     double x;
     double y;

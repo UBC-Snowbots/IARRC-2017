@@ -15,7 +15,7 @@ LidarObstacleManager::LidarObstacleManager(
         cone_grouping_tolerance(cone_grouping_tolerance)
 {}
 
-void LidarObstacleManager::addLaserScan(sensor_msgs::LaserScan &scan) {
+void LidarObstacleManager::addLaserScan(const sensor_msgs::LaserScan &scan) {
     // Create an obstacle for every hit in the lidar scan
     std::vector<LidarObstacle> temp_obstacles;
     for (int i = 0; i < scan.ranges.size(); ++i) {
@@ -30,6 +30,10 @@ void LidarObstacleManager::addLaserScan(sensor_msgs::LaserScan &scan) {
 
 std::vector<LidarObstacle> LidarObstacleManager::getObstacles() {
     return obstacles;
+}
+
+void LidarObstacleManager::clearObstacles(){
+    obstacles.clear();
 }
 
 void LidarObstacleManager::addObstacle(LidarObstacle obstacle) {
@@ -148,3 +152,35 @@ LineOfBestFit LidarObstacleManager::getLineOfBestFit(const std::vector<Point> &p
     return LineOfBestFit(slope, y_intercept, 0);
 }
 
+visualization_msgs::Marker LidarObstacleManager::getObstacleRVizMarkers() {
+    visualization_msgs::Marker points;
+
+    // TODO: we shold differenetiat between walls and cones
+
+    // TODO: Should be a param (currently in the default LaserScan frame)
+    points.header.frame_id = "laser";
+    points.header.stamp = ros::Time::now();
+    points.ns = "debug";
+    points.action = visualization_msgs::Marker::ADD;
+    points.pose.orientation.w = 1.0;
+    points.id = 0;
+    // TODO: Make these round, not blocks
+    points.type = visualization_msgs::Marker::POINTS;
+    // TODO: Make the scale a param
+    points.scale.x = 0.1;
+    points.scale.y = 0.1;
+    // Points are green
+    // TODO: Make this a param
+    points.color.g = 1.0f;
+    points.color.a = 1.0;
+
+    for (LidarObstacle obstacle: obstacles){
+        Point center = obstacle.getCenter();
+        geometry_msgs::Point geom_point;
+        geom_point.x = center.x;
+        geom_point.y = center.y;
+        points.points.push_back(geom_point);
+    }
+
+    return points;
+}
