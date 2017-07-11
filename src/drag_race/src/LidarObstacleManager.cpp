@@ -217,7 +217,7 @@ visualization_msgs::Marker LidarObstacleManager::getConeRVizMarker() {
     points.color.a = 1.0;
 
     for (LidarObstacle obstacle: obstacles){
-        if (obstacle.getObstacleType() == CONE){
+        if (obstacle.getObstacleType() == WALL){
             Point center = obstacle.getCenter();
             geometry_msgs::Point geom_point;
             geom_point.x = center.x;

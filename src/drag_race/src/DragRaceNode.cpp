@@ -45,8 +45,8 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name)
     SB_getParam(nh, "linear_speed_multiplier", linear_speed_multiplier, 1.0);
     SB_getParam(nh, "line_to_the_right", line_to_the_right, false);
     double max_obstacle_merging_distance, cone_grouping_tolerance;
-    SB_getParam(nh, "max_obstacle_merging_distance", max_obstacle_merging_distance, 1.3);
-    SB_getParam(nh, "cone_grouping_tolerance", cone_grouping_tolerance, 0.3);
+    SB_getParam(nh, "max_obstacle_merging_distance", max_obstacle_merging_distance, 0.3);
+    SB_getParam(nh, "cone_grouping_tolerance", cone_grouping_tolerance, 1.3);
 
     // Setup drag race controller with given params
     drag_race_controller = DragRaceController(target_distance, line_to_the_right, theta_scaling_multiplier,
