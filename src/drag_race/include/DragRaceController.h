@@ -17,6 +17,11 @@
 class DragRaceController {
 public:
     /**
+     * Empty Constructor
+     */
+    DragRaceController();
+
+    /**
      * Initializes parameters of the robot.
      *
      * @param targetDistance
@@ -39,7 +44,7 @@ public:
      * @param longestConeLine
      * @return the optimal angular and linear acceleration.
      */
-    geometry_msgs::Twist determineDesiredMotion(LineOfBestFit *longestConeLine);
+    geometry_msgs::Twist determineDesiredMotion(LineOfBestFit longestConeLine);
 
 private:
 
@@ -49,7 +54,7 @@ private:
      * @param line
      * @return the minimum distance from given line and the origin.
      */
-    static double determineDistanceFromLine(LineOfBestFit *line);
+    static double determineDistanceFromLine(LineOfBestFit line);
 
     // How far from the target line the robot should be
     double target_distance;
