@@ -22,7 +22,7 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
                                     &DragRaceNode::scanCallBack, this);
 
     // Setup Publisher(s)
-    std::string twist_topic = private_nh.resolveName("twist");
+    std::string twist_topic = private_nh.resolveName("cmd_vel");
     twist_publisher = private_nh.advertise<geometry_msgs::Twist>
                                 (twist_topic, queue_size);
     std::string cone_debug_topic = private_nh.resolveName("debug/cone");
