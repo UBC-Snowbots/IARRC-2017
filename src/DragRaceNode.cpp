@@ -8,8 +8,7 @@
 
 #include <DragRaceNode.h>
 
-DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name)
-{
+DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
     // Setup NodeHandles
     ros::init(argc, argv, node_name);
     ros::NodeHandle nh;
@@ -19,13 +18,13 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name)
     std::string scan_topic = "/scan";
     uint32_t queue_size = 1;
 
-    scan_subscriber = nh.subscribe( scan_topic, queue_size, 
-                                    &DragRaceNode::scanCallBack, this);
+    scan_subscriber = nh.subscribe(scan_topic, queue_size,
+                                   &DragRaceNode::scanCallBack, this);
 
     // Setup Publisher(s)
     std::string twist_topic = private_nh.resolveName("twist");
     twist_publisher = private_nh.advertise<geometry_msgs::Twist>
-                                (twist_topic, queue_size);
+            (twist_topic, queue_size);
     std::string cone_debug_topic = private_nh.resolveName("debug/cone");
     cone_debug_publisher = private_nh.advertise<visualization_msgs::Marker>
             (cone_debug_topic, queue_size);
@@ -47,17 +46,19 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name)
     double max_obstacle_merging_distance, cone_grouping_tolerance;
     SB_getParam(nh, "max_obstacle_merging_distance", max_obstacle_merging_distance, 1.3);
     SB_getParam(nh, "cone_grouping_tolerance", cone_grouping_tolerance, 0.3);
+    SB_getParam(nh, "max_distance_from_robot_accepted", max_distance_from_robot_accepted, 1.0);
 
     // Setup drag race controller with given params
     drag_race_controller = DragRaceController(target_distance, line_to_the_right, theta_scaling_multiplier,
-                                           angular_speed_multiplier, linear_speed_multiplier, angular_vel_cap,
-                                           linear_vel_cap);
+                                              angular_speed_multiplier, linear_speed_multiplier, angular_vel_cap,
+                                              linear_vel_cap);
 
     // Setup the obstacle manager with given params
-    obstacle_manager = LidarObstacleManager(max_obstacle_merging_distance, cone_grouping_tolerance);
+    obstacle_manager = LidarObstacleManager(max_obstacle_merging_distance, cone_grouping_tolerance,
+                                            max_distance_from_robot_accepted);
 }
 
-void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr& scan) {
+void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan) {
     // Clear any obstacles we already have
     obstacle_manager.clearObstacles();
 

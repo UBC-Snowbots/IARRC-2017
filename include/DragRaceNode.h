@@ -39,6 +39,10 @@ private:
     // Manages line handling and movement
     DragRaceController drag_race_controller;
 
+
+    // How far lines can be before being considered invalid
+    double max_distance_from_robot_accepted;
+
     // How far from the target line the robot should be
     double target_distance;
 
