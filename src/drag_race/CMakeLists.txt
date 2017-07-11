@@ -9,8 +9,8 @@ add_definitions(--std=c++14)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
-    roscpp
-    )
+        roscpp
+        )
 find_package(sb_utils REQUIRED)
 
 ## System dependencies are found with CMake's conventions
@@ -37,19 +37,20 @@ include_directories(
 # add_executable(${PROJECT_NAME}_node src/drag_race_node.cpp)
 
 # TODO: Perhaps rename to something like `drag_race_controller_node`
-add_executable(drag_race_node 
-    src/drag_race_node.cpp 
-    src/DragRaceNode.cpp
-    src/LidarObstacleManager.cpp
-    src/LidarObstacle.cpp
-    )
+add_executable(drag_race
+        src/drag_race_node.cpp
+        src/DragRaceNode.cpp
+        src/DragRaceController.cpp)
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
 
-target_link_libraries(drag_race_node ${catkin_LIBRARIES} ${sb_utils_LIBRARIES})
+target_link_libraries(drag_race
+        ${catkin_LIBRARIES}
+        ${sb_utils_LIBRARIES}
+        )
 
 #############
 ## Testing ##
@@ -73,6 +74,12 @@ if (CATKIN_ENABLE_TESTING)
         test/lidar-obstacle-test.cpp
         src/LidarObstacle)
     target_link_libraries(lidar-obstacle-test ${catkin_LIBRARIES})
+
+    catkin_add_gtest(drag-race-controller-test
+            test/drag-race-controller-test.cpp
+            src/DragRaceNode.cpp
+            src/DragRaceController.cpp)
+    target_link_libraries(drag-race-controller-test ${catkin_LIBRARIES})
 
     # TODO: Maybe some rostests?
 
