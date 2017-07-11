@@ -12,6 +12,7 @@
 
 // ROS Includes
 #include <sensor_msgs/LaserScan.h>
+#include <visualization_msgs/Marker.h>
 
 // SB Includes
 #include <LidarObstacle.h>
@@ -67,7 +68,7 @@ public:
      *
      * @param scan the scan to be merged in
      */
-    void addLaserScan(sensor_msgs::LaserScan& scan);
+    void addLaserScan(const sensor_msgs::LaserScan& scan);
 
     /**
      * Clears all saved obstacles
@@ -111,6 +112,16 @@ public:
      * @return the minimum distance between obstacle1 and obstacle2
      */
     static double minDistanceBetweenObstacles(LidarObstacle obstacle1, LidarObstacle obstacle2);
+
+    /**
+     * Gets all stored obstacles as a vector of markers that can be rendered in RViz
+     *
+     * @return all stored obstacles as a vector of markers that can be rendered in RViz
+     */
+    // TODO: when we update lidarObstacle to be a bit more obstract, improve this as well
+    // TODO: to represent things like radius
+    // TODO: TEST ME
+    visualization_msgs::Marker getObstacleRVizMarkers();
 
 private:
 

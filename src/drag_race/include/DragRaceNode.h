@@ -29,7 +29,7 @@ public:
 
     // TODO: doc comment
     // TODO: TEST ME!
-    static geometry_msgs::Twist determineDesiredMotion(geometry_msgs::LaserScan& scan);
+    static geometry_msgs::Twist determineDesiredMotion(sensor_msgs::LaserScan& scan);
 
 private:
     // TODO: Doc comment
@@ -40,6 +40,9 @@ private:
 
     // Subscribes to the LaserScan
     ros::Subscriber scan_subscriber;
+    // Publishes Twist messages to control the robot
     ros::Publisher twist_publisher;
+    // Publishes the obstacles so we can see them in RViz
+    ros::Publisher obstacle_debug_publisher;
 };
 #endif //DRAG_RACE_NODE_DRAG_RACE_H
