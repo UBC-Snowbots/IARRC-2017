@@ -15,7 +15,7 @@ LineDetect::LineDetect() : initialLineDetectThreshold(200),
                            white(255),
                            windowWidth(10),
                            numVerticalSlice(10),
-                           degree(3) {}
+                           degree(2) {}
 
 intVec LineDetect::getHistogram(cv::Mat& image) {
 
@@ -109,6 +109,7 @@ Polynomial LineDetect::fitPolyLine(std::vector<Point> points, int order) {
 
     int moreOrder = order + 1;
     assert(points.size() >= moreOrder);
+    assert(order <= 3);
 
     std::vector<double> xv(points.size(), 0);
     std::vector<double> yv(points.size(), 0);
@@ -130,12 +131,14 @@ Polynomial LineDetect::fitPolyLine(std::vector<Point> points, int order) {
     // solve for linear least squares fit
     result = A.householderQr().solve(yvMapped);
 
-    return Polynomial{result[0], result[1], result[2], result[3]};
+    if (result.size() == 3)
+        return Polynomial{result[0], result[1], result[2], result[3]};
+    else
+        return Polynomial{result[0], result[1], result[2], 0};
 }
 
 cv::Point LineDetect::getIntersection(Polynomial leftLine, Polynomial rightLine) {
     // Isolate slopes
-    double aCombinedSlope = leftLine.a - rightLine.a;
 
     double bCombinedSlope = leftLine.b - rightLine.b;
 
@@ -144,10 +147,10 @@ cv::Point LineDetect::getIntersection(Polynomial leftLine, Polynomial rightLine)
     double dCombinedSlope = leftLine.d - rightLine.d;
 
     // Solve for x
-    double x = cubicFormula(aCombinedSlope, bCombinedSlope, cCombinedSlope, dCombinedSlope);
+    double x = cubicFormula(0, bCombinedSlope, cCombinedSlope, dCombinedSlope);
 
     // Solve for y
-    double y = leftLine.a * pow(x, 3) + leftLine.b * pow(x, 2) + leftLine.c * x + leftLine.d;
+    double y = leftLine.b * pow(x, 2) + leftLine.c * x + leftLine.d;
 
     cv::Point point;
     point.x = x;

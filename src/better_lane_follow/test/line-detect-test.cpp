@@ -127,21 +127,19 @@ TEST(LineDetect, fitPolyLineLeftTest) {
 
     Point testPoint1{2.0, 0.0};
     Point testPoint2{3.0, 1.0};
-    Point testPoint3{4.0, 2.0};
-    Point testPoint4{5.0, 3.0};
-    Point testPoint5{6.0, 2.0};
+    Point testPoint3{4.0, 1.0};
+    Point testPoint4{6.0, 0.0};
 
-    std::vector<Point> testPoints = {testPoint1, testPoint2, testPoint3, testPoint4, testPoint5};
-    int testOrder = 3;
+    std::vector<Point> testPoints = {testPoint1, testPoint2, testPoint3, testPoint4};
+    int testOrder = 2;
 
     LineDetect testLineDetect;
     Polynomial testPolynomial = testLineDetect.fitPolyLine(testPoints, testOrder);
-    Polynomial expectedPolynomial{3.60000, -4.54762, 1.71429, -0.16666};
+    Polynomial expectedPolynomial{-3.18182, 2.16364, -0.27273};
 
     EXPECT_NEAR(expectedPolynomial.a, testPolynomial.a, 0.00001);
     EXPECT_NEAR(expectedPolynomial.b, testPolynomial.b, 0.00001);
     EXPECT_NEAR(expectedPolynomial.c, testPolynomial.c, 0.00001);
-    EXPECT_NEAR(expectedPolynomial.d, testPolynomial.d, 0.00001);
 }
 
 TEST(LineDetect, fitPolyLineRightTest) {
@@ -153,7 +151,7 @@ TEST(LineDetect, fitPolyLineRightTest) {
     Point testPoint5{9.0, 4.0};
 
     std::vector<Point> testPoints = {testPoint1, testPoint2, testPoint3, testPoint4, testPoint5};
-    int testOrder = 2;
+    int testOrder = 3;
 
     LineDetect testLineDetect;
     Polynomial testPolynomial = testLineDetect.fitPolyLine(testPoints, testOrder);
