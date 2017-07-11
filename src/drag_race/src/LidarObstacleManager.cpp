@@ -7,6 +7,11 @@
 #include <LidarObstacleManager.h>
 #include <stack>
 
+LidarObstacleManager::LidarObstacleManager():
+    max_obstacle_merging_distance(0.3),
+    cone_grouping_tolerance(1.3)
+{};
+
 LidarObstacleManager::LidarObstacleManager(
         double max_obstacle_merging_distance,
         double max_distance_from_robot_accepted,

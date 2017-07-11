@@ -20,18 +20,22 @@
 class SlopeInterceptLine {
 public:
     SlopeInterceptLine(double slope, double y_intercept) :
-        slope(slope), y_intercept(y_intercept) {}
+            slope(slope), y_intercept(y_intercept) {}
 
     // TODO: DOC functions
     inline double getSlope() { return slope; }
+
     inline double getYIntercept() { return y_intercept; }
-    inline double getXIntercept() { return -y_intercept/slope; }
+
+    inline double getXIntercept() { return -y_intercept / slope; }
+
     inline double getXCoorAtY(double y) {
         if (slope == 0)
             return y_intercept;
         else
-            return (y - y_intercept)/slope;
+            return (y - y_intercept) / slope;
     }
+
     inline double getYCoorAtX(double x) { return slope * x + y_intercept; }
 
 protected:
@@ -59,7 +63,10 @@ struct FiniteLine {
 
 class LidarObstacleManager {
 public:
-    LidarObstacleManager(double max_obstacle_merging_distance, double max_distance_from_robot_accepted, double cone_grouping_tolerance);
+    LidarObstacleManager();
+
+    LidarObstacleManager(double max_obstacle_merging_distance, double cone_grouping_tolerance,
+                         double max_distance_from_robot_accepted);
 
     /**
      * Merges or adds the given obstacle to the already saved ones
@@ -76,7 +83,7 @@ public:
      *
      * @param scan the scan to be merged in
      */
-    void addLaserScan(const sensor_msgs::LaserScan& scan);
+    void addLaserScan(const sensor_msgs::LaserScan &scan);
 
     /**
      * Clears all saved obstacles
@@ -87,7 +94,7 @@ public:
      * Gets all obstacles
      * @return all saved obstacles
      */
-     std::vector<LidarObstacle> getObstacles();
+    std::vector<LidarObstacle> getObstacles();
 
     /**
      * Gets all lines of cones in the saved obstacles
