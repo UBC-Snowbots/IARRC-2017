@@ -74,9 +74,13 @@ const int ANGULAR_MAX = 145;
 const int ANGULAR_MIN = 35;
 const int ANGULAR_STOP = 90;
 
-// The minimum and maximum PWM signals to send
+// The minimum and maximum PWM signals to map received values to
 const int MIN_PWM = 2000;
 const int MAX_PWM = 1000;
+
+// The safety cutoffs to prevent us drawing too much current
+const int MIN_PWM_CUTOFF = 1400;
+const int MAX_PWM_CUTOFF = 1400;
 
 unsigned long previousMillis = 0;
 unsigned long currentMillis = 0;
@@ -149,6 +153,17 @@ void drive(int linear_speed, int angular_speed){
 	velocity = map(linear_speed, LINEAR_MIN, LINEAR_MAX, MIN_PWM, MAX_PWM); 
 	angle = map(angular_speed, ANGULAR_MIN, ANGULAR_MAX, MIN_PWM, MAX_PWM);
 
+  // Check that we're not outside our safety cutoffs
+  if (velocity > MAX_PWM_CUTOFF)
+    velocity = MAX_PWM_CUTOFF;
+  else if (velocity < MIN_PWM_CUTOFF)
+    velocity = MIN_PWM_CUTOFF;
+   if (angle > MAX_PWM_CUTOFF)
+    angle = MAX_PWM_CUTOFF;
+  else if (velocity < MIN_PWM_CUTOFF)
+    angle = MIN_PWM_CUTOFF;
+
+  // Write the commands to the motor and the servo
 	motor.writeMicroseconds(velocity);
 	direction_motor.writeMicroseconds(angle);
 
