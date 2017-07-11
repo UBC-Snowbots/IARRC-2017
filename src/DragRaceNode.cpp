@@ -22,8 +22,8 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
                                     &DragRaceNode::scanCallBack, this);
 
     // Setup Publisher(s)
-    std::string twist_topic = private_nh.resolveName("cmd_vel");
-    twist_publisher = private_nh.advertise<geometry_msgs::Twist>
+    std::string twist_topic = nh.resolveName("cmd_vel");
+    twist_publisher = nh.advertise<geometry_msgs::Twist>
                                 (twist_topic, queue_size);
     std::string cone_debug_topic = private_nh.resolveName("debug/cone");
     cone_debug_publisher = private_nh.advertise<visualization_msgs::Marker>
@@ -36,18 +36,18 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
             (best_line_debug_topic, queue_size);
 
     // Get Params
-    SB_getParam(nh, "target_distance", target_distance, 1.0);
-    SB_getParam(nh, "angular_vel_cap", angular_vel_cap, 1.0);
-    SB_getParam(nh, "linear_vel_cap", linear_vel_cap, 1.0);
-    SB_getParam(nh, "theta_scaling_multiplier", theta_scaling_multiplier, 1.0);
-    SB_getParam(nh, "angular_speed_multiplier", angular_speed_multiplier, 1.0);
-    SB_getParam(nh, "linear_speed_multiplier", linear_speed_multiplier, 1.0);
-    SB_getParam(nh, "line_to_the_right", line_to_the_right, false);
+    SB_getParam(private_nh, "target_distance", target_distance, 1.0);
+    SB_getParam(private_nh, "angular_vel_cap", angular_vel_cap, 1.0);
+    SB_getParam(private_nh, "linear_vel_cap", linear_vel_cap, 1.0);
+    SB_getParam(private_nh, "theta_scaling_multiplier", theta_scaling_multiplier, 1.0);
+    SB_getParam(private_nh, "angular_speed_multiplier", angular_speed_multiplier, 1.0);
+    SB_getParam(private_nh, "linear_speed_multiplier", linear_speed_multiplier, 1.0);
+    SB_getParam(private_nh, "line_to_the_right", line_to_the_right, true);
     double max_obstacle_merging_distance, cone_grouping_tolerance, min_wall_length;
-    SB_getParam(nh, "max_obstacle_merging_distance", max_obstacle_merging_distance, 0.3);
-    SB_getParam(nh, "cone_grouping_tolerance", cone_grouping_tolerance, 1.3);
-    SB_getParam(nh, "max_distance_from_robot_accepted", max_distance_from_robot_accepted, 1.5);
-    SB_getParam(nh, "min_wall_length", min_wall_length, 0.4);
+    SB_getParam(private_nh, "max_obstacle_merging_distance", max_obstacle_merging_distance, 0.3);
+    SB_getParam(private_nh, "cone_grouping_tolerance", cone_grouping_tolerance, 1.8);
+    SB_getParam(private_nh, "max_distance_from_robot_accepted", max_distance_from_robot_accepted, 2.0);
+    SB_getParam(private_nh, "min_wall_length", min_wall_length, 0.4);
 
     // Setup drag race controller with given params
     drag_race_controller = DragRaceController(target_distance, line_to_the_right, theta_scaling_multiplier,
