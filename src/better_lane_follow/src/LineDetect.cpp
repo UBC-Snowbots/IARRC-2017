@@ -186,3 +186,22 @@ double LineDetect::getAngleFromOriginToPoint(cv::Point point) {
 
     return angle;
 }
+
+cv::Point LineDetect::moveAwayFromLine(Polynomial line, double targetXDistance, double targetYDistance) {
+    cv::Point targetPoint;
+
+    // Move along the line and stop when targetXDistance is met.
+    targetPoint.x = targetXDistance;
+    targetPoint.y = line.a * pow(targetPoint.x, 3) + line.b * pow(targetPoint.x, 2) + line.c * targetPoint.x + line.d;
+
+    // Find y-intercept of line.
+    double y_intercept = cubicFormula(line.a, line.b, line.c, line.d);
+
+    // Go a certain distance away from the line while staying in the course.
+    if(y_intercept > 0)
+        targetPoint.y -= targetYDistance; // If line is to the right move left.
+    else
+        targetPoint.y += targetYDistance; // If line is to the left move right.
+
+    return targetPoint;
+}

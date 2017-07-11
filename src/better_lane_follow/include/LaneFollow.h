@@ -71,6 +71,10 @@ private:
     double angular_speed_multiplier;
     double linear_speed_multiplier;
 
+    // Moving away from line variables
+    double target_x_distance;
+    double target_y_distance;
+
     /**
      * Subscribes to the raw camera image node
      */

@@ -40,6 +40,8 @@ LaneFollow::LaneFollow(int argc, char **argv, std::string node_name) {
     SB_getParam(nh, "linear_vel_cap", linear_vel_cap, 1.0);
     SB_getParam(nh, "angular_speed_multiplier", angular_speed_multiplier, 1.0);
     SB_getParam(nh, "linear_speed_multiplier", linear_speed_multiplier, 1.0);
+    SB_getParam(nh, "target_x_distance", target_x_distance, 0.5);
+    SB_getParam(nh, "target_y_distance", target_y_distance, 0.5);
 
     /*while (ros::ok()) {
 
@@ -71,9 +73,10 @@ void LaneFollow::subscriberCallBack(const sensor_msgs::Image::ConstPtr &msg) {
         cv::Point intersectionPoint = LineDetect::getIntersection(boundaryLines[0], boundaryLines[1]);
         angle_heading = LineDetect::getAngleFromOriginToPoint(intersectionPoint);
     }
-    // Head parallel to the line of only 1 line exists
+    // Head to a point a certain distance away from the line
     else if (boundaryLines.size() == 1) {
-        angle_heading = atan(boundaryLines[0].c);
+        cv::Point targetPoint = LineDetect::moveAwayFromLine(boundaryLines[0], target_x_distance, target_y_distance);
+        angle_heading = LineDetect::getAngleFromOriginToPoint(targetPoint);
     }
     // If no lines are seen go straight (See initialization)
 

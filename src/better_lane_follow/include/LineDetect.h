@@ -65,6 +65,8 @@ public:
 
     static cv::Point getIntersection(Polynomial leftLine, Polynomial rightLine);
 
+    static cv::Point moveAwayFromLine(Polynomial line, double targetXDistance, double targetYDistance);
+
     static double getAngleFromOriginToPoint(cv::Point point);
 
     static double cubicFormula(double a, double b, double c, double d);
