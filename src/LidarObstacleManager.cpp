@@ -14,10 +14,12 @@ LidarObstacleManager::LidarObstacleManager():
 
 LidarObstacleManager::LidarObstacleManager(
         double max_obstacle_merging_distance,
+        double max_distance_from_robot_accepted,
         double cone_grouping_tolerance
 ) :
         max_obstacle_merging_distance(max_obstacle_merging_distance),
-        cone_grouping_tolerance(cone_grouping_tolerance) { }
+        max_distance_from_robot_accepted(max_distance_from_robot_accepted),
+        cone_grouping_tolerance(cone_grouping_tolerance) {}
 
 void LidarObstacleManager::addLaserScan(const sensor_msgs::LaserScan &scan) {
     // Create an obstacle for every hit in the lidar scan
@@ -186,9 +188,12 @@ LineOfBestFit LidarObstacleManager::getBestLine(bool lineToTheRight) {
     for (size_t i = 0; i < lines.size(); i++) {
         // Only check lines where the y-intercept is on the correct side.
         if ((lineToTheRight && lines[i].getYIntercept() < 0) || (!lineToTheRight && lines[i].getYIntercept() >= 0)) {
-            // If correlation is stronger than the current best, update best line.
-            if (fabs(lines[i].correlation) > fabs(bestLine.correlation))
-                bestLine = lines[i];
+            // Don't accept lines that are too far from the robot.
+            if (fabs(lines[i].getYIntercept()) <= max_distance_from_robot_accepted) {
+                // If correlation is stronger than the current best, update best line.
+                if (fabs(lines[i].correlation) > fabs(bestLine.correlation))
+                    bestLine = lines[i];
+            }
         }
     }
     return bestLine;
@@ -217,7 +222,7 @@ visualization_msgs::Marker LidarObstacleManager::getConeRVizMarker() {
     points.color.a = 1.0;
 
     for (LidarObstacle obstacle: obstacles){
-        if (obstacle.getObstacleType() == WALL){
+        if (obstacle.getObstacleType() == CONE){
             Point center = obstacle.getCenter();
             geometry_msgs::Point geom_point;
             geom_point.x = center.x;
