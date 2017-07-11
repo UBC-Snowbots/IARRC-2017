@@ -40,7 +40,6 @@ public:
     int getRightSide() {
         return (center + width/2);
     }
-
 };
 
 class LineDetect {
@@ -63,8 +62,11 @@ public:
 
     Polynomial fitPolyLine(std::vector<Point> points, int order);
 
-    static Point getIntersection(Polynomial leftLine, Polynomial rightLine);
-    static double getAngleFromOriginToPoint(Point point);
+    static cv::Point getIntersection(Polynomial leftLine, Polynomial rightLine);
+
+    static double getAngleFromOriginToPoint(cv::Point point);
+
+    static double cubicFormula(double a, double b, double c, double d);
 
 private:
     int white;

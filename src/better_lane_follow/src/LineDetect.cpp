@@ -133,28 +133,45 @@ Polynomial LineDetect::fitPolyLine(std::vector<Point> points, int order) {
     return Polynomial{result[0], result[1], result[2], result[3]};
 }
 
-Point LineDetect::getIntersection(Polynomial leftLine, Polynomial rightLine)
-{
+cv::Point LineDetect::getIntersection(Polynomial leftLine, Polynomial rightLine) {
     // Isolate slopes
-    double combinedSlope = leftLine.c - rightLine.c;
+    double aCombinedSlope = leftLine.a - rightLine.a;
 
-    // Isolate y-intercepts
-    double combinedYIntercepts = rightLine.d - leftLine.d;
+    double bCombinedSlope = leftLine.b - rightLine.b;
+
+    double cCombinedSlope = leftLine.c - rightLine.c;
+
+    double dCombinedSlope = leftLine.d - rightLine.d;
 
     // Solve for x
-    double x = combinedYIntercepts / combinedSlope;
+    double x = cubicFormula(aCombinedSlope, bCombinedSlope, cCombinedSlope, dCombinedSlope);
 
     // Solve for y
-    double y = leftLine.c * x + leftLine.d;
+    double y = leftLine.a * pow(x, 3) + leftLine.b * pow(x, 2) + leftLine.c * x + leftLine.d;
 
-    Point point;
+    cv::Point point;
     point.x = x;
     point.y = y;
 
     return point;
 }
 
-double LineDetect::getAngleFromOriginToPoint(Point point) {
+double LineDetect::cubicFormula(double a, double b, double c, double d) {
+    double p = -b/(3.0*a);
+    double q = pow(p, 3) + (b*c - 3.0*a*d)/(6.0*pow(a, 2));
+    double r = c/(3.0*a);
+    double s = pow(p, 2);
+    double t = pow(q, 2);
+    double u = pow(r-s, 3);
+    double v = pow(t + u, 1.0/2.0);
+    double w = pow(q + v, 1.0/3.0);
+    double x = pow(q - v, 1.0/3.0);
+
+    return w + x + p;
+}
+
+
+double LineDetect::getAngleFromOriginToPoint(cv::Point point) {
     double dy = point.y;
     double dx = point.x;
 

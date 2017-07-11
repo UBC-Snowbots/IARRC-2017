@@ -12,17 +12,20 @@
 #ifndef LANE_FOLLOW_H
 #define LANE_FOLLOW_H
 
+#include <opencv2/opencv.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/core/core.hpp>
-#include <iostream>
-#include <vector>
-#include <string>
-#include <stdio.h>
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
 #include <sensor_msgs/Image.h>
 #include <LineDetect.h>
 #include "sb_utils.h"
+
+// temp headers
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+#include <image_transport/image_transport.h>
 
 class LaneFollow {
 
@@ -71,18 +74,24 @@ private:
     /**
      * Subscribes to the raw camera image node
      */
-    ros::Subscriber image_sub;
+    image_transport::Subscriber image_sub;
 
     /**
      * Publishes the filtered image
      */
-    ros::Publisher filter_pub;
+    image_transport::Publisher filter_pub;
 
     /**
      * Publishes the recommended twist message
      */
     ros::Publisher twist_pub;
 
+    /**
+     * Converts ros::sensor_msgs::Image into a cv::Mat
+     *
+     * @param message to be converted
+     */
+    cv::Mat rosToMat(const sensor_msgs::Image::ConstPtr& image);
 };
 
 #endif

@@ -7,9 +7,6 @@
  */
 
 #include <LaneFollow.h>
-#include <opencv2/opencv.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/objdetect/objdetect.hpp>
 
 class Twist;
 
@@ -29,7 +26,7 @@ LaneFollow::LaneFollow(int argc, char **argv, std::string node_name) {
                                              &LaneFollow::subscriberCallBack, this);
 
     // Setup publishers
-    std::string filter_topic_name = "/robot/lane_follow/filtered_image";
+    std::string filter_topic_name = "/robot/lane_follow/lane_detect_image";
     std::string twist_topic_name = "/robot/lane_follow/twist_message";
     uint32_t queue_size = 1;
 
@@ -52,7 +49,7 @@ LaneFollow::LaneFollow(int argc, char **argv, std::string node_name) {
     }*/
 }
 
-void LaneFollow::subscriberCallBack(const sensor_msgs::ImageConstPtr &msg) {
+void LaneFollow::subscriberCallBack(const sensor_msgs::Image::ConstPtr &msg) {
 
     // The command to return
     geometry_msgs::Twist stayInLane;
@@ -63,13 +60,15 @@ void LaneFollow::subscriberCallBack(const sensor_msgs::ImageConstPtr &msg) {
     stayInLane.angular.x = 0;
     stayInLane.angular.y = 0;
 
-    // TODO: Populate the vector with poly fit.
-    std::vector<Polynomial> boundaryLines;
+    LineDetect ld;
+
+    cv::Mat filteredImage = LaneFollow::rosToMat(msg);
+    std::vector<Polynomial> boundaryLines = ld.getLines(filteredImage);
     double angle_heading = 0;
 
     // Head to the middle of the line if 2 lines exist
     if (boundaryLines.size() >= 2) {
-        Point intersectionPoint = LineDetect::getIntersection(boundaryLines[0], boundaryLines[1]);
+        cv::Point intersectionPoint = LineDetect::getIntersection(boundaryLines[0], boundaryLines[1]);
         angle_heading = LineDetect::getAngleFromOriginToPoint(intersectionPoint);
     }
     // Head parallel to the line of only 1 line exists
@@ -97,5 +96,11 @@ void LaneFollow::subscriberCallBack(const sensor_msgs::ImageConstPtr &msg) {
 
 double LaneFollow::magicFunction(double x, double y, double x_scale, double y_scale) {
     return (1 / fabs(x) * x_scale + sqrt(fabs(y)) * y_scale) / 2;
+}
+
+cv::Mat LaneFollow::rosToMat(const sensor_msgs::Image::ConstPtr &image) {
+    cv_bridge::CvImagePtr imagePtr;
+    imagePtr = cv_bridge::toCvCopy(image, image->encoding);
+    return imagePtr->image;
 }
 

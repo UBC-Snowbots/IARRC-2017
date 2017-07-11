@@ -7,7 +7,7 @@
 #include <LineDetect.h>
 #include <gtest/gtest.h>
 
-TEST(LineDetect, getHistogramSmallTest){
+TEST(LineDetect, getHistogramSmallTest) {
 
     cv::Mat testImage(cv::Size(4, 4), CV_8UC1, cv::Scalar(0));
 
@@ -20,7 +20,7 @@ TEST(LineDetect, getHistogramSmallTest){
     EXPECT_EQ(expectedHistogram, testHistogram);
 }
 
-TEST(LineDetect, getHistogramLargeTest){
+TEST(LineDetect, getHistogramLargeTest) {
 
     cv::Mat testImage(cv::Size(10, 10), CV_8UC1, cv::Scalar(0));
     testImage.at<uchar>(2, 0) = 255;
@@ -41,7 +41,7 @@ TEST(LineDetect, getHistogramLargeTest){
     EXPECT_EQ(expectedHistogram, testHistogram);
 }
 
-TEST(LineDetect, getWindowSliceLeftTest){
+TEST(LineDetect, getWindowSliceLeftTest) {
 
     cv::Mat testImage(cv::Size(10, 10), CV_8UC1, cv::Scalar(0));
     testImage.at<uchar>(2, 0) = 255;
@@ -71,7 +71,7 @@ TEST(LineDetect, getWindowSliceLeftTest){
     EXPECT_EQ(false, equal);
 }
 
-TEST(LineDetect, getWindowSliceRightTest){
+TEST(LineDetect, getWindowSliceRightTest) {
 
     cv::Mat testImage(cv::Size(10, 10), CV_8UC1, cv::Scalar(0));
     testImage.at<uchar>(2, 0) = 255;
@@ -88,7 +88,7 @@ TEST(LineDetect, getWindowSliceRightTest){
     // let initialLineDetectThreshold and windowWidth be 2
     Window testWindow{8, 2};
 
-    int verticalSliceIndex = 2;
+    int verticalSliceIndex = 3;
 
     LineDetect testLineDetect;
 
@@ -101,7 +101,7 @@ TEST(LineDetect, getWindowSliceRightTest){
     EXPECT_EQ(false, equal);
 }
 
-TEST(LineDetect, getHistogramPeakPositionLargeTest){
+TEST(LineDetect, getHistogramPeakPositionLargeTest) {
 
     intVec testHistogram = {0, 1, 3, 5, 2, 1, 1, 2, 6, 2, 0, 3};
 
@@ -112,7 +112,7 @@ TEST(LineDetect, getHistogramPeakPositionLargeTest){
     EXPECT_EQ(expectedPeak, testPeak);
 }
 
-TEST(LineDetect, getHistogramPeakPositionSmallTest){
+TEST(LineDetect, getHistogramPeakPositionSmallTest) {
 
     intVec testHistogram = {2, 1, 7, 6, 2, 1, 6, 6, 0};
 
@@ -123,7 +123,7 @@ TEST(LineDetect, getHistogramPeakPositionSmallTest){
     EXPECT_EQ(expectedPeak, testPeak);
 }
 
-TEST(LineDetect, fitPolyLineLeftTest){
+TEST(LineDetect, fitPolyLineLeftTest) {
 
     Point testPoint1{2.0, 0.0};
     Point testPoint2{3.0, 1.0};
@@ -144,25 +144,53 @@ TEST(LineDetect, fitPolyLineLeftTest){
     EXPECT_NEAR(expectedPolynomial.d, testPolynomial.d, 0.00001);
 }
 
-TEST(LineDetect, fitPolyLineRightTest){
+TEST(LineDetect, fitPolyLineRightTest) {
 
-    Point testPoint1{5.0, 2.0};
-    Point testPoint2{6.0, 0.0};
-    Point testPoint3{7.0, 3.0};
-    Point testPoint4{8.0, 1.0};
-    Point testPoint5{9.0, 3.0};
+    Point testPoint1{5.0, 0.0};
+    Point testPoint2{6.0, 1.0};
+    Point testPoint3{6.0, 2.0};
+    Point testPoint4{8.0, 3.0};
+    Point testPoint5{9.0, 4.0};
 
     std::vector<Point> testPoints = {testPoint1, testPoint2, testPoint3, testPoint4, testPoint5};
-    int testOrder = 3;
+    int testOrder = 2;
 
     LineDetect testLineDetect;
     Polynomial testPolynomial = testLineDetect.fitPolyLine(testPoints, testOrder);
-    Polynomial expectedPolynomial{36.37143, -14.66666, 1.96429, -0.08333};
+    Polynomial expectedPolynomial{-34.99999, 14.08333, -1.83333, 0.08333};
 
     EXPECT_NEAR(expectedPolynomial.a, testPolynomial.a, 0.00001);
     EXPECT_NEAR(expectedPolynomial.b, testPolynomial.b, 0.00001);
     EXPECT_NEAR(expectedPolynomial.c, testPolynomial.c, 0.00001);
     EXPECT_NEAR(expectedPolynomial.d, testPolynomial.d, 0.00001);
+}
+
+TEST(LineDetect, cubicFormulaRightTest) {
+    double aTest = -34.99999;
+    double bTest = 14.08333;
+    double cTest = -1.83333;
+    double dTest = 0.08333;
+
+    LineDetect testLineDetect;
+
+    double xActual = testLineDetect.cubicFormula(aTest, bTest, cTest, dTest);
+
+    double xExpected = 0.19999;
+    EXPECT_NEAR(xExpected, xActual, 0.00001);
+}
+
+TEST(LineDetect, cubicFormulaLeftTest) {
+    double aTest = 3.60000;
+    double bTest = -4.54762;
+    double cTest = 1.71429;
+    double dTest = -0.16666;
+
+    LineDetect testLineDetect;
+
+    double xActual = testLineDetect.cubicFormula(aTest, bTest, cTest, dTest);
+
+    double xExpected = 0.149475;
+    EXPECT_NEAR(xExpected, xActual, 0.00001);
 }
 
 int main(int argc, char **argv) {
