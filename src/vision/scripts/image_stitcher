@@ -18,7 +18,7 @@ from cv_bridge import CvBridge, CvBridgeError
 # The following code attempts to stitch 3 images from 3 cameras, and would potentially be improved 
 # to stitch an input number of images in the future
 
-# Inialize the video streams and allow them to warmup
+# Intialize the video streams and allow them to warmup
 print("[INFO] starting cameras...")
 midStream = VideoStream(src=2).start()
 leftStream = VideoStream(src=3).start()
