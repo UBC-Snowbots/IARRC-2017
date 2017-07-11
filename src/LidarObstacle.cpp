@@ -7,6 +7,8 @@
 
 #include <LidarObstacle.h>
 
+// TODO: min wall length, and determination of whether to merge obstacles and what their type is,
+// TODO: all really belongs in LidarObstacleManager
 LidarObstacle::LidarObstacle() :
     LidarObstacle(std::vector<Reading>()) {}
 

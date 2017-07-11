@@ -7,6 +7,7 @@
 #include <LidarObstacleManager.h>
 #include <stack>
 
+// TODO: We should probably get rid of the default constructor here.....
 LidarObstacleManager::LidarObstacleManager():
     max_obstacle_merging_distance(0.3),
     cone_grouping_tolerance(1.3)
@@ -15,11 +16,13 @@ LidarObstacleManager::LidarObstacleManager():
 LidarObstacleManager::LidarObstacleManager(
         double max_obstacle_merging_distance,
         double max_distance_from_robot_accepted,
-        double cone_grouping_tolerance
+        double cone_grouping_tolerance,
+        double min_wall_length
 ) :
         max_obstacle_merging_distance(max_obstacle_merging_distance),
         max_distance_from_robot_accepted(max_distance_from_robot_accepted),
-        cone_grouping_tolerance(cone_grouping_tolerance) {}
+        cone_grouping_tolerance(cone_grouping_tolerance),
+        min_wall_length(min_wall_length){}
 
 void LidarObstacleManager::addLaserScan(const sensor_msgs::LaserScan &scan) {
     // Create an obstacle for every hit in the lidar scan
@@ -28,7 +31,7 @@ void LidarObstacleManager::addLaserScan(const sensor_msgs::LaserScan &scan) {
         double angle = scan.angle_min + i * scan.angle_increment;
         double range = scan.ranges[i];
         if (range < scan.range_max && range > scan.range_min) {
-            addObstacle(LidarObstacle(angle, range));
+            addObstacle(LidarObstacle(min_wall_length, angle, range));
         }
     }
 }
