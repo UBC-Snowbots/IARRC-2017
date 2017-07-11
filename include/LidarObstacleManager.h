@@ -22,9 +22,17 @@ public:
     SlopeInterceptLine(double slope, double y_intercept) :
         slope(slope), y_intercept(y_intercept) {}
 
+    // TODO: DOC functions
     inline double getSlope() { return slope; }
     inline double getYIntercept() { return y_intercept; }
     inline double getXIntercept() { return -y_intercept/slope; }
+    inline double getXCoorAtY(double y) {
+        if (slope == 0)
+            return y_intercept;
+        else
+            return (y - y_intercept)/slope;
+    }
+    inline double getYCoorAtX(double x) { return slope * x + y_intercept; }
 
 protected:
     double slope;
@@ -94,6 +102,8 @@ public:
      */
     static LineOfBestFit getLineOfBestFit(const std::vector<Point> &points);
 
+    LineOfBestFit getBestLine(bool lineToTheRight);
+
     /**
      * Finds groups of points within a larger group of points
      *
@@ -114,14 +124,33 @@ public:
     static double minDistanceBetweenObstacles(LidarObstacle obstacle1, LidarObstacle obstacle2);
 
     /**
-     * Gets all stored obstacles as a vector of markers that can be rendered in RViz
+     * Gets all stored obstacles as a marker of points that can be rendered in RViz
      *
-     * @return all stored obstacles as a vector of markers that can be rendered in RViz
+     * @return all stored obstacles as a marker of points that can be rendered in RViz
      */
     // TODO: when we update lidarObstacle to be a bit more obstract, improve this as well
     // TODO: to represent things like radius
     // TODO: TEST ME
-    visualization_msgs::Marker getObstacleRVizMarkers();
+    visualization_msgs::Marker getConeRVizMarker();
+
+    /**
+     * Gets the lines determined from cones as a marker of lines that can be rendered in RViz
+     *
+     * @return the lines determined from cones as a marker of lines that can be rendered in RViz
+     */
+    // TODO: Can we add line endings?
+    // TODO: TEST ME
+    visualization_msgs::Marker getConeLinesRVizMarker();
+
+    /**
+     * Gets the "best" line from all the cone lines as a marker we can visualize in RViz
+     *
+     * @return the lines determined from cones as a marker that can be rendered in RViz
+     */
+    // TODO: Can we add line endings?
+    // TODO: TEST ME
+    // TODO: Add line_to_the_right to the constructor
+    visualization_msgs::Marker getBestConeLineRVizMarker(bool line_to_the_right);
 
 private:
 

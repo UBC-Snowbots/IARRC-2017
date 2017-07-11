@@ -16,7 +16,6 @@ LidarObstacleManager::LidarObstacleManager(
 
 void LidarObstacleManager::addLaserScan(const sensor_msgs::LaserScan &scan) {
     // Create an obstacle for every hit in the lidar scan
-    std::vector<LidarObstacle> temp_obstacles;
     for (int i = 0; i < scan.ranges.size(); ++i) {
         // Check that the lidar hit is within acceptable bounds
         double angle = scan.angle_min + i * scan.angle_increment;
@@ -86,8 +85,10 @@ std::vector<LineOfBestFit> LidarObstacleManager::getConeLines() {
 
     // Fit a line of best fit to each group
     std::vector<LineOfBestFit> lines;
-    lines.reserve(groups.size());
-    std::transform(groups.begin(), groups.end(), lines.begin(), getLineOfBestFit);
+    for (std::vector<Point> group : groups)
+        if (group.size() >= 2)
+            lines.emplace_back(getLineOfBestFit(group));
+
 
     return lines;
 }
@@ -134,6 +135,10 @@ LineOfBestFit LidarObstacleManager::getLineOfBestFit(const std::vector<Point> &p
     // Get line of best fit using linear regression formula
     // http://www.statisticshowto.com/how-to-find-a-linear-regression-equation/
 
+    // TODO: Handle this more nicely
+    // WE SHOULD NEVER GET HERE
+    BOOST_ASSERT(points.size() >= 2);
+
     double x_sum = std::accumulate(points.begin(), points.end(), 0.0,
                                    [](double accum, Point p) { return accum + p.x; });
     double y_sum = std::accumulate(points.begin(), points.end(), 0.0,
@@ -168,7 +173,23 @@ LineOfBestFit LidarObstacleManager::getLineOfBestFit(const std::vector<Point> &p
     return LineOfBestFit(slope, y_intercept, r);
 }
 
-visualization_msgs::Marker LidarObstacleManager::getObstacleRVizMarkers() {
+LineOfBestFit LidarObstacleManager::getBestLine(bool lineToTheRight) {
+    LineOfBestFit bestLine(0, 0, 0);
+
+    std::vector<LineOfBestFit> lines = getConeLines();
+
+    for (size_t i = 0; i < lines.size(); i++) {
+        // Only check lines where the y-intercept is on the correct side.
+        if ((lineToTheRight && lines[i].getYIntercept() < 0) || (!lineToTheRight && lines[i].getYIntercept() >= 0)) {
+            // If correlation is stronger than the current best, update best line.
+            if (fabs(lines[i].correlation) > fabs(bestLine.correlation))
+                bestLine = lines[i];
+        }
+    }
+    return bestLine;
+}
+
+visualization_msgs::Marker LidarObstacleManager::getConeRVizMarker() {
     visualization_msgs::Marker points;
 
     // TODO: we shold differenetiat between walls and cones
@@ -191,12 +212,82 @@ visualization_msgs::Marker LidarObstacleManager::getObstacleRVizMarkers() {
     points.color.a = 1.0;
 
     for (LidarObstacle obstacle: obstacles){
-        Point center = obstacle.getCenter();
-        geometry_msgs::Point geom_point;
-        geom_point.x = center.x;
-        geom_point.y = center.y;
-        points.points.push_back(geom_point);
+        if (obstacle.getObstacleType() == CONE){
+            Point center = obstacle.getCenter();
+            geometry_msgs::Point geom_point;
+            geom_point.x = center.x;
+            geom_point.y = center.y;
+            points.points.push_back(geom_point);
+        }
     }
 
     return points;
+}
+
+visualization_msgs::Marker LidarObstacleManager::getConeLinesRVizMarker() {
+    visualization_msgs::Marker lines;
+
+    // TODO: Should be a param (currently in the default LaserScan frame)
+    lines.header.frame_id = "laser";
+    lines.header.stamp = ros::Time::now();
+    lines.ns = "debug";
+    lines.action = visualization_msgs::Marker::ADD;
+    lines.pose.orientation.w = 1.0;
+    lines.id = 0;
+    lines.type = visualization_msgs::Marker::LINE_LIST;
+    lines.action = visualization_msgs::Marker::ADD;
+    // TODO: Make the scale a param
+    lines.scale.x = 0.1;
+    lines.scale.y = 0.1;
+    // TODO: Make this a param
+    lines.color.r = 1.0f;
+    lines.color.a = 1.0;
+
+    // Get the cone lines
+    std::vector<LineOfBestFit> cone_lines = getConeLines();
+    for (int i = 0; i < cone_lines.size(); i++){
+        // Get two points to represent the line
+        geometry_msgs::Point p1, p2;
+        p1.x = -10;
+        p1.y = cone_lines[i].getYCoorAtX(p1.x);
+        // TODO: make length here a param
+        p2.x = 10;
+        p2.y = cone_lines[i].getYCoorAtX(p2.x);
+        lines.points.push_back(p1);
+        lines.points.push_back(p2);
+    }
+    return lines;
+}
+
+// TODO: See comments in above visualisation functions
+visualization_msgs::Marker LidarObstacleManager::getBestConeLineRVizMarker(bool line_to_the_right) {
+    // We'll just put a single line in this
+    visualization_msgs::Marker line;
+
+    // TODO: Should be a param (currently in the default LaserScan frame)
+    line.header.frame_id = "laser";
+    line.header.stamp = ros::Time::now();
+    line.ns = "debug";
+    line.action = visualization_msgs::Marker::ADD;
+    line.pose.orientation.w = 1.0;
+    line.id = 0;
+    line.type = visualization_msgs::Marker::LINE_LIST;
+    line.action = visualization_msgs::Marker::ADD;
+    // TODO: Make the scale a param
+    line.scale.x = 0.1;
+    line.scale.y = 0.1;
+    // TODO: Make this a param
+    line.color.b = 1.0f;
+    line.color.a = 1.0;
+
+    LineOfBestFit best_line = getBestLine(line_to_the_right);
+    geometry_msgs::Point p1, p2;
+    p1.x = -10;
+    p1.y = best_line.getYCoorAtX(p1.x);
+    p2.x = 10;
+    p2.y = best_line.getYCoorAtX(p2.x);
+    line.points.push_back(p1);
+    line.points.push_back(p2);
+
+    return line;
 }

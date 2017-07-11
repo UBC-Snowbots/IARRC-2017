@@ -33,8 +33,6 @@ private:
     // TODO: Doc comment
     void scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan);
 
-    LineOfBestFit getBestLine(std::vector<LineOfBestFit> lines, bool lineToTheRight);
-
     // Manages obstacles, including the cones and wall
     LidarObstacleManager obstacle_manager;
 
@@ -61,7 +59,12 @@ private:
     // Publishes Twist messages to control the robot
     ros::Publisher twist_publisher;
     // Publishes the obstacles so we can see them in RViz
-    ros::Publisher obstacle_debug_publisher;
+    ros::Publisher cone_debug_publisher;
+    // Publishes the cone lines so we can see them in RViz
+    ros::Publisher cone_line_debug_publisher;
+    // Publishes the cone line we're using to determine the twist message
+    // so we can see it in RViz
+    ros::Publisher best_line_debug_publisher;
 };
 
 #endif //DRAG_RACE_NODE_DRAG_RACE_H
