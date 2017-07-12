@@ -21,6 +21,11 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
     scan_subscriber = nh.subscribe(scan_topic, queue_size,
                                    &DragRaceNode::scanCallBack, this);
 
+    // TODO: make sure this is the right topic name
+    std::string traffic_light_topic = "/robot/vision/activity_detected";
+
+    traffic_light_subscriber = nh.subscribe(traffic_light_topic, queue_size, &DragRaceNode::greenLightCallBack, this);
+
     // Setup Publisher(s)
     std::string twist_topic = nh.resolveName("cmd_vel");
     twist_publisher = nh.advertise<geometry_msgs::Twist>
@@ -48,7 +53,7 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
     SB_getParam(private_nh, "cone_grouping_tolerance", cone_grouping_tolerance, 1.8);
     SB_getParam(private_nh, "max_distance_from_robot_accepted", max_distance_from_robot_accepted, 2.0);
     SB_getParam(private_nh, "min_wall_length", min_wall_length, 0.4);
-
+    SB_getParam(private_nh, "minimum_green_count_recognised", minimum_green_recognised_count, 10);
     // Setup drag race controller with given params
     drag_race_controller = DragRaceController(target_distance, line_to_the_right, theta_scaling_multiplier,
                                               angular_speed_multiplier, linear_speed_multiplier, angular_vel_cap,
@@ -57,6 +62,12 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
     // Setup the obstacle manager with given params
     obstacle_manager = LidarObstacleManager(max_obstacle_merging_distance, cone_grouping_tolerance,
                                             max_distance_from_robot_accepted, min_wall_length);
+}
+
+void DragRaceNode::greenLightCallBack(const std_msgs::Bool &green_light_detected) {
+    if (green_light_detected.data) {
+        green_count_recognised++;
+    }
 }
 
 void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan) {
@@ -79,6 +90,12 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan) {
 
     // Avoid the line given while staying within the boundaries
     geometry_msgs::Twist twist = drag_race_controller.determineDesiredMotion(best_line, no_line_on_expected_side);
+
+    // If no green light has been detected stop.
+    if (green_count_recognised < minimum_green_recognised_count) {
+        twist.angular.z = 0;
+        twist.linear.x = 0;
+    }
 
     // Publish our desired twist message
     twist_publisher.publish(twist);
