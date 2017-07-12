@@ -7,10 +7,10 @@
 
 #include <LineDetect.h>
 #include <Eigen/QR>
-#include <math.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/objdetect/objdetect.hpp>
+#include "../../vision/include/IPM.h"
 
 using namespace cv;
 
@@ -67,8 +67,8 @@ intVec LineDetect::getHistogram(cv::Mat &image) {
 
     for (int j = 0; j < image.rows; j++) {
         for (int i = 0; i < image.cols; i++) {
-            int pixelValue = (int) image.at<uchar>(i, j);
-            if (pixelValue == white) {
+            int pixelValue = image.at<uchar>(i, j);
+            if (pixelValue >= white) {
                 histogram[i]++;
             }
         }
@@ -214,4 +214,15 @@ cv::Point2d LineDetect::moveAwayFromLine(Polynomial line, double targetXDistance
         targetPoint.y += targetYDistance; // If line is to the left move right.
 
     return targetPoint;
+}
+
+std::vector<Point2d> LineDetect::transformPoints(std::vector<cv::Point2d> points) {
+
+    std::vector<Point2d> realPoints;
+
+    for (int i = 0; i < points.size(); i++) {
+        realPoints.push_back(applyHomographyInv(points[i]));
+    }
+
+    return realPoints;
 }
