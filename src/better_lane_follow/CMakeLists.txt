@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(OpenCV REQUIRED)
 find_package(sb_utils REQUIRED)
+find_package(vision REQUIRED)
 find_package(Eigen REQUIRED)
 
 add_definitions(-std=c++14)
@@ -35,6 +36,7 @@ include_directories(
     ${sb_utils_INCLUDE_DIRS}
     ${OpenCV_INCLUDE_DIRS}
     ${EIGEN_INCLUDE_DIRS}
+    ${ipm_INCLUDE_DIRS}
     ./include
 )
 
@@ -54,6 +56,7 @@ target_link_libraries(better_lane_follower
     ${catkin_LIBRARIES}
     ${OpenCV_LIBS}
     ${sb_utils_LIBRARIES}
+    ${ipm_LIBRARIES}
     )
 
 #############
