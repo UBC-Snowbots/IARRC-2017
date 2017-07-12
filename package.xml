@@ -50,7 +50,7 @@
   <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>sensor_msgs</run_depend>
-  <run_depend>vizualisation_msgs</run_depend>
+  <run_depend>visualisation_msgs</run_depend>
   <run_depend>sb_utils</run_depend>
   <!-- We need this to be able to run the hokuyo lidar -->
   <run_depend>urg_node</run_depend>
