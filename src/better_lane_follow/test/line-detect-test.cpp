@@ -126,26 +126,25 @@ TEST(LineDetect, getHistogramPeakPositionSmallTest) {
     EXPECT_EQ(expectedPeak, testPeak);
 }
 
-TEST(LineDetect, fitPolyLineLeftTest) {
+TEST(LineDetect, fitPolyLineFirstOrderTest) {
 
     cv::Point2d testPoint1{2.0, 0.0};
-    cv::Point2d testPoint2{3.0, 1.0};
-    cv::Point2d testPoint3{4.0, 1.0};
-    cv::Point2d testPoint4{6.0, 0.0};
+    cv::Point2d testPoint2{2.0, 2.0};
+    cv::Point2d testPoint3{3.0, 4.0};
+    cv::Point2d testPoint4{4.0, 7.0};
 
     std::vector<cv::Point2d> testPoints = {testPoint1, testPoint2, testPoint3, testPoint4};
-    int testOrder = 2;
+    int testOrder = 1;
 
     LineDetect testLineDetect;
     Polynomial testPolynomial = testLineDetect.fitPolyLine(testPoints, testOrder);
-    Polynomial expectedPolynomial{0, -0.27273, 2.16364, -3.18182};
+    Polynomial expectedPolynomial{0, 0, -0.05714, 0.71428};
 
-    EXPECT_NEAR(expectedPolynomial.b, testPolynomial.b, 0.00001);
     EXPECT_NEAR(expectedPolynomial.c, testPolynomial.c, 0.00001);
     EXPECT_NEAR(expectedPolynomial.d, testPolynomial.d, 0.00001);
 }
 
-TEST(LineDetect, fitPolyLineRightTest) {
+TEST(LineDetect, fitPolyLineThirdOrderTest) {
 
     cv::Point2d testPoint1{5.0, 0.0};
     cv::Point2d testPoint2{6.0, 1.0};

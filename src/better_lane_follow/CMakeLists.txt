@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(better_lane_follow)
+project(lane_follow)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
@@ -42,7 +42,7 @@ include_directories(
 
 ## Declare a C++ executable
 # add_executable(sample_package_node src/sample_package_node.cpp)
-add_executable(better_lane_follower
+add_executable(lane_follower
     src/LineDetect.cpp
     src/lane_follow.cpp
     src/LaneFollow.cpp
@@ -52,7 +52,7 @@ add_executable(better_lane_follower
 # target_link_libraries(sample_package_node
 #   ${catkin_LIBRARIES}
 # )
-target_link_libraries(better_lane_follower
+target_link_libraries(lane_follower
     ${catkin_LIBRARIES}
     ${OpenCV_LIBS}
     ${sb_utils_LIBRARIES}

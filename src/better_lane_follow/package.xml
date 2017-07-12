@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>better_lane_follow</name>
+  <name>lane_follow</name>
   <version>0.0.0</version>
   <description>
       Package for lane detection and lane following

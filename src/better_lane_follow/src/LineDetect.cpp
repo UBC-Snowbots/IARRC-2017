@@ -16,7 +16,7 @@ LineDetect::LineDetect() : initialLineDetectThreshold(50),
                            white(250),
                            windowWidth(200),
                            numVerticalSlice(10),
-                           degree(2) {}
+                           degree(1) {}
 
 std::vector <Polynomial> LineDetect::getLines(cv::Mat &filteredImage) {
 
@@ -134,26 +134,27 @@ Polynomial LineDetect::fitPolyLine(std::vector <cv::Point2d> points, int order) 
     // solve for linear least squares fit
     result = A.householderQr().solve(yvMapped);
 
-    if (result.size() == 4)
+    if (result.size() == 4) // 3rd order
         return Polynomial{result[3], result[2], result[1], result[0]};
-    else
+    else if (result.size() == 3) // 2nd order
         return Polynomial{0, result[2], result[1], result[0]};
+    else // 1st order
+        return Polynomial{0, 0, result[1], result[0]};
 }
 
 cv::Point2d LineDetect::getIntersection(Polynomial leftLine, Polynomial rightLine) {
 
     // Isolate slopes
-    double bCombinedSlope = leftLine.b - rightLine.b;
+    double combinedSlope = leftLine.c - rightLine.c;
 
-    double cCombinedSlope = leftLine.c - rightLine.c;
-
-    double dCombinedSlope = leftLine.d - rightLine.d;
+    // Isolate y-intercepts
+    double combinedYIntercept = rightLine.d - leftLine.d;
 
     // Solve for x
-    double x = cubicFormula(0, bCombinedSlope, cCombinedSlope, dCombinedSlope);
+    double x = combinedYIntercept/combinedSlope;
 
     // Solve for y
-    double y = leftLine.b * std::pow(x, 2) + leftLine.c * x + leftLine.d;
+    double y = leftLine.c * x + leftLine.d;
 
     cv::Point2d point;
     point.x = x;
@@ -163,6 +164,7 @@ cv::Point2d LineDetect::getIntersection(Polynomial leftLine, Polynomial rightLin
 }
 
 double LineDetect::cubicFormula(double a, double b, double c, double d) {
+
     double p = -b / (3.0 * a);
     double q = std::pow(p, 3) + (b * c - 3.0 * a * d) / (6.0 * std::pow(a, 2));
     double r = c / (3.0 * a);
@@ -176,11 +178,17 @@ double LineDetect::cubicFormula(double a, double b, double c, double d) {
     return w + x + p;
 }
 
-double LineDetect::quadraticFormula(double a, double b, double c, double &x_1, double &x_2) {
+void LineDetect::quadraticFormula(double a, double b, double c, double &x_1, double &x_2) {
 
+    double d = sqrt(std::pow(b, 2) - 4 * a * c);
+    x_1 = (-b + d)/(2 * a);
+    x_2 = (-b - d)/(2 * a);
+
+    return;
 }
 
 double LineDetect::getAngleFromOriginToPoint(cv::Point2d point) {
+
     double dy = point.y;
     double dx = point.x;
 
@@ -195,6 +203,7 @@ double LineDetect::getAngleFromOriginToPoint(cv::Point2d point) {
 }
 
 cv::Point2d LineDetect::moveAwayFromLine(Polynomial line, double targetXDistance, double targetYDistance) {
+
     cv::Point2d targetPoint;
 
     // Move along the line and stop when targetXDistance is met.
@@ -219,7 +228,7 @@ std::vector<Point2d> LineDetect::transformPoints(std::vector<cv::Point2d> points
     std::vector<Point2d> realPoints;
 
     for (int i = 0; i < points.size(); i++) {
-        realPoints.push_back(applyHomographyInv(points[i]));
+        //realPoints.push_back(applyHomographyInv(points[i]));
     }
 
     return realPoints;
