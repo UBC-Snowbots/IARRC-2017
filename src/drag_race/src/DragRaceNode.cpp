@@ -78,7 +78,7 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr& scan) {
     obstacle_manager.addLaserScan(*scan);
 
     // TODO: Option 1
-    if (obstacle_manager.collision_detected){
+    if (obstacle_manager.collisionDetected()){
         incoming_obstacle_ticks++;
     } else {
         // False alarm

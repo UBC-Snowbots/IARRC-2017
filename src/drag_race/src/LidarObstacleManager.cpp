@@ -31,6 +31,7 @@ LidarObstacleManager::LidarObstacleManager(
             {}
 
 void LidarObstacleManager::addLaserScan(const sensor_msgs::LaserScan &scan) {
+
     // Create an obstacle for every hit in the lidar scan
     for (int i = 0; i < scan.ranges.size(); ++i) {
         // Check that the lidar hit is within acceptable bounds
@@ -315,3 +316,8 @@ visualization_msgs::Marker LidarObstacleManager::getBestConeLineRVizMarker(bool 
 
     return line;
 }
+
+bool LidarObstacleManager::collisionDetected() {
+    return collision_detected;
+}
+

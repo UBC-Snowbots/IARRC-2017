@@ -225,13 +225,13 @@ TEST_F(LidarObstacleManagerTest, getLineOfBestFitRandomPoints3){
 TEST_F(LidarObstacleManagerTest, noObstacleInFront) {
     LidarObstacleManager man = LidarObstacleManager(0.3, 1.3, 1.5, 0.4, 1.0, 1.0);
     man.addLaserScan(scan1);
-    EXPECT_FALSE(man.collision_detected);
+    EXPECT_FALSE(man.collisionDetected());
 }
 
 TEST_F(LidarObstacleManagerTest, obstacleInFront) {
-    LidarObstacleManager man = LidarObstacleManager(0.3, 1.3, 1.5, 0.4, 1.0, 0.5);
+    LidarObstacleManager man = LidarObstacleManager(0.3, 1.3, 1.5, 0.4, 0.5, 1.0);
     man.addLaserScan(scan1);
-    EXPECT_FALSE(man.collision_detected);
+    EXPECT_TRUE(man.collisionDetected());
 }
 
 

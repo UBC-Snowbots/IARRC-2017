@@ -169,8 +169,7 @@ public:
     // TODO: Add line_to_the_right to the constructor
     visualization_msgs::Marker getBestConeLineRVizMarker(bool line_to_the_right);
 
-    // True if there is an obstacle within collision_distance away
-    bool collision_detected;
+    bool collisionDetected();
 
 private:
 
@@ -192,6 +191,9 @@ private:
 
     // The mimimum length of an obstacle before it's considered a wall
     double min_wall_length;
+
+    // True if there is an obstacle within collision_distance away
+    bool collision_detected;
 
 };
 
