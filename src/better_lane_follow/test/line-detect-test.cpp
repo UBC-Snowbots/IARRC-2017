@@ -1,7 +1,7 @@
 /*
  * Created By: Raad Khan
  * Created On: July 9, 2017
- * Description: Tests LineDetect class functions
+ * Description: Tests LineDetect class
  */
 
 #include <LineDetect.h>
