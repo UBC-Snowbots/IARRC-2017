@@ -68,6 +68,8 @@ public:
 
     static double cubicFormula(double a, double b, double c, double d);
 
+    std::vector<cv::Point2d> transformPoints(std::vector<cv::Point2d>);
+
 private:
     int white;
 
