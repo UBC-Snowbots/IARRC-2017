@@ -119,6 +119,11 @@ TEST(RightLineTest, angleLeftLessThanTargetDistance) {
     // Turn Left
     EXPECT_GE(testCommand.angular.z, 0);
 }
+
+TEST(CollisionDetectionTest, nothingAhead) {
+
+}
+
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     ::testing::InitGoogleTest(&argc, argv);

@@ -6,6 +6,7 @@
 
 #include <LidarObstacleManager.h>
 #include <stack>
+#include <cmath>
 
 // TODO: We should probably get rid of the default constructor here.....
 LidarObstacleManager::LidarObstacleManager():
@@ -17,12 +18,17 @@ LidarObstacleManager::LidarObstacleManager(
         double max_obstacle_merging_distance,
         double max_distance_from_robot_accepted,
         double cone_grouping_tolerance,
-        double min_wall_length
+        double min_wall_length,
+        double collision_distance,
+        double collision_angle
 ) :
         max_obstacle_merging_distance(max_obstacle_merging_distance),
         max_distance_from_robot_accepted(max_distance_from_robot_accepted),
         cone_grouping_tolerance(cone_grouping_tolerance),
-        min_wall_length(min_wall_length){}
+        min_wall_length(min_wall_length),
+        collision_distance(collision_distance),
+        collision_angle(collision_angle*180/M_PI)
+            {}
 
 void LidarObstacleManager::addLaserScan(const sensor_msgs::LaserScan &scan) {
     // Create an obstacle for every hit in the lidar scan
@@ -33,8 +39,14 @@ void LidarObstacleManager::addLaserScan(const sensor_msgs::LaserScan &scan) {
         if (range < scan.range_max && range > scan.range_min) {
             addObstacle(LidarObstacle(min_wall_length, angle, range));
         }
+
+        // TODO: Currently hardcoded, 5 degrees = 0.0872665rad
+        if (std::abs(angle) < collision_angle) {
+            collision_detected = range < collision_distance;
+        }
     }
 }
+
 
 std::vector<LidarObstacle> LidarObstacleManager::getObstacles() {
     return obstacles;
@@ -46,8 +58,13 @@ void LidarObstacleManager::clearObstacles(){
 
 void LidarObstacleManager::addObstacle(LidarObstacle obstacle) {
     // See if this obstacle is close enough to any other saved obstacle to be the same
-    // TODO: Should we be instead checking for the CLOSEST saved obstcle?
+<<<<<<< HEAD
+    // TODO: Should we be instead checking for the CLOSEST saved obstacle?
     for (LidarObstacle saved_obstacle : obstacles) {
+=======
+    // TODO: Should we be instead checking for the CLOSEST saved obstcle?
+    for (LidarObstacle& saved_obstacle : obstacles) {
+>>>>>>> bc27f33c4c9216aeeee3fff830bf535be9eff2ee
         if (minDistanceBetweenObstacles(saved_obstacle, obstacle)
             < max_obstacle_merging_distance) {
             saved_obstacle.mergeInLidarObstacle(obstacle);

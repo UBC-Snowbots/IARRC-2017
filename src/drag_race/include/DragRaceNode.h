@@ -24,6 +24,7 @@
 #include <sb_utils.h>
 #include <LidarObstacleManager.h>
 #include <DragRaceController.h>
+#include <LidarObstacle.h>
 
 class DragRaceNode {
 public:
@@ -57,6 +58,15 @@ private:
     double theta_scaling_multiplier;
     double angular_speed_multiplier;
     double linear_speed_multiplier;
+
+    // Incoming obstacle detection
+    int incoming_obstacle_ticks;
+    int obstacle_ticks_threshold;
+    double collision_distance;
+    double collision_angle;
+
+    // Signals that we're at the end of the course
+    bool end_of_course;
 
     // Subscribes to the LaserScan
     ros::Subscriber scan_subscriber;

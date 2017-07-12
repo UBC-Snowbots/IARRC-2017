@@ -10,7 +10,11 @@
 class LidarObstacleManagerTest : public testing::Test {
 protected:
     LidarObstacleManagerTest() :
-            obstacle_manager_1(0.2, 2)
+<<<<<<< HEAD
+            obstacle_manager_1()
+=======
+            obstacle_manager_1(0.2, 2, 1, 0.4)
+>>>>>>> bc27f33c4c9216aeeee3fff830bf535be9eff2ee
             {}
 
     virtual void SetUp(){
@@ -84,6 +88,13 @@ TEST_F(LidarObstacleManagerTest, minDistanceBetweenObstaclesTest){
     double distance = LidarObstacleManager::minDistanceBetweenObstacles(cone1, cone2);
     EXPECT_LE(0.93, distance);
     EXPECT_GE(1.07, distance);
+}
+
+TEST_F(LidarObstacleManagerTest, minDistanceBetweenObstaclesTest2){
+    LidarObstacle obstacle1({ {0, 1}, {M_PI/2, 100} });
+    LidarObstacle obstacle2({ {M_PI, 1}, {-M_PI/2, 100} });
+
+    EXPECT_DOUBLE_EQ(2.0, LidarObstacleManager::minDistanceBetweenObstacles(obstacle1, obstacle2));
 }
 
 TEST_F(LidarObstacleManagerTest, addObstacleTest){
@@ -214,6 +225,18 @@ TEST_F(LidarObstacleManagerTest, getLineOfBestFitRandomPoints3){
 
 // TODO
 // TEST(SlopeInterceptLineTest, testGetXIntercept){}
+
+TEST_F(LidarObstacleManagerTest, noObstacleInFront) {
+    LidarObstacleManager man = LidarObstacleManager(0.3, 1.3, 1.5, 0.4, 1.0, 1.0);
+    man.addLaserScan(scan1);
+    EXPECT_FALSE(man.collision_detected);
+}
+
+TEST_F(LidarObstacleManagerTest, obstacleInFront) {
+    LidarObstacleManager man = LidarObstacleManager(0.3, 1.3, 1.5, 0.4, 1.0, 0.5);
+    man.addLaserScan(scan1);
+    EXPECT_FALSE(man.collision_detected);
+}
 
 
 int main(int argc, char **argv) {
