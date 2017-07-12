@@ -79,7 +79,6 @@ if (CATKIN_ENABLE_TESTING)
 
     catkin_add_gtest(drag-race-controller-test
             test/drag-race-controller-test.cpp
-            src/DragRaceNode.cpp
             src/DragRaceController.cpp)
     target_link_libraries(drag-race-controller-test ${catkin_LIBRARIES})
 

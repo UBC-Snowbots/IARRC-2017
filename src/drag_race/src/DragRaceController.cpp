@@ -6,7 +6,7 @@
  */
 #include "DragRaceController.h"
 
-DragRaceController::DragRaceController(){};
+DragRaceController::DragRaceController() { };
 
 DragRaceController::DragRaceController(double targetDistance, bool lineToTheRight, double theta_scaling_multiplier,
                                        double angular_speed_multiplier, double linear_speed_multiplier,
@@ -19,14 +19,28 @@ DragRaceController::DragRaceController(double targetDistance, bool lineToTheRigh
         angular_vel_cap(angular_vel_cap),
         linear_vel_cap(linear_vel_cap) { }
 
-geometry_msgs::Twist DragRaceController::determineDesiredMotion(LineOfBestFit longestConeLine) {
+geometry_msgs::Twist DragRaceController::determineDesiredMotion(LineOfBestFit longestConeLine, bool no_line_on_expected_side) {
 
     // Determine angle of line.
     double theta = atan(longestConeLine.getSlope());
 
+    double distanceError;
+    double minDistanceFromLine = determineDistanceFromLine(longestConeLine);
 
-    double distanceError = target_distance - determineDistanceFromLine(longestConeLine);
+    if (no_line_on_expected_side) {
+        // Aim for three half-lanes across the farther line if in plan b.
+        double planBTargetDistance = target_distance * 3;
+        distanceError = planBTargetDistance - minDistanceFromLine;
+    } else
+        // Aim for one half-lane across the closer line if in plan a.
+        distanceError = target_distance - minDistanceFromLine;
+
+    // Make distance relative to where the line is, turning it into displacement.
     if (!line_to_the_right)
+        distanceError *= -1.0;
+
+    // Account for using the opposite line (Flip displacement).
+    if (no_line_on_expected_side)
         distanceError *= -1.0;
 
     geometry_msgs::Twist command;
@@ -37,9 +51,13 @@ geometry_msgs::Twist DragRaceController::determineDesiredMotion(LineOfBestFit lo
     command.angular.x = 0;
     command.angular.y = 0;
 
-    // Figure out how fast we should be turning
-    command.angular.z = (theta_scaling_multiplier * theta + distanceError) * angular_speed_multiplier;
-    //printf("Distance: %f, Theta: %f\n", distanceError, theta * theta_scaling_multiplier);
+    // If no line then go straight.
+    if (longestConeLine.correlation == 0)
+        command.angular.z = 0;
+    else
+        // Figure out how fast we should be turning
+        command.angular.z = (theta_scaling_multiplier * theta + distanceError) * angular_speed_multiplier;
+
     // Limit the angular velocity
     if (fabs(command.angular.z) > angular_vel_cap)
         command.angular.z = angular_vel_cap * command.angular.z / fabs(command.angular.z);
