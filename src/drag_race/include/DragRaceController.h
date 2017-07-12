@@ -44,7 +44,7 @@ public:
      * @param longestConeLine
      * @return the optimal angular and linear acceleration.
      */
-    geometry_msgs::Twist determineDesiredMotion(LineOfBestFit longestConeLine, bool isPlanB);
+    geometry_msgs::Twist determineDesiredMotion(LineOfBestFit longestConeLine, bool no_line_on_expected_side);
 
 private:
 

@@ -66,7 +66,7 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan) {
     // Insert the scan we just received
     obstacle_manager.addLaserScan(*scan);
 
-    bool isPlanB = false;
+    bool no_line_on_expected_side = false;
 
     // Get the best line for us
     LineOfBestFit best_line = obstacle_manager.getBestLine(line_to_the_right);
@@ -74,11 +74,11 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan) {
     // If no good lines, initiate plan B and use lines on the other side.
     if (best_line.correlation == 0) {
         best_line = obstacle_manager.getBestLine(!line_to_the_right);
-        isPlanB = true;
+        no_line_on_expected_side = true;
     }
 
     // Avoid the line given while staying within the boundaries
-    geometry_msgs::Twist twist = drag_race_controller.determineDesiredMotion(best_line, isPlanB);
+    geometry_msgs::Twist twist = drag_race_controller.determineDesiredMotion(best_line, no_line_on_expected_side);
 
     // Publish our desired twist message
     twist_publisher.publish(twist);
