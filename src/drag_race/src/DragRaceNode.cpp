@@ -55,7 +55,6 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
     // In DEGREES
     SB_getParam(nh, "collision_angle", collision_angle, 5.0);
 
-
     // Setup drag race controller with given params
     drag_race_controller = DragRaceController(target_distance, line_to_the_right, theta_scaling_multiplier,
                                            angular_speed_multiplier, linear_speed_multiplier, angular_vel_cap,
