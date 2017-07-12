@@ -165,20 +165,6 @@ TEST(LineDetect, fitPolyLineThirdOrderTest) {
     EXPECT_NEAR(expectedPolynomial.d, testPolynomial.d, 0.00001);
 }
 
-TEST(LineDetect, cubicFormulaRightTest) {
-    double aTest = -34.99999;
-    double bTest = 14.08333;
-    double cTest = -1.83333;
-    double dTest = 0.08333;
-
-    LineDetect testLineDetect;
-
-    double xActual = testLineDetect.cubicFormula(aTest, bTest, cTest, dTest);
-
-    double xExpected = 0.19999;
-    EXPECT_NEAR(xExpected, xActual, 0.00001);
-}
-
 TEST(LineDetect, getLinesTest) {
     std::string image_path = "images/straightImage.jpg";
     std::vector<Polynomial> testLines;

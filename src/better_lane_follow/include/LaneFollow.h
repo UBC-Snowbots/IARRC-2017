@@ -45,16 +45,13 @@ private:
     int angle_theta;
 
     /**
-     * Computes the average of 1/x and sqrt(y), multiplied by their respective scaling factors
+     * Initializator
      *
-     * @param x
-     * @param y
-     * @param x_scale the value to multiply the x value by
-     * @param y_scale the value to multiply the y value by
-     *
-     * @return the average of: [x_scale * 1/x] and [y_scale * sqrt(y)]
+     * @params image information and where to apply the IPM
      */
-    double magicFunction(double x, double y, double x_scale, double y_scale);
+    void createFilter(float ipm_base_width, float ipm_top_width,
+                      float ipm_base_displacement, float ipm_top_displacement,
+                      float image_height, float image_width);
 
     // Instantiate LineDetect class which generates the lane lines
     LineDetect ld;
@@ -70,6 +67,13 @@ private:
     // Moving away from line variables
     double target_x_distance;
     double target_y_distance;
+
+    // IPM
+    IPM ipm;
+    double ipm_base_width, ipm_top_width, ipm_base_displacement, ipm_top_displacement;
+
+    // Whether or not we've received the first image
+    bool receivedFirstImage;
 
     /**
      * Subscribes to the raw camera image node
@@ -91,7 +95,10 @@ private:
      *
      * @param message to be converted
      */
-    cv::Mat rosToMat(const sensor_msgs::Image::ConstPtr& image);
+    cv::Mat rosToMat(const sensor_msgs::Image::ConstPtr &image);
+
+    std::vector<cv::Point2d> transformPoints(std::vector<cv::Point2d>);
+
 };
 
 #endif
