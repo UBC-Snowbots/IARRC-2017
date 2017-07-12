@@ -20,10 +20,10 @@ LineDetect::LineDetect() : initialLineDetectThreshold(50),
                            numVerticalSlice(10),
                            degree(2) {}
 
-std::vector<Polynomial> LineDetect::getLines(cv::Mat& filteredImage) {
+std::vector <Polynomial> LineDetect::getLines(cv::Mat &filteredImage) {
 
     intVec baseHistogram = LineDetect::getHistogram(filteredImage);
-    std::vector<Window> windows;
+    std::vector <Window> windows;
 
     for (int i = 0; i < baseHistogram.size(); i++) {
         if (baseHistogram[i] > initialLineDetectThreshold) {
@@ -32,26 +32,28 @@ std::vector<Polynomial> LineDetect::getLines(cv::Mat& filteredImage) {
         }
     }
 
-    std::vector<std::vector<cv::Point2d>> linePoints( windows.size(), std::vector<cv::Point2d>(numVerticalSlice) );
+    std::vector <std::vector<cv::Point2d>> linePoints(windows.size(), std::vector<cv::Point2d>(numVerticalSlice));
 
     for (int verticalSliceIndex = 0; verticalSliceIndex < numVerticalSlice; verticalSliceIndex++) {
         for (int windowIndex = 0; windowIndex < windows.size(); windowIndex++) {
             Window window = windows.at(windowIndex);
-            cv::Point2d point{(double)window.center, (double)(verticalSliceIndex*filteredImage.rows/numVerticalSlice)};
+            cv::Point2d point{(double) window.center,
+                              (double) (verticalSliceIndex * filteredImage.rows / numVerticalSlice)};
             linePoints[windowIndex].emplace_back(point);
 
             cv::Mat windowSlice = LineDetect::getWindowSlice(filteredImage, window, verticalSliceIndex);
             intVec windowHistogram = LineDetect::getHistogram(windowSlice);
             std::pair<int, int> peak = LineDetect::getHistogramPeakPosition(windowHistogram);
 
-            window.center = windowIndex ? window.center = peak.second : peak.first /*+ (window.center - window.width/2)*/;
+            window.center = windowIndex ? window.center = peak.second
+                                        : peak.first /*+ (window.center - window.width/2)*/;
         }
     }
 
-    std::vector<Polynomial> polyLines;
+    std::vector <Polynomial> polyLines;
     Polynomial polyPoints;
 
-    for (std::vector<cv::Point2d> points : linePoints) {
+    for (std::vector <cv::Point2d> points : linePoints) {
         polyPoints = LineDetect::fitPolyLine(points, degree);
         polyLines.emplace_back(polyPoints);
     }
@@ -59,13 +61,13 @@ std::vector<Polynomial> LineDetect::getLines(cv::Mat& filteredImage) {
     return polyLines;
 }
 
-intVec LineDetect::getHistogram(cv::Mat& image) {
+intVec LineDetect::getHistogram(cv::Mat &image) {
 
     intVec histogram(image.cols, 0);
 
     for (int j = 0; j < image.rows; j++) {
         for (int i = 0; i < image.cols; i++) {
-            int pixelValue = (int)image.at<uchar>(i, j);
+            int pixelValue = (int) image.at<uchar>(i, j);
             if (pixelValue == white) {
                 histogram[i]++;
             }
@@ -75,11 +77,11 @@ intVec LineDetect::getHistogram(cv::Mat& image) {
     return histogram;
 }
 
-cv::Mat LineDetect::getWindowSlice(cv::Mat& image, Window window, int verticalSliceIndex) {
+cv::Mat LineDetect::getWindowSlice(cv::Mat &image, Window window, int verticalSliceIndex) {
 
     cv::Mat windowSlice = image(Range(window.getLeftSide(), window.getRightSide()),
-                                Range(verticalSliceIndex*image.rows/numVerticalSlice,
-                                          (verticalSliceIndex+1)*image.rows/numVerticalSlice));
+                                Range(verticalSliceIndex * image.rows / numVerticalSlice,
+                                      (verticalSliceIndex + 1) * image.rows / numVerticalSlice));
 
     return windowSlice;
 }
@@ -89,7 +91,7 @@ std::pair<int, int> LineDetect::getHistogramPeakPosition(intVec histogram) {
     std::pair<int, int> peak(0, 0);
     int peakValue = 0;
 
-    for (int i = 0; i < (int)(histogram.size()/2.0); i++) {
+    for (int i = 0; i < (int) (histogram.size() / 2.0); i++) {
         if (histogram[i] > peakValue) {
             peakValue = histogram[i];
             peak.first = i;
@@ -98,7 +100,7 @@ std::pair<int, int> LineDetect::getHistogramPeakPosition(intVec histogram) {
 
     peakValue = 0;
 
-    for (int i = (int)(histogram.size()/2.0); i < histogram.size(); i++) {
+    for (int i = (int) (histogram.size() / 2.0); i < histogram.size(); i++) {
         if (histogram[i] > peakValue) {
             peakValue = histogram[i];
             peak.second = i;
@@ -108,7 +110,7 @@ std::pair<int, int> LineDetect::getHistogramPeakPosition(intVec histogram) {
     return peak;
 }
 
-Polynomial LineDetect::fitPolyLine(std::vector<cv::Point2d> points, int order) {
+Polynomial LineDetect::fitPolyLine(std::vector <cv::Point2d> points, int order) {
 
     int moreOrder = order + 1;
     assert(points.size() >= moreOrder);
@@ -163,29 +165,32 @@ cv::Point2d LineDetect::getIntersection(Polynomial leftLine, Polynomial rightLin
 }
 
 double LineDetect::cubicFormula(double a, double b, double c, double d) {
-    double p = -b/(3.0*a);
-    double q = std::pow(p, 3) + (b*c - 3.0*a*d)/(6.0 * std::pow(a, 2));
-    double r = c/(3.0*a);
+    double p = -b / (3.0 * a);
+    double q = std::pow(p, 3) + (b * c - 3.0 * a * d) / (6.0 * std::pow(a, 2));
+    double r = c / (3.0 * a);
     double s = std::pow(p, 2);
     double t = std::pow(q, 2);
     double u = std::pow(r - s, 3);
-    double v = std::pow(t + u, 1.0/2.0);
-    double w = std::pow(q + v, 1.0/3.0);
-    double x = std::pow(q - v, 1.0/3.0);
+    double v = std::pow(t + u, 1.0 / 2.0);
+    double w = std::pow(q + v, 1.0 / 3.0);
+    double x = std::pow(q - v, 1.0 / 3.0);
 
     return w + x + p;
 }
 
-double
+double LineDetect::quadraticFormula(double a, double b, double c, double &x_1, double &x_2) {
+
+}
+
 double LineDetect::getAngleFromOriginToPoint(cv::Point2d point) {
     double dy = point.y;
     double dx = point.x;
 
-    double angle = atan(dy/dx);
+    double angle = atan(dy / dx);
 
     // If the endpoint is behind and to the left
-    if(dx < 0 && dy > 0) angle += M_PI;
-    // If the endpoint is behind and to the right
+    if (dx < 0 && dy > 0) angle += M_PI;
+        // If the endpoint is behind and to the right
     else if (dx < 0 && dy < 0) angle -= M_PI;
 
     return angle;
@@ -196,13 +201,14 @@ cv::Point2d LineDetect::moveAwayFromLine(Polynomial line, double targetXDistance
 
     // Move along the line and stop when targetXDistance is met.
     targetPoint.x = targetXDistance;
-    targetPoint.y = line.a * std::pow(targetPoint.x, 3) + line.b * std::pow(targetPoint.x, 2) + line.c * targetPoint.x + line.d;
+    targetPoint.y =
+            line.a * std::pow(targetPoint.x, 3) + line.b * std::pow(targetPoint.x, 2) + line.c * targetPoint.x + line.d;
 
     // Find y-intercept of line.
     double y_intercept = cubicFormula(line.a, line.b, line.c, line.d);
 
     // Go a certain distance away from the line while staying in the course.
-    if(y_intercept > 0)
+    if (y_intercept > 0)
         targetPoint.y -= targetYDistance; // If line is to the right move left.
     else
         targetPoint.y += targetYDistance; // If line is to the left move right.
