@@ -144,42 +144,9 @@ Polynomial LineDetect::fitPolyLine(std::vector <cv::Point2d> points, int order) 
 
 cv::Point2d LineDetect::getIntersection(Polynomial leftLine, Polynomial rightLine) {
 
-    // Isolate slopes
-    double bCombinedSlope = leftLine.b - rightLine.b;
-
-    double cCombinedSlope = leftLine.c - rightLine.c;
-
-    double dCombinedSlope = leftLine.d - rightLine.d;
-
-    // Solve for x
-    double x = cubicFormula(0, bCombinedSlope, cCombinedSlope, dCombinedSlope);
-
-    // Solve for y
-    double y = leftLine.b * std::pow(x, 2) + leftLine.c * x + leftLine.d;
-
-    cv::Point2d point;
-    point.x = x;
-    point.y = y;
+    Point2d point;
 
     return point;
-}
-
-double LineDetect::cubicFormula(double a, double b, double c, double d) {
-    double p = -b / (3.0 * a);
-    double q = std::pow(p, 3) + (b * c - 3.0 * a * d) / (6.0 * std::pow(a, 2));
-    double r = c / (3.0 * a);
-    double s = std::pow(p, 2);
-    double t = std::pow(q, 2);
-    double u = std::pow(r - s, 3);
-    double v = std::pow(t + u, 1.0 / 2.0);
-    double w = std::pow(q + v, 1.0 / 3.0);
-    double x = std::pow(q - v, 1.0 / 3.0);
-
-    return w + x + p;
-}
-
-double LineDetect::quadraticFormula(double a, double b, double c, double &x_1, double &x_2) {
-
 }
 
 double LineDetect::getAngleFromOriginToPoint(cv::Point2d point) {
@@ -199,30 +166,6 @@ double LineDetect::getAngleFromOriginToPoint(cv::Point2d point) {
 cv::Point2d LineDetect::moveAwayFromLine(Polynomial line, double targetXDistance, double targetYDistance) {
     cv::Point2d targetPoint;
 
-    // Move along the line and stop when targetXDistance is met.
-    targetPoint.x = targetXDistance;
-    targetPoint.y =
-            line.a * std::pow(targetPoint.x, 3) + line.b * std::pow(targetPoint.x, 2) + line.c * targetPoint.x + line.d;
-
-    // Find y-intercept of line.
-    double y_intercept = cubicFormula(line.a, line.b, line.c, line.d);
-
-    // Go a certain distance away from the line while staying in the course.
-    if (y_intercept > 0)
-        targetPoint.y -= targetYDistance; // If line is to the right move left.
-    else
-        targetPoint.y += targetYDistance; // If line is to the left move right.
 
     return targetPoint;
-}
-
-std::vector<Point2d> LineDetect::transformPoints(std::vector<cv::Point2d> points) {
-
-    std::vector<Point2d> realPoints;
-
-    for (int i = 0; i < points.size(); i++) {
-        realPoints.push_back(applyHomographyInv(points[i]));
-    }
-
-    return realPoints;
 }

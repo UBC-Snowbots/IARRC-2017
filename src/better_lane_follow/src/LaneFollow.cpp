@@ -42,6 +42,14 @@ LaneFollow::LaneFollow(int argc, char **argv, std::string node_name) {
     SB_getParam(nh, "target_x_distance", target_x_distance, 0.5);
     SB_getParam(nh, "target_y_distance", target_y_distance, 0.5);
 
+    SB_getParam(nh, "ipm_filter/ipm_base_width", ipm_base_width, (float) 1);
+    SB_getParam(nh, "ipm_filter/ipm_top_width", ipm_top_width, (float) 0.5);
+    SB_getParam(nh, "ipm_filter/ipm_base_displacement", ipm_base_displacement, (float) 0);
+    SB_getParam(nh, "ipm_filter/ipm_top_displacement", ipm_top_displacement, (float) 0.25);
+
+
+    receivedFirstImage = false;
+
     /*while (ros::ok()) {
 
         // ...
@@ -64,6 +72,14 @@ void LaneFollow::subscriberCallBack(const sensor_msgs::Image::ConstPtr &msg) {
     LineDetect ld;
 
     cv::Mat filteredImage = LaneFollow::rosToMat(msg);
+
+    // Initialize ipm filter
+    if (!receivedFirstImage) {
+        receivedFirstImage = true;
+        createFilter(ipm_base_width, ipm_top_width, ipm_base_displacement, ipm_top_displacement,
+                           filteredImage.rows, filteredImage.cols);
+    }
+
     std::vector<Polynomial> boundaryLines = ld.getLines(filteredImage);
     double angle_heading = 0;
 
@@ -72,7 +88,7 @@ void LaneFollow::subscriberCallBack(const sensor_msgs::Image::ConstPtr &msg) {
         cv::Point intersectionPoint = LineDetect::getIntersection(boundaryLines[0], boundaryLines[1]);
         angle_heading = LineDetect::getAngleFromOriginToPoint(intersectionPoint);
     }
-    // Head to a point a certain distance away from the line
+        // Head to a point a certain distance away from the line
     else if (boundaryLines.size() == 1) {
         cv::Point targetPoint = LineDetect::moveAwayFromLine(boundaryLines[0], target_x_distance, target_y_distance);
         angle_heading = LineDetect::getAngleFromOriginToPoint(targetPoint);
@@ -83,21 +99,50 @@ void LaneFollow::subscriberCallBack(const sensor_msgs::Image::ConstPtr &msg) {
     stayInLane.angular.z = pow(angle_heading, 2.0) * angular_speed_multiplier;
 
     // Limit the angular speed
-    if(stayInLane.angular.z > angular_vel_cap)
+    if (stayInLane.angular.z > angular_vel_cap)
         stayInLane.angular.z = angular_vel_cap * stayInLane.angular.z / fabs(stayInLane.angular.z);
 
     // Figure out how fast we should move forward
     stayInLane.linear.x = linear_speed_multiplier / fabs(stayInLane.angular.z);
 
     // Limit the linear speed
-    if(stayInLane.linear.x > linear_vel_cap)
+    if (stayInLane.linear.x > linear_vel_cap)
         stayInLane.linear.x = linear_vel_cap;
 
     twist_pub.publish(stayInLane);
 }
 
-double LaneFollow::magicFunction(double x, double y, double x_scale, double y_scale) {
-    return (1 / fabs(x) * x_scale + sqrt(fabs(y)) * y_scale) / 2;
+void LaneFollow::createFilter(float ipm_base_width, float ipm_top_width,
+                              float ipm_base_displacement, float ipm_top_displacement,
+                              float image_height, float image_width) {
+    double x1, x2, x3, x4;
+    double y1, y2, y3, y4;
+
+    std::vector<cv::Point2f> orig_points;
+    std::vector<cv::Point2f> dst_points;
+
+    x1 = image_width / 2 - ipm_base_width / 2 * image_width;
+    y1 = (1 - ipm_base_displacement) * image_height;
+    x2 = image_width / 2 + ipm_base_width / 2 * image_width;
+    y2 = (1 - ipm_base_displacement) * image_height;
+    x3 = image_width / 2 + ipm_top_width / 2 * image_width;
+    y3 = image_height * ipm_top_displacement;
+    x4 = image_width / 2 - ipm_top_width / 2 * image_width;
+    y4 = image_height * ipm_top_displacement;
+
+    //Set up the IPM points
+    orig_points.push_back(Point2f(x1, y1));
+    orig_points.push_back(Point2f(x2, y2));
+    orig_points.push_back(Point2f(x3, y3));
+    orig_points.push_back(Point2f(x4, y4));
+
+    dst_points.push_back(Point2f(0, image_height));
+    dst_points.push_back(Point2f(image_width, image_height));
+    dst_points.push_back(Point2f(image_width, 0));
+    dst_points.push_back(Point2f(0, 0));
+
+    //Create the IPM transformer
+    ipm = IPM(Size(image_width, image_height), Size(image_width, image_height), orig_points, dst_points);
 }
 
 cv::Mat LaneFollow::rosToMat(const sensor_msgs::Image::ConstPtr &image) {
@@ -106,3 +151,13 @@ cv::Mat LaneFollow::rosToMat(const sensor_msgs::Image::ConstPtr &image) {
     return imagePtr->image;
 }
 
+std::vector<Point2d> LaneFollow::transformPoints(std::vector<cv::Point2d> points) {
+
+    std::vector<Point2d> realPoints;
+
+    for (int i = 0; i < points.size(); i++) {
+        realPoints.push_back(ipm.applyHomographyInv(points[i]));
+    }
+
+    return realPoints;
+}

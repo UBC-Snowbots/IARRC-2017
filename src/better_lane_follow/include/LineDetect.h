@@ -72,8 +72,6 @@ public:
 
     static void quadraticFormula(double a, double b, double c, double &x_1, double &x_2);
 
-    std::vector<cv::Point2d> transformPoints(std::vector<cv::Point2d>);
-
 private:
     int white;
 

@@ -14,7 +14,7 @@ IPMFilterNode::IPMFilterNode(int argc, char **argv, std::string node_name) {
     receivedFirstImage = false;
 
     // Set topics
-    std::string image_topic = "/vision/hsv_filtered_image";
+    std::string image_topic = "/robot/vision/raw_image";
     std::string output_topic = "/vision/ipm_filtered_image";
 
     // ROS
@@ -44,7 +44,7 @@ IPMFilterNode::IPMFilterNode() { };
 void IPMFilterNode::filteredImageCallBack(const sensor_msgs::ImageConstPtr &msg) {
     if (!receivedFirstImage) {
         ros::NodeHandle private_nh("~");
-        ROS_INFO("First image received! (IPM)");
+        ROS_INFO("First image received! IPM");
         receivedFirstImage = true;
         //Obtains parameters of image and IPM points from the param server
         SB_getParam(private_nh, "image_width", image_width, (int) msg->width);
