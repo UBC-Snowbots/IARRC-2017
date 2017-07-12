@@ -6,9 +6,7 @@
  */
 
 #include <LaneFollow.h>
-#include <ros/ros.h>
-// temp headers
-#include <opencv2/opencv.hpp>
+// #include <ros/ros.h>
 
 using namespace std;
 
@@ -35,7 +33,7 @@ int main(int argc, char** argv) {
     while(true) {
         if (image.empty())
             break;
-        
+
     }
 }
 

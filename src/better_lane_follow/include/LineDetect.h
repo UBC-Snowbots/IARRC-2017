@@ -50,21 +50,21 @@ public:
 
     // TODO doc functions
 
-    std::vector<Polynomial> getLines(Mat& filteredImage);
+    std::vector<Polynomial> getLines(cv::Mat& filteredImage);
 
-    intVec getHistogram(Mat& image);
+    intVec getHistogram(cv::Mat& image);
 
-    Mat getWindowSlice(Mat& image, Window window, int verticalSliceIndex);
+    cv::Mat getWindowSlice(cv::Mat& image, Window window, int verticalSliceIndex);
 
     std::pair<int, int> getHistogramPeakPosition(intVec histogram);
 
-    Polynomial fitPolyLine(std::vector<Point2d> points, int order);
+    Polynomial fitPolyLine(std::vector<cv::Point2d> points, int order);
 
-    static Point2d getIntersection(Polynomial leftLine, Polynomial rightLine);
+    static cv::Point2d getIntersection(Polynomial leftLine, Polynomial rightLine);
 
-    static Point2d moveAwayFromLine(Polynomial line, double targetXDistance, double targetYDistance);
+    static cv::Point2d moveAwayFromLine(Polynomial line, double targetXDistance, double targetYDistance);
 
-    static double getAngleFromOriginToPoint(Point2d point);
+    static double getAngleFromOriginToPoint(cv::Point2d point);
 
     static double cubicFormula(double a, double b, double c, double d);
 

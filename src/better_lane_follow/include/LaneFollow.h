@@ -1,12 +1,8 @@
 /*
  * Created By: Raad Khan
  * Created On: April 23, 2017
- * Description: Gets angle of lane lines point of intersection
- *              relative to the robot and broadcasts a
- *              recommended Twist message.
- * Usage:
- * Subscribes to:
- * Publishes to:
+ * Description: Gets angle of point of intersection of lane lines
+ *              and broadcasts a recommended Twist message.
  */
 
 #ifndef LANE_FOLLOW_H

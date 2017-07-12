@@ -2,8 +2,7 @@
  * Created By: Raad Khan
  * Created On: April 23, 2017
  * Description: Gets angle of point of intersection of lane lines
- *              relative to the robot and broadcasts a
- *              recommended Twist message.
+ *              and broadcasts a recommended Twist message.
  */
 
 #include <LaneFollow.h>
