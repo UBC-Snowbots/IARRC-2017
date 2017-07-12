@@ -69,6 +69,8 @@ public:
 
     static double cubicFormula(double a, double b, double c, double d);
 
+    static void quadraticFormula(double a, double b, double c, double &x_1, double &x_2);
+
 private:
     int white;
 

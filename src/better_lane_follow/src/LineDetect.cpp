@@ -176,6 +176,7 @@ double LineDetect::cubicFormula(double a, double b, double c, double d) {
     return w + x + p;
 }
 
+double
 double LineDetect::getAngleFromOriginToPoint(cv::Point2d point) {
     double dy = point.y;
     double dx = point.x;
