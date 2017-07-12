@@ -19,14 +19,28 @@ DragRaceController::DragRaceController(double targetDistance, bool lineToTheRigh
         angular_vel_cap(angular_vel_cap),
         linear_vel_cap(linear_vel_cap) { }
 
-geometry_msgs::Twist DragRaceController::determineDesiredMotion(LineOfBestFit longestConeLine) {
+geometry_msgs::Twist DragRaceController::determineDesiredMotion(LineOfBestFit longestConeLine, bool isPlanB) {
 
     // Determine angle of line.
     double theta = atan(longestConeLine.getSlope());
 
+    double distanceError;
+    double minDistanceFromLine = determineDistanceFromLine(longestConeLine);
 
-    double distanceError = target_distance - determineDistanceFromLine(longestConeLine);
+    if (isPlanB) {
+        // Aim for three half-lanes across the farther line if in plan b.
+        double planBTargetDistance = target_distance * 3;
+        distanceError = planBTargetDistance - minDistanceFromLine;
+    } else
+        // Aim for one half-lane across the closer line if in plan a.
+        distanceError = target_distance - minDistanceFromLine;
+
+    // Make distance relative to where the line is, turning it into displacement.
     if (!line_to_the_right)
+        distanceError *= -1.0;
+
+    // Account for using the opposite line (Flip displacement).
+    if (isPlanB)
         distanceError *= -1.0;
 
     geometry_msgs::Twist command;
