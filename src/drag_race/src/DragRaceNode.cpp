@@ -18,13 +18,13 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
     std::string scan_topic = "/scan";
     uint32_t queue_size = 1;
 
-    scan_subscriber = nh.subscribe( scan_topic, queue_size, 
-                                    &DragRaceNode::scanCallBack, this);
+    scan_subscriber = nh.subscribe(scan_topic, queue_size,
+                                   &DragRaceNode::scanCallBack, this);
 
     // Setup Publisher(s)
     std::string twist_topic = nh.resolveName("cmd_vel");
     twist_publisher = nh.advertise<geometry_msgs::Twist>
-                                (twist_topic, queue_size);
+            (twist_topic, queue_size);
     std::string cone_debug_topic = private_nh.resolveName("debug/cone");
     cone_debug_publisher = private_nh.advertise<visualization_msgs::Marker>
             (cone_debug_topic, queue_size);
@@ -51,15 +51,15 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
 
     // Setup drag race controller with given params
     drag_race_controller = DragRaceController(target_distance, line_to_the_right, theta_scaling_multiplier,
-                                           angular_speed_multiplier, linear_speed_multiplier, angular_vel_cap,
-                                           linear_vel_cap);
+                                              angular_speed_multiplier, linear_speed_multiplier, angular_vel_cap,
+                                              linear_vel_cap);
 
     // Setup the obstacle manager with given params
     obstacle_manager = LidarObstacleManager(max_obstacle_merging_distance, cone_grouping_tolerance,
                                             max_distance_from_robot_accepted, min_wall_length);
 }
 
-void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr& scan) {
+void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan) {
     // Clear any obstacles we already have
     obstacle_manager.clearObstacles();
 
@@ -69,8 +69,19 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr& scan) {
     // Get the best line for us
     LineOfBestFit best_line = obstacle_manager.getBestLine(line_to_the_right);
 
-    // Determine what we need to do to stay at the desired distance from the wall
-    geometry_msgs::Twist twist = drag_race_controller.determineDesiredMotion(best_line);
+    geometry_msgs::Twist twist;
+
+    // If no line then go straight.
+    if (fabs(best_line.correlation) == 0) {
+        twist.angular.x = 0;
+        twist.angular.y = 0;
+        twist.angular.z = 0;
+        twist.linear.x = linear_vel_cap;
+        twist.linear.y = 0;
+        twist.linear.z = 0;
+    } else
+        // Avoid the line given while staying within the boundaries
+        twist = drag_race_controller.determineDesiredMotion(best_line);
 
     // Publish our desired twist message
     twist_publisher.publish(twist);
