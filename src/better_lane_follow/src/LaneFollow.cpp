@@ -77,7 +77,7 @@ void LaneFollow::subscriberCallBack(const sensor_msgs::Image::ConstPtr &msg) {
     if (!receivedFirstImage) {
         receivedFirstImage = true;
         createFilter(ipm_base_width, ipm_top_width, ipm_base_displacement, ipm_top_displacement,
-                           filteredImage.rows, filteredImage.cols);
+                     filteredImage.rows, filteredImage.cols);
     }
 
     std::vector<Polynomial> boundaryLines = ld.getLines(filteredImage);
@@ -87,8 +87,7 @@ void LaneFollow::subscriberCallBack(const sensor_msgs::Image::ConstPtr &msg) {
     if (boundaryLines.size() >= 2) {
         cv::Point intersectionPoint = LineDetect::getIntersection(boundaryLines[0], boundaryLines[1]);
         angle_heading = LineDetect::getAngleFromOriginToPoint(intersectionPoint);
-    }
-        // Head to a point a certain distance away from the line
+    }// Head to a point a certain distance away from the line
     else if (boundaryLines.size() == 1) {
         cv::Point targetPoint = LineDetect::moveAwayFromLine(boundaryLines[0], target_x_distance, target_y_distance);
         angle_heading = LineDetect::getAngleFromOriginToPoint(targetPoint);
@@ -102,8 +101,12 @@ void LaneFollow::subscriberCallBack(const sensor_msgs::Image::ConstPtr &msg) {
     if (stayInLane.angular.z > angular_vel_cap)
         stayInLane.angular.z = angular_vel_cap * stayInLane.angular.z / fabs(stayInLane.angular.z);
 
-    // Figure out how fast we should move forward
-    stayInLane.linear.x = linear_speed_multiplier / fabs(stayInLane.angular.z);
+    if (stayInLane.angular.z == 0)
+        // Go as fast as possible.
+        stayInLane.linear.x = linear_vel_cap;
+    else
+        // Figure out how fast we should move forward
+        stayInLane.linear.x = linear_speed_multiplier / fabs(stayInLane.angular.z);
 
     // Limit the linear speed
     if (stayInLane.linear.x > linear_vel_cap)
