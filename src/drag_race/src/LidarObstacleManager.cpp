@@ -40,7 +40,6 @@ void LidarObstacleManager::addLaserScan(const sensor_msgs::LaserScan &scan) {
             addObstacle(LidarObstacle(min_wall_length, angle, range));
         }
 
-        // TODO: Currently hardcoded, 5 degrees = 0.0872665rad
         if (std::abs(angle) < collision_angle) {
             collision_detected = range < collision_distance;
         }
