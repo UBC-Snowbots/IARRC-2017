@@ -6,7 +6,7 @@
  */
 #include "DragRaceController.h"
 
-DragRaceController::DragRaceController(){};
+DragRaceController::DragRaceController() { };
 
 DragRaceController::DragRaceController(double targetDistance, bool lineToTheRight, double theta_scaling_multiplier,
                                        double angular_speed_multiplier, double linear_speed_multiplier,
@@ -37,9 +37,13 @@ geometry_msgs::Twist DragRaceController::determineDesiredMotion(LineOfBestFit lo
     command.angular.x = 0;
     command.angular.y = 0;
 
-    // Figure out how fast we should be turning
-    command.angular.z = (theta_scaling_multiplier * theta + distanceError) * angular_speed_multiplier;
-    //printf("Distance: %f, Theta: %f\n", distanceError, theta * theta_scaling_multiplier);
+    // If no line then go straight.
+    if (longestConeLine.correlation == 0)
+        command.angular.z = 0;
+    else
+        // Figure out how fast we should be turning
+        command.angular.z = (theta_scaling_multiplier * theta + distanceError) * angular_speed_multiplier;
+
     // Limit the angular velocity
     if (fabs(command.angular.z) > angular_vel_cap)
         command.angular.z = angular_vel_cap * command.angular.z / fabs(command.angular.z);

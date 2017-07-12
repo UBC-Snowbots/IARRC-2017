@@ -71,17 +71,9 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan) {
 
     geometry_msgs::Twist twist;
 
-    // If no line then go straight.
-    if (fabs(best_line.correlation) == 0) {
-        twist.angular.x = 0;
-        twist.angular.y = 0;
-        twist.angular.z = 0;
-        twist.linear.x = linear_vel_cap;
-        twist.linear.y = 0;
-        twist.linear.z = 0;
-    } else
-        // Avoid the line given while staying within the boundaries
-        twist = drag_race_controller.determineDesiredMotion(best_line);
+
+    // Avoid the line given while staying within the boundaries
+    twist = drag_race_controller.determineDesiredMotion(best_line);
 
     // Publish our desired twist message
     twist_publisher.publish(twist);
