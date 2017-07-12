@@ -10,11 +10,7 @@
 class LidarObstacleManagerTest : public testing::Test {
 protected:
     LidarObstacleManagerTest() :
-<<<<<<< HEAD
             obstacle_manager_1()
-=======
-            obstacle_manager_1(0.2, 2, 1, 0.4)
->>>>>>> bc27f33c4c9216aeeee3fff830bf535be9eff2ee
             {}
 
     virtual void SetUp(){

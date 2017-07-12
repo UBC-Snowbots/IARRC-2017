@@ -34,7 +34,7 @@ double correlation = 1.0;
 
 // TEST(Position of Line, Heading of the line, Robots Relative position to target distance)
 TEST(LeftLineTest, angleRightMoreThanTargetDistance) {
-    LineOfBestFit *testLine = new LineOfBestFit(right_angle_slope, line_to_the_left, correlation);
+    LineOfBestFit testLine = LineOfBestFit(right_angle_slope, line_to_the_left, correlation);
     DragRaceController *dragRaceController = new DragRaceController(more_than_target_distance, false,
                                                                    theta_scaling_multiplier, angular_speed_multiplier,
                                                                    linear_speed_multiplier, angular_vel_cap, linear_vel_cap);
@@ -44,7 +44,7 @@ TEST(LeftLineTest, angleRightMoreThanTargetDistance) {
 }
 
 TEST(LeftLineTest, angleLeftMoreThanTargetDistance) {
-    LineOfBestFit *testLine = new LineOfBestFit(left_angle_slope, line_to_the_left, correlation);
+    LineOfBestFit testLine = LineOfBestFit(left_angle_slope, line_to_the_left, correlation);
     DragRaceController *dragRaceController = new DragRaceController(more_than_target_distance, false,
                                                                     theta_scaling_multiplier, angular_speed_multiplier,
                                                                     linear_speed_multiplier, angular_vel_cap,
@@ -55,7 +55,7 @@ TEST(LeftLineTest, angleLeftMoreThanTargetDistance) {
 }
 
 TEST(LeftLineTest, angleRightLessThanTargetDistance) {
-    LineOfBestFit *testLine = new LineOfBestFit(right_angle_slope, line_to_the_left, correlation);
+    LineOfBestFit testLine = LineOfBestFit(right_angle_slope, line_to_the_left, correlation);
     DragRaceController *dragRaceController = new DragRaceController(less_than_target_distance, false,
                                                                     theta_scaling_multiplier, angular_speed_multiplier,
                                                                     linear_speed_multiplier, angular_vel_cap,
@@ -66,7 +66,7 @@ TEST(LeftLineTest, angleRightLessThanTargetDistance) {
 }
 
 TEST(LeftLineTest, angleLeftLessThanTargetDistance) {
-    LineOfBestFit *testLine = new LineOfBestFit(left_angle_slope, line_to_the_left, correlation);
+    LineOfBestFit testLine = LineOfBestFit(left_angle_slope, line_to_the_left, correlation);
     DragRaceController *dragRaceController = new DragRaceController(less_than_target_distance, false,
                                                                     theta_scaling_multiplier, angular_speed_multiplier,
                                                                     linear_speed_multiplier, angular_vel_cap,
@@ -77,7 +77,7 @@ TEST(LeftLineTest, angleLeftLessThanTargetDistance) {
 }
 
 TEST(RightLineTest, angleRightMoreThanTargetDistance) {
-    LineOfBestFit *testLine = new LineOfBestFit(right_angle_slope, line_to_the_right, correlation);
+    LineOfBestFit testLine = LineOfBestFit(right_angle_slope, line_to_the_right, correlation);
     DragRaceController *dragRaceController = new DragRaceController(more_than_target_distance, true,
                                                                     theta_scaling_multiplier, angular_speed_multiplier,
                                                                     linear_speed_multiplier, angular_vel_cap,
@@ -88,7 +88,7 @@ TEST(RightLineTest, angleRightMoreThanTargetDistance) {
 }
 
 TEST(RightLineTest, angleLeftMoreThanTargetDistance) {
-    LineOfBestFit *testLine = new LineOfBestFit(left_angle_slope, line_to_the_right, correlation);
+    LineOfBestFit testLine = LineOfBestFit(left_angle_slope, line_to_the_right, correlation);
     DragRaceController *dragRaceController = new DragRaceController(more_than_target_distance, true,
                                                                     theta_scaling_multiplier, angular_speed_multiplier,
                                                                     linear_speed_multiplier, angular_vel_cap,
@@ -99,7 +99,7 @@ TEST(RightLineTest, angleLeftMoreThanTargetDistance) {
 }
 
 TEST(RightLineTest, angleRightLessThanTargetDistance) {
-    LineOfBestFit *testLine = new LineOfBestFit(right_angle_slope, line_to_the_right, correlation);
+    LineOfBestFit testLine = LineOfBestFit(right_angle_slope, line_to_the_right, correlation);
     DragRaceController *dragRaceController = new DragRaceController(less_than_target_distance, true,
                                                                     theta_scaling_multiplier, angular_speed_multiplier,
                                                                     linear_speed_multiplier, angular_vel_cap,
@@ -110,7 +110,7 @@ TEST(RightLineTest, angleRightLessThanTargetDistance) {
 }
 
 TEST(RightLineTest, angleLeftLessThanTargetDistance) {
-    LineOfBestFit *testLine = new LineOfBestFit(left_angle_slope, line_to_the_right, correlation);
+    LineOfBestFit testLine = LineOfBestFit(left_angle_slope, line_to_the_right, correlation);
     DragRaceController *dragRaceController = new DragRaceController(less_than_target_distance, true,
                                                                     theta_scaling_multiplier, angular_speed_multiplier,
                                                                     linear_speed_multiplier, angular_vel_cap,
