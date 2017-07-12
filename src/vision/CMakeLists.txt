@@ -12,6 +12,18 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(OpenCV REQUIRED)
 find_package(sb_utils REQUIRED)
 
+# Export the Inverse Prespective Mapping Class (IPM) as a library
+catkin_package(
+    INCLUDE_DIRS include
+    LIBRARIES ipm
+    CATKIN_DEPENDS roscpp
+    )
+
+## Declare a C++ library
+add_library(ipm
+    include/IPM.h src/IPM.cpp
+)
+target_link_libraries(ipm ${catkin_LIBRARIES})
 
 include_directories(
         ${catkin_INCLUDE_DIRS}
@@ -19,8 +31,6 @@ include_directories(
         ${OpenCV_INCLUDE_DIRS}
         ./include
 )
-
-catkin_package()
 
 add_executable(HSVFilter
         src/HSVFilter.cpp
