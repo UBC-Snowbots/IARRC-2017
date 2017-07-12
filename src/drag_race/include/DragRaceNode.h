@@ -24,7 +24,6 @@
 #include <sb_utils.h>
 #include <LidarObstacleManager.h>
 #include <DragRaceController.h>
-#include <LidarObstacle.h>
 
 class DragRaceNode {
 public:

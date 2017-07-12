@@ -78,7 +78,7 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr& scan) {
     // Insert the scan we just received
     obstacle_manager.addLaserScan(*scan);
 
-    // Check for incoming obstacles
+    // TODO: Option 1
     if (obstacle_manager.collision_detected){
         incoming_obstacle_ticks++;
     } else {
@@ -101,14 +101,19 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr& scan) {
     geometry_msgs::Twist twist = drag_race_controller.determineDesiredMotion(best_line);
 
 
-    // TODO: Make more sophisticated
+    // TODO: Option 2
+    /*
     std::vector<LidarObstacle> obstacles = obstacle_manager.getObstacles();
     for (int i = 0; i < obstacles.size(); i++){
         LidarObstacle currObs = obstacles[i];
-        if (currObs.getObstacleType() == WALL && currObs.getAvgDistance() < 1.0 && currObs.getLength() > 2.0){
+        if (currObs.getObstacleType() == WALL
+                && currObs.getAvgDistance() < collision_distance
+                && currObs.getLength() > 2.0 //TODO: If going for this option, maybe make length param
+                && std::abs(currObs.getAvgAngle())*180/M_PI < collision_angle ){
             end_of_course = true;
         }
     }
+    */
 
     if (end_of_course) {
         twist.linear.x = twist.linear.y = twist.linear.z = 0;
