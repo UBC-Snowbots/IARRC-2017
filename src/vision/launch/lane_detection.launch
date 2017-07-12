@@ -1,0 +1,46 @@
+<launch>
+
+    <!-- Initialise the HSV filter -->
+    <node name="HSVFilter_lanes" pkg="vision" type="HSVFilter" output="screen">
+        
+        <!-- Input --> 
+        <remap from="/robot/vision/raw_image" to="/vision/input_image"/>
+
+        <!-- Output -->
+        <remap from="/vision/hsv_filtered_image" to="/vision/hsv_filtered_image" />
+
+        <!-- Node parameters -->
+        <rosparam param="update_frequency">5.0</rosparam>
+        <rosparam param="config_file" subst_value="true">$(find vision)/launch/lane_filter.conf</rosparam>
+        <rosparam param="show_image_window">true</rosparam>
+        <rosparam param="show_calibration_window">true</rosparam>
+
+        <!-- Input image parameters if set manually -->
+        <!--
+        <rosparam param="image_width"></rosparam>
+        <rosparam param="image_height"></rosparam>
+        --> 
+    </node>
+
+    <!-- Initialise the IPM filter  -->
+    <node name="IPMFilter" pkg="vision" type="IPMFilter" output="screen">
+        <!-- Input -->
+        <remap from="/vision/hsv_filtered_image" to="/vision/hsv_filtered_image" />
+
+        <!-- Output -->
+        <remap from="/vision/ipm_filtered_image" to="/vision/ipm_filtered_image" />
+
+        <!-- IPM parameters -->
+        <rosparam param="ipm_base_width">1.0</rosparam>
+        <rosparam param="ipm_top_width">0.5</rosparam>
+        <rosparam param="ipm_base_displacement">0</rosparam>
+        <rosparam param="ipm_top_displacement">0.25</rosparam>
+
+        <!-- Input image parameters if set manually -->
+        <!--
+        <rosparam param="image_width"></rosparam>
+        <rosparam param="image_height"></rosparam>
+        --> 
+    </node>
+
+</launch>
