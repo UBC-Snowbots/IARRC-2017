@@ -51,6 +51,7 @@ public:
     LineOfBestFit(double slope, double y_intercept, double correlation) :
             SlopeInterceptLine(slope, y_intercept), correlation(correlation) {}
 
+    // TODO: Add getter function and make private
     double correlation;
 };
 
