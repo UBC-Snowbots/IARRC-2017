@@ -8,7 +8,9 @@
 
 #include <DragRaceNode.h>
 
-DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
+DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name):
+    green_count_recognised(0)
+{
     // Setup NodeHandles
     ros::init(argc, argv, node_name);
     ros::NodeHandle nh;

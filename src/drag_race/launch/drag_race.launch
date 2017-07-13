@@ -6,6 +6,9 @@
     <!-- Start the camera -->
     <node name="camera" pkg="vision" type="camera" output="screen"/>
 
+    <!-- Start green light detection -->
+    <include file="$(find vision)/launch/stoplight_detection.launch"/>
+
     <!-- Start the steering driver to control the robot -->
     <include file="$(find drivers)/launch/steering_driver.launch"/>
 
