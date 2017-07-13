@@ -13,7 +13,7 @@ using namespace cv;
 
 LineDetect::LineDetect() : white(250),
                            numVerticalSlice(10),
-                           degree(1) {}
+                           degree(1) { }
 
 std::vector <Polynomial> LineDetect::getLaneLines(cv::Mat &filteredImage) {
 
@@ -30,7 +30,7 @@ std::vector <Polynomial> LineDetect::getLaneLines(cv::Mat &filteredImage) {
 
     std::vector <std::vector<cv::Point2d>> lanePoints = this->getLanePoints(filteredImage, baseWindows);
 
-    std::vector <Polynomial> polyLines;
+    std::vector<Polynomial> polyLines;
     Polynomial polyPoints;
 
     for (std::vector <cv::Point2d> points : lanePoints) {
@@ -148,7 +148,7 @@ Polynomial LineDetect::fitPolyLine(std::vector <cv::Point2d> points, int order) 
     // create matrix
     for (size_t i = 0; i < points.size(); i++)
         for (size_t j = 0; j < moreOrder; j++)
-            A(i, j) = std::pow((xv.at(i)), j);
+            A(i, j) = pow((xv.at(i)), j);
 
     // solve for linear least squares fit
     result = A.householderQr().solve(yvMapped);
@@ -201,15 +201,49 @@ double LineDetect::getAngleFromOriginToPoint(cv::Point2d point) {
     return angle;
 }
 
-cv::Point2d LineDetect::moveAwayFromLine(Polynomial line, double distanceAwayFromOrigin, double distanceAwayFromLine) {
+cv::Point2d LineDetect::moveAwayFromLine(Polynomial line, double distanceAwayFromRobot, double distanceAwayFromLine) {
 
     cv::Point2d targetPoint;
 
-    double y = line.c * distanceAwayFromOrigin + line.d;
-    double displacementAwayFromLine = distanceAwayFromLine * line.d/fabs(line.d);
+    // Get parallel line closer to the middle of the course.
+    Polynomial targetParallelLine;
+    targetParallelLine.c = line.c;
+    targetParallelLine.d = line.d - distanceAwayFromLine * line.d / fabs(line.d);
 
-    targetPoint.y -= displacementAwayFromLine;
-    targetPoint.x = (y - line.d) / line.c;
+    cv::Point2d perpendicularIntersection = getPerpendicularIntersection(targetParallelLine);
+
+    double distanceToPerpendicularIntersection = sqrt(
+            pow(perpendicularIntersection.x, 2) + pow(perpendicularIntersection.y, 2));
+
+    // cos(theta) = A/H
+    double scalarProjectionAngle = acos(distanceToPerpendicularIntersection / distanceAwayFromRobot);
+
+    // tan(theta) = O/A
+    double anglePerpendicularIntersection = atan(perpendicularIntersection.x / perpendicularIntersection.y);
+
+    // anglePerpendicularIntersection + angleHeading = scalarProjectionAngle
+    double angleHeading = scalarProjectionAngle - anglePerpendicularIntersection;
+
+    // Polar coordinates
+    targetPoint.x = distanceAwayFromRobot * cos(angleHeading);
+    targetPoint.y = distanceAwayFromRobot * sin(angleHeading);
 
     return targetPoint;
+}
+
+cv::Point2d LineDetect::getPerpendicularIntersection(Polynomial line) {
+    cv::Point2d perpendicularIntersection;
+
+    double negReciprocal = -1.0 / line.c;
+
+    // Set the two sides equal then isolate x to one side.
+    double isolatedXSlope = negReciprocal - line.c;
+
+    // Divide both sides by the isolated slope to get the x point intersection.
+    perpendicularIntersection.x = line.d / isolatedXSlope;
+
+    // Plug in the xIntersection to get the y point intersection.
+    perpendicularIntersection.y = negReciprocal * perpendicularIntersection.x;
+
+    return perpendicularIntersection;
 }
