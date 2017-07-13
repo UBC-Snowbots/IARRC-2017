@@ -4,7 +4,7 @@
     <node name="camera" pkg="vision" type="camera" output="screen">
 
         <!-- Output -->
-        <remap from="/vision/hsv_filtered_image" to="/vision/hsv_filtered_image" />
+        <remap from="/vision/input_image" to="/vision/input_image" />
 
         <!-- Node parameters -->
         <rosparam param="show_video_stream">true</rosparam>
