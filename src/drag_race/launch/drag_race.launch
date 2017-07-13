@@ -25,6 +25,9 @@
             <rosparam param="max_obstacle_merging_distance"> 0.3 </rosparam>
             <!-- The minimum length an obstacle must be to be considered a wall -->
             <rosparam param="min_wall_length"> 0.4 </rosparam>
+            <rosparam param="obstacle_ticks_threshold">10</rosparam>
+            <rosparam param="collision_distance">3.0</rosparam>
+            <rosparam param="collision_angle">5.0</rosparam>
 
         <!-- Line Detection Params -->
             <!-- The maximum distance between cones in the same group
