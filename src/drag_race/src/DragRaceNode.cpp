@@ -50,7 +50,7 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
     SB_getParam(nh, "max_distance_from_robot_accepted", max_distance_from_robot_accepted, 2.0);
     SB_getParam(nh, "min_wall_length", min_wall_length, 0.4);
     SB_getParam(nh, "obstacle_ticks_threshold", obstacle_ticks_threshold, 10);
-    SB_getParam(nh, "collision_distance", collision_distance, 1.0);
+    SB_getParam(nh, "collision_distance", collision_distance, 3.0);
 
     // In DEGREES
     SB_getParam(nh, "collision_angle", collision_angle, 5.0);
