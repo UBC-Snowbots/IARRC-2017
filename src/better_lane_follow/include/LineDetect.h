@@ -50,26 +50,28 @@ public:
 
     // TODO doc functions
 
-    std::vector<Polynomial> getLines(cv::Mat& filteredImage);
+    std::vector<Polynomial> getLaneLines(cv::Mat& filteredImage);
 
     intVec getHistogram(cv::Mat& image);
 
+    std::pair<int, int> getBaseHistogramPeakPosition(intVec histogram);
+
+    std::vector <std::vector<cv::Point2d>> getLanePoints(cv::Mat& filteredImage, std::vector <Window> windows);
+
     cv::Mat getWindowSlice(cv::Mat& image, Window window, int verticalSliceIndex);
 
-    std::pair<int, int> getHistogramPeakPosition(intVec histogram);
+    int getWindowHistogramPeakPosition(intVec histogram);
 
     Polynomial fitPolyLine(std::vector<cv::Point2d> points, int order);
 
     static cv::Point2d getIntersection(Polynomial leftLine, Polynomial rightLine);
 
-    static cv::Point2d moveAwayFromLine(Polynomial line, double targetXDistance, double targetYDistance);
-
     static double getAngleFromOriginToPoint(cv::Point2d point);
+
+    static cv::Point2d moveAwayFromLine(Polynomial line, double targetXDistance, double targetYDistance);
 
 private:
     int white;
-
-    int initialLineDetectThreshold;
 
     int windowWidth;
 

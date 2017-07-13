@@ -104,24 +104,24 @@ TEST(LineDetect, getWindowSliceRightTest) {
     EXPECT_EQ(false, equal);
 }
 
-TEST(LineDetect, getHistogramPeakPositionLargeTest) {
+TEST(LineDetect, getBaseHistogramPeakPositionLargeTest) {
 
     intVec testHistogram = {0, 1, 3, 5, 2, 1, 1, 2, 6, 2, 0, 3};
 
     LineDetect testLineDetect;
 
-    std::pair<int, int> testPeak = testLineDetect.getHistogramPeakPosition(testHistogram);
+    std::pair<int, int> testPeak = testLineDetect.getBaseHistogramPeakPosition(testHistogram);
     std::pair<int, int> expectedPeak(3, 8);
     EXPECT_EQ(expectedPeak, testPeak);
 }
 
-TEST(LineDetect, getHistogramPeakPositionSmallTest) {
+TEST(LineDetect, getBaseHistogramPeakPositionSmallTest) {
 
     intVec testHistogram = {2, 1, 7, 6, 2, 1, 6, 6, 0};
 
     LineDetect testLineDetect;
 
-    std::pair<int, int> testPeak = testLineDetect.getHistogramPeakPosition(testHistogram);
+    std::pair<int, int> testPeak = testLineDetect.getBaseHistogramPeakPosition(testHistogram);
     std::pair<int, int> expectedPeak(2, 6);
     EXPECT_EQ(expectedPeak, testPeak);
 }
@@ -138,7 +138,7 @@ TEST(LineDetect, fitPolyLineFirstOrderTest) {
 
     LineDetect testLineDetect;
     Polynomial testPolynomial = testLineDetect.fitPolyLine(testPoints, testOrder);
-    Polynomial expectedPolynomial{0, 0, -0.05714, 0.71428};
+    Polynomial expectedPolynomial{0, 0, 3.00000, -5.00000};
 
     EXPECT_NEAR(expectedPolynomial.c, testPolynomial.c, 0.00001);
     EXPECT_NEAR(expectedPolynomial.d, testPolynomial.d, 0.00001);
@@ -165,7 +165,7 @@ TEST(LineDetect, fitPolyLineThirdOrderTest) {
     EXPECT_NEAR(expectedPolynomial.d, testPolynomial.d, 0.00001);
 }
 
-TEST(LineDetect, getLinesTest) {
+TEST(LineDetect, getLaneLinesTest) {
     std::string image_path = "images/straightImage.jpg";
     std::vector<Polynomial> testLines;
     cv::Mat testColor = imread(image_path);
@@ -173,7 +173,7 @@ TEST(LineDetect, getLinesTest) {
     cv::cvtColor(testColor, testGray, CV_BGR2GRAY);
 
     LineDetect testLineDetect;
-    testLines = testLineDetect.getLines(testGray);
+    testLines = testLineDetect.getLaneLines(testGray);
     cv::Point2d testPoint = testLineDetect.getIntersection(testLines[0], testLines[1]);
     double testAngle = testLineDetect.getAngleFromOriginToPoint(testPoint);
 

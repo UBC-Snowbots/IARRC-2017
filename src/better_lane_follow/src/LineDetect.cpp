@@ -8,51 +8,33 @@
 #include <LineDetect.h>
 #include <Eigen/QR>
 #include <opencv2/objdetect/objdetect.hpp>
-#include "../../vision/include/IPM.h"
 
 using namespace cv;
 
-LineDetect::LineDetect() : initialLineDetectThreshold(50),
-                           white(250),
-                           windowWidth(200),
+LineDetect::LineDetect() : white(250),
                            numVerticalSlice(10),
                            degree(1) {}
 
-std::vector <Polynomial> LineDetect::getLines(cv::Mat &filteredImage) {
+std::vector <Polynomial> LineDetect::getLaneLines(cv::Mat &filteredImage) {
 
-    intVec baseHistogram = LineDetect::getHistogram(filteredImage);
-    std::vector <Window> windows;
+    windowWidth = filteredImage.cols / 4;
 
-    for (int i = 0; i < baseHistogram.size(); i++) {
-        if (baseHistogram[i] > initialLineDetectThreshold) {
-            Window window{i, windowWidth};
-            windows.emplace_back(window);
-        }
-    }
+    intVec baseHistogram = this->getHistogram(filteredImage);
+    std::pair<int, int> peak = this->getBaseHistogramPeakPosition(baseHistogram);
 
-    std::vector <std::vector<cv::Point2d>> linePoints(windows.size(), std::vector<cv::Point2d>(numVerticalSlice));
+    std::vector <Window> baseWindows;
+    Window windowLeft{peak.first, windowWidth};
+    Window windowRight{peak.second, windowWidth};
+    baseWindows.emplace_back(windowLeft);
+    baseWindows.emplace_back(windowRight);
 
-    for (int verticalSliceIndex = 0; verticalSliceIndex < numVerticalSlice; verticalSliceIndex++) {
-        for (int windowIndex = 0; windowIndex < windows.size(); windowIndex++) {
-            Window window = windows.at(windowIndex);
-            cv::Point2d point{(double) window.center,
-                              (double) (verticalSliceIndex * filteredImage.rows / numVerticalSlice)};
-            linePoints[windowIndex].emplace_back(point);
-
-            cv::Mat windowSlice = LineDetect::getWindowSlice(filteredImage, window, verticalSliceIndex);
-            intVec windowHistogram = LineDetect::getHistogram(windowSlice);
-            std::pair<int, int> peak = LineDetect::getHistogramPeakPosition(windowHistogram);
-
-            window.center = windowIndex ? window.center = peak.second
-                                        : peak.first /*+ (window.center - window.width/2)*/;
-        }
-    }
+    std::vector <std::vector<cv::Point2d>> lanePoints = this->getLanePoints(filteredImage, baseWindows);
 
     std::vector <Polynomial> polyLines;
     Polynomial polyPoints;
 
-    for (std::vector <cv::Point2d> points : linePoints) {
-        polyPoints = LineDetect::fitPolyLine(points, degree);
+    for (std::vector <cv::Point2d> points : lanePoints) {
+        polyPoints = this->fitPolyLine(points, degree);
         polyLines.emplace_back(polyPoints);
     }
 
@@ -65,7 +47,7 @@ intVec LineDetect::getHistogram(cv::Mat &image) {
 
     for (int j = 0; j < image.rows; j++) {
         for (int i = 0; i < image.cols; i++) {
-            int pixelValue = image.at<uchar>(i, j);
+            int pixelValue = image.at<uchar>(j, i);
             if (pixelValue >= white) {
                 histogram[i]++;
             }
@@ -75,16 +57,7 @@ intVec LineDetect::getHistogram(cv::Mat &image) {
     return histogram;
 }
 
-cv::Mat LineDetect::getWindowSlice(cv::Mat &image, Window window, int verticalSliceIndex) {
-
-    cv::Mat windowSlice = image(Range(window.getLeftSide(), window.getRightSide()),
-                                Range(verticalSliceIndex * image.rows / numVerticalSlice,
-                                      (verticalSliceIndex + 1) * image.rows / numVerticalSlice));
-
-    return windowSlice;
-}
-
-std::pair<int, int> LineDetect::getHistogramPeakPosition(intVec histogram) {
+std::pair<int, int> LineDetect::getBaseHistogramPeakPosition(intVec histogram) {
 
     std::pair<int, int> peak(0, 0);
     int peakValue = 0;
@@ -102,6 +75,52 @@ std::pair<int, int> LineDetect::getHistogramPeakPosition(intVec histogram) {
         if (histogram[i] > peakValue) {
             peakValue = histogram[i];
             peak.second = i;
+        }
+    }
+
+    return peak;
+}
+
+std::vector <std::vector<cv::Point2d>> LineDetect::getLanePoints(cv::Mat &filteredImage, std::vector<Window> windows) {
+
+    std::vector<std::vector<cv::Point2d>> linePoints(windows.size(), std::vector<cv::Point2d>(numVerticalSlice));
+
+    for (int verticalSliceIndex = 0; verticalSliceIndex < numVerticalSlice; verticalSliceIndex++) {
+        for (int windowIndex = 0; windowIndex < windows.size(); windowIndex++) {
+            Window window = windows.at(windowIndex);
+            cv::Mat windowSlice = this->getWindowSlice(filteredImage, window, verticalSliceIndex);
+            intVec windowHistogram = this->getHistogram(windowSlice);
+            int peak = this->getWindowHistogramPeakPosition(windowHistogram);
+            window.center = peak;
+            cv::Point2d point{
+                    (double) window.center,
+                    (double) (verticalSliceIndex * filteredImage.rows / numVerticalSlice)
+            };
+            linePoints[windowIndex].emplace_back(point);
+        }
+    }
+
+    return linePoints;
+}
+
+cv::Mat LineDetect::getWindowSlice(cv::Mat &image, Window window, int verticalSliceIndex) {
+
+    cv::Mat windowSlice = image(Range(window.getLeftSide(), window.getRightSide()),
+                                Range(verticalSliceIndex * image.rows / numVerticalSlice,
+                                      (verticalSliceIndex + 1) * image.rows / numVerticalSlice));
+
+    return windowSlice;
+}
+
+int LineDetect::getWindowHistogramPeakPosition(intVec histogram) {
+
+    int peak = 0;
+    int peakValue = 0;
+
+    for (int i = 0; i < (int) histogram.size(); i++) {
+        if (histogram[i] > peakValue) {
+            peakValue = histogram[i];
+            peak = i;
         }
     }
 
@@ -134,11 +153,14 @@ Polynomial LineDetect::fitPolyLine(std::vector <cv::Point2d> points, int order) 
     // solve for linear least squares fit
     result = A.householderQr().solve(yvMapped);
 
-    if (result.size() == 4) // 3rd order
+    // 3rd order
+    if (result.size() == 4)
         return Polynomial{result[3], result[2], result[1], result[0]};
-    else if (result.size() == 3) // 2nd order
+    // 2nd order
+    else if (result.size() == 3)
         return Polynomial{0, result[2], result[1], result[0]};
-    else // 1st order
+    // 1st order
+    else
         return Polynomial{0, 0, result[1], result[0]};
 }
 
@@ -151,7 +173,7 @@ cv::Point2d LineDetect::getIntersection(Polynomial leftLine, Polynomial rightLin
     double combinedYIntercept = rightLine.d - leftLine.d;
 
     // Solve for x
-    double x = combinedYIntercept/combinedSlope;
+    double x = combinedYIntercept / combinedSlope;
 
     // Solve for y
     double y = leftLine.c * x + leftLine.d;
@@ -170,6 +192,7 @@ double LineDetect::getAngleFromOriginToPoint(cv::Point2d point) {
 
     double angle = atan(dy / dx);
 
+
     // If the endpoint is behind and to the left
     if (dx < 0 && dy > 0) angle += M_PI;
         // If the endpoint is behind and to the right
@@ -178,10 +201,15 @@ double LineDetect::getAngleFromOriginToPoint(cv::Point2d point) {
     return angle;
 }
 
-cv::Point2d LineDetect::moveAwayFromLine(Polynomial line, double targetXDistance, double targetYDistance) {
+cv::Point2d LineDetect::moveAwayFromLine(Polynomial line, double distanceAwayFromOrigin, double distanceAwayFromLine) {
 
     cv::Point2d targetPoint;
 
+    double y = line.c * distanceAwayFromOrigin + line.d;
+    double displacementAwayFromLine = distanceAwayFromLine * line.d/fabs(line.d);
+
+    targetPoint.y -= displacementAwayFromLine;
+    targetPoint.x = (y - line.d) / line.c;
 
     return targetPoint;
 }
