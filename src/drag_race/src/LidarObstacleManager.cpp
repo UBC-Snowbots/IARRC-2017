@@ -333,7 +333,11 @@ visualization_msgs::Marker LidarObstacleManager::getBestConeLineRVizMarker(bool 
     line.color.b = 1.0f;
     line.color.a = 1.0;
 
+    // TODO: Find a better way to sync this logic up. Copy pasting sucks
     LineOfBestFit best_line = getBestLine(line_to_the_right);
+    // If no line found on desired side
+    if (best_line.correlation == 0)
+        best_line = getBestLine(!line_to_the_right);
     geometry_msgs::Point p1, p2;
     p1.x = -10;
     p1.y = best_line.getYCoorAtX(p1.x);

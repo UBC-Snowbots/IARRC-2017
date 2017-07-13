@@ -44,13 +44,13 @@
   <build_depend>roscpp</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>sensor_msgs</build_depend>
-  <build_depend>visualisation_msgs</build_depend>
+  <build_depend>visualization_msgs</build_depend>
   <build_depend>sb_utils</build_depend>
 
   <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>sensor_msgs</run_depend>
-  <run_depend>vizualisation_msgs</run_depend>
+  <run_depend>visualization_msgs</run_depend>
   <run_depend>sb_utils</run_depend>
   <!-- We need this to be able to run the hokuyo lidar -->
   <run_depend>urg_node</run_depend>
