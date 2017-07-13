@@ -34,14 +34,15 @@ int main(int argc, char **argv) {
 
     bool show_video_stream;
     SB_getParam(nh, "show_video_stream", show_video_stream, true);
-    if()
+
     while (nh.ok()) {
         bool isRead = cap.read(inputImage);
         if (!isRead) {
             cout << "Failed to read image from camera" << endl;
             break;
         }
-        imshow(inputWindow, inputImage);
+        if (show_video_stream)
+            imshow(inputWindow, inputImage);
         sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", inputImage).toImageMsg();
         pub.publish(msg);
         waitKey(1);
