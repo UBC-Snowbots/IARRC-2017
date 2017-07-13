@@ -72,6 +72,8 @@ if (CATKIN_ENABLE_TESTING)
 
     # Adding gtests to the package
     catkin_add_gtest(line-detect-test test/line-detect-test.cpp src/LineDetect.cpp)
+    catkin_add_gtest(lane-follow-test test/lane-follow-test.cpp src/LaneFollow.cpp)
+    target_link_libraries(lane-follow-test ${catkin_LIBRARIES})
     target_link_libraries(line-detect-test ${catkin_LIBRARIES})
 
 endif()
