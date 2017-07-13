@@ -8,6 +8,7 @@
 #include <image_transport/image_transport.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <cv_bridge/cv_bridge.h>
+#include <sb_utils.h>
 
 using namespace cv;
 using namespace std;
@@ -31,6 +32,9 @@ int main(int argc, char **argv) {
 
     ros::Rate loop_rate(30);
 
+    bool show_video_stream;
+    SB_getParam(nh, "show_video_stream", show_video_stream, true);
+    if()
     while (nh.ok()) {
         bool isRead = cap.read(inputImage);
         if (!isRead) {
