@@ -48,19 +48,21 @@ public:
      */
     LineDetect();
 
-    // TODO doc functions
+    // TODO: doc functions
 
-    std::vector<Polynomial> getLaneLines(cv::Mat& filteredImage);
+    std::vector<Window> getBaseWindows(cv::Mat& filteredImage);
 
     intVec getHistogram(cv::Mat& image);
 
     std::pair<int, int> getBaseHistogramPeakPosition(intVec histogram);
 
-    std::vector <std::vector<cv::Point2d>> getLanePoints(cv::Mat& filteredImage, std::vector <Window> windows);
+    std::vector <std::vector<cv::Point2d>> getLanePoints(cv::Mat& filteredImage, std::vector<Window> windows);
 
-    cv::Mat getWindowSlice(cv::Mat& image, Window window, int verticalSliceIndex);
+    cv::Mat getWindowSlice(cv::Mat& filteredImage, Window window, int verticalSliceIndex);
 
     int getWindowHistogramPeakPosition(intVec histogram);
+
+    std::vector<Polynomial> getLaneLines(std::vector <std::vector<cv::Point2d>> lanePoints);
 
     Polynomial fitPolyLine(std::vector<cv::Point2d> points, int order);
 

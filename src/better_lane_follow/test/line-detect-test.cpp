@@ -13,95 +13,36 @@ using namespace cv;
 TEST(LineDetect, getHistogramSmallTest) {
 
     cv::Mat testImage(Size(4, 4), CV_8UC1, Scalar(0));
-
-    testImage.at<uchar>(1, 2) = 255;
+    testImage.at<uchar>(2, 1) = 255;
 
     LineDetect testLineDetect;
 
     intVec testHistogram = testLineDetect.getHistogram(testImage);
     intVec expectedHistogram = {0, 1, 0, 0};
+
     EXPECT_EQ(expectedHistogram, testHistogram);
 }
 
 TEST(LineDetect, getHistogramLargeTest) {
 
     cv::Mat testImage(Size(10, 10), CV_8UC1, Scalar(0));
-    testImage.at<uchar>(2, 0) = 255;
-    testImage.at<uchar>(2, 4) = 255;
-    testImage.at<uchar>(2, 8) = 255;
-    testImage.at<uchar>(2, 7) = 255;
-    testImage.at<uchar>(4, 3) = 255;
-    testImage.at<uchar>(4, 4) = 255;
-    testImage.at<uchar>(8, 9) = 255;
+    testImage.at<uchar>(0, 2) = 255;
+    testImage.at<uchar>(4, 2) = 255;
     testImage.at<uchar>(8, 2) = 255;
-    testImage.at<uchar>(8, 3) = 255;
-    testImage.at<uchar>(9, 7) = 255;
+    testImage.at<uchar>(7, 2) = 255;
+    testImage.at<uchar>(3, 4) = 255;
+    testImage.at<uchar>(4, 4) = 255;
+    testImage.at<uchar>(9, 8) = 255;
+    testImage.at<uchar>(2, 8) = 255;
+    testImage.at<uchar>(3, 8) = 255;
+    testImage.at<uchar>(7, 9) = 255;
 
     LineDetect testLineDetect;
 
     intVec testHistogram = testLineDetect.getHistogram(testImage);
     intVec expectedHistogram = {0, 0, 4, 0, 2, 0, 0, 0, 3, 1};
+
     EXPECT_EQ(expectedHistogram, testHistogram);
-}
-
-TEST(LineDetect, getWindowSliceLeftTest) {
-
-    cv::Mat testImage(Size(10, 10), CV_8UC1, Scalar(0));
-    testImage.at<uchar>(2, 0) = 255;
-    testImage.at<uchar>(2, 4) = 255;
-    testImage.at<uchar>(2, 8) = 255;
-    testImage.at<uchar>(2, 7) = 255;
-    testImage.at<uchar>(4, 3) = 255;
-    testImage.at<uchar>(4, 4) = 255;
-    testImage.at<uchar>(8, 9) = 255;
-    testImage.at<uchar>(8, 2) = 255;
-    testImage.at<uchar>(8, 3) = 255;
-    testImage.at<uchar>(9, 7) = 255;
-
-    // let initialLineDetectThreshold and windowWidth be 2
-    Window testWindow{2, 2};
-
-    int verticalSliceIndex = 2;
-
-    LineDetect testLineDetect;
-
-    cv::Mat testWindowSlice = testLineDetect.getWindowSlice(testImage, testWindow, verticalSliceIndex);
-    cv::Mat expectedWindowSlice = testImage(Range(1, 3), Range(2, 3));
-    // Get a matrix with non-zero values at points where the two matrices have different values
-    cv::Mat diff = (testWindowSlice != expectedWindowSlice);
-    // Equal if no matrix elements disagree
-    bool equal = countNonZero(diff);
-    EXPECT_EQ(false, equal);
-}
-
-TEST(LineDetect, getWindowSliceRightTest) {
-
-    cv::Mat testImage(Size(10, 10), CV_8UC1, Scalar(0));
-    testImage.at<uchar>(2, 0) = 255;
-    testImage.at<uchar>(2, 4) = 255;
-    testImage.at<uchar>(2, 8) = 255;
-    testImage.at<uchar>(2, 7) = 255;
-    testImage.at<uchar>(4, 3) = 255;
-    testImage.at<uchar>(4, 4) = 255;
-    testImage.at<uchar>(8, 9) = 255;
-    testImage.at<uchar>(8, 2) = 255;
-    testImage.at<uchar>(8, 3) = 255;
-    testImage.at<uchar>(9, 7) = 255;
-
-    // let initialLineDetectThreshold and windowWidth be 2
-    Window testWindow{8, 2};
-
-    int verticalSliceIndex = 3;
-
-    LineDetect testLineDetect;
-
-    cv::Mat testWindowSlice = testLineDetect.getWindowSlice(testImage, testWindow, verticalSliceIndex);
-    cv::Mat expectedWindowSlice = testImage(Range(7, 9), Range(2, 3));
-    // Get a matrix with non-zero values at points where the two matrices have different values
-    cv::Mat diff = (testWindowSlice != expectedWindowSlice);
-    // Equal if no matrix elements disagree
-    bool equal = countNonZero(diff);
-    EXPECT_EQ(false, equal);
 }
 
 TEST(LineDetect, getBaseHistogramPeakPositionLargeTest) {
@@ -112,6 +53,7 @@ TEST(LineDetect, getBaseHistogramPeakPositionLargeTest) {
 
     std::pair<int, int> testPeak = testLineDetect.getBaseHistogramPeakPosition(testHistogram);
     std::pair<int, int> expectedPeak(3, 8);
+
     EXPECT_EQ(expectedPeak, testPeak);
 }
 
@@ -123,7 +65,70 @@ TEST(LineDetect, getBaseHistogramPeakPositionSmallTest) {
 
     std::pair<int, int> testPeak = testLineDetect.getBaseHistogramPeakPosition(testHistogram);
     std::pair<int, int> expectedPeak(2, 6);
+
     EXPECT_EQ(expectedPeak, testPeak);
+}
+
+TEST(LineDetect, getWindowSliceLeftTest) {
+
+    cv::Mat testImage(Size(10, 10), CV_8UC1, Scalar(0));
+    testImage.at<uchar>(0, 2) = 255;
+    testImage.at<uchar>(4, 2) = 255;
+    testImage.at<uchar>(8, 2) = 255;
+    testImage.at<uchar>(7, 2) = 255;
+    testImage.at<uchar>(3, 4) = 255;
+    testImage.at<uchar>(4, 4) = 255;
+    testImage.at<uchar>(9, 8) = 255;
+    testImage.at<uchar>(2, 8) = 255;
+    testImage.at<uchar>(3, 8) = 255;
+    testImage.at<uchar>(7, 9) = 255;
+
+    // let initialLineDetectThreshold and windowWidth be 2
+    Window testWindow{2, 2};
+
+    int verticalSliceIndex = 2;
+
+    LineDetect testLineDetect;
+
+    cv::Mat testWindowSlice = testLineDetect.getWindowSlice(testImage, testWindow, verticalSliceIndex);
+    cv::Mat expectedWindowSlice = testImage(Range(2, 3), Range(1, 3));
+    // Get a matrix with non-zero values at points where the two matrices have different values
+    cv::Mat diff = (testWindowSlice != expectedWindowSlice);
+    // Equal if no matrix elements disagree
+    bool equal = countNonZero(diff);
+
+    EXPECT_EQ(false, equal);
+}
+
+TEST(LineDetect, getWindowSliceRightTest) {
+
+    cv::Mat testImage(Size(10, 10), CV_8UC1, Scalar(0));
+    testImage.at<uchar>(0, 2) = 255;
+    testImage.at<uchar>(4, 2) = 255;
+    testImage.at<uchar>(8, 2) = 255;
+    testImage.at<uchar>(7, 2) = 255;
+    testImage.at<uchar>(3, 4) = 255;
+    testImage.at<uchar>(4, 4) = 255;
+    testImage.at<uchar>(9, 8) = 255;
+    testImage.at<uchar>(2, 8) = 255;
+    testImage.at<uchar>(3, 8) = 255;
+    testImage.at<uchar>(7, 9) = 255;
+
+    // let initialLineDetectThreshold and windowWidth be 2
+    Window testWindow{8, 2};
+
+    int verticalSliceIndex = 3;
+
+    LineDetect testLineDetect;
+
+    cv::Mat testWindowSlice = testLineDetect.getWindowSlice(testImage, testWindow, verticalSliceIndex);
+    cv::Mat expectedWindowSlice = testImage(Range(2, 3), Range(7, 9));
+    // Get a matrix with non-zero values at points where the two matrices have different values
+    cv::Mat diff = (testWindowSlice != expectedWindowSlice);
+    // Equal if no matrix elements disagree
+    bool equal = countNonZero(diff);
+
+    EXPECT_EQ(false, equal);
 }
 
 TEST(LineDetect, fitPolyLineFirstOrderTest) {
@@ -137,6 +142,7 @@ TEST(LineDetect, fitPolyLineFirstOrderTest) {
     int testOrder = 1;
 
     LineDetect testLineDetect;
+
     Polynomial testPolynomial = testLineDetect.fitPolyLine(testPoints, testOrder);
     Polynomial expectedPolynomial{0, 0, 3.00000, -5.00000};
 
@@ -156,6 +162,7 @@ TEST(LineDetect, fitPolyLineThirdOrderTest) {
     int testOrder = 3;
 
     LineDetect testLineDetect;
+
     Polynomial testPolynomial = testLineDetect.fitPolyLine(testPoints, testOrder);
     Polynomial expectedPolynomial{0.08333, -1.83333, 14.08333, -34.99999};
 
@@ -165,17 +172,18 @@ TEST(LineDetect, fitPolyLineThirdOrderTest) {
     EXPECT_NEAR(expectedPolynomial.d, testPolynomial.d, 0.00001);
 }
 
-TEST(LineDetect, getLaneLinesTest) {
+TEST(LineDetect, straightLaneFollowTest) {
+
     std::string image_path = "images/straightImage.jpg";
-    std::vector<Polynomial> testLines;
     cv::Mat testColor = imread(image_path);
     cv::Mat testGray;
     cv::cvtColor(testColor, testGray, CV_BGR2GRAY);
 
     LineDetect testLineDetect;
-    testLines = testLineDetect.getLaneLines(testGray);
-    cv::Point2d testPoint = testLineDetect.getIntersection(testLines[0], testLines[1]);
-    double testAngle = testLineDetect.getAngleFromOriginToPoint(testPoint);
+
+    std::vector<Polynomial> testLaneLines;
+    cv::Point2d testIntersect = testLineDetect.getIntersection(testLaneLines[0], testLaneLines[1]);
+    double testAngle = testLineDetect.getAngleFromOriginToPoint(testIntersect);
 
     EXPECT_NEAR(0, testAngle, 10);
 }

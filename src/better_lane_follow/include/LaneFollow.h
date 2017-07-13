@@ -8,21 +8,23 @@
 #ifndef LANE_FOLLOW_H
 #define LANE_FOLLOW_H
 
+#include <LineDetect.h>
+
 #include <opencv2/opencv.hpp>
-#include <opencv2/objdetect/objdetect.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
+
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
 #include <sensor_msgs/Image.h>
-#include <LineDetect.h>
-#include "sb_utils.h"
 
-// temp headers
+#include <sb_utils.h>
+#include <IPM.h>
+
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>
-#include <IPM.h>
 
 class LaneFollow {
 
@@ -71,7 +73,7 @@ private:
 
     // IPM
     IPM ipm;
-    double ipm_base_width, ipm_top_width, ipm_base_displacement, ipm_top_displacement;
+    float ipm_base_width, ipm_top_width, ipm_base_displacement, ipm_top_displacement;
 
     // Whether or not we've received the first image
     bool receivedFirstImage;
@@ -98,9 +100,8 @@ private:
      */
     cv::Mat rosToMat(const sensor_msgs::Image::ConstPtr &image);
 
-    std::vector<cv::Point2d> transformPoints(std::vector<cv::Point2d>);
+    std::vector <std::vector<cv::Point2d>> transformPoints(std::vector <std::vector<cv::Point2d>> filteredPoints);
 
 };
 
 #endif
-

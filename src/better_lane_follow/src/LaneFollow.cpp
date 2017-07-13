@@ -42,7 +42,7 @@ LaneFollow::LaneFollow(int argc, char **argv, std::string node_name) {
     SB_getParam(nh, "target_x_distance", target_x_distance, 0.5);
     SB_getParam(nh, "target_y_distance", target_y_distance, 0.5);
 
-    SB_getParam(nh, "ipm_filter/ipm_base_width", ipm_base_width, (float) 1);
+    SB_getParam(nh, "ipm_filter/ipm_base_width", ipm_base_width, (float) 1.0);
     SB_getParam(nh, "ipm_filter/ipm_top_width", ipm_top_width, (float) 0.5);
     SB_getParam(nh, "ipm_filter/ipm_base_displacement", ipm_base_displacement, (float) 0);
     SB_getParam(nh, "ipm_filter/ipm_top_displacement", ipm_top_displacement, (float) 0.25);
@@ -71,7 +71,7 @@ void LaneFollow::subscriberCallBack(const sensor_msgs::Image::ConstPtr &msg) {
 
     LineDetect ld;
 
-    cv::Mat filteredImage = LaneFollow::rosToMat(msg);
+    cv::Mat filteredImage = this->rosToMat(msg);
 
     // Initialize ipm filter
     if (!receivedFirstImage) {
@@ -80,16 +80,22 @@ void LaneFollow::subscriberCallBack(const sensor_msgs::Image::ConstPtr &msg) {
                      filteredImage.rows, filteredImage.cols);
     }
 
-    std::vector<Polynomial> boundaryLines = ld.getLines(filteredImage);
+    std::vector<Window> baseWindows = ld.getBaseWindows(filteredImage);
+    std::vector <std::vector<cv::Point2d>> filteredLanePoints = ld.getLanePoints(filteredImage, baseWindows);
+    std::vector<Polynomial> filteredBoundaryLines = ld.getLaneLines(filteredLanePoints);
+    // transform IPM, cartesian coordinates to real-world, ROS coordinates
+    std::vector <std::vector<cv::Point2d>> realLanePoints = this->transformPoints(filteredLanePoints);
+    std::vector<Polynomial> realBoundaryLines = ld.getLaneLines(realLanePoints);
+
     double angle_heading = 0;
 
     // Head to the middle of the line if 2 lines exist
-    if (boundaryLines.size() >= 2) {
-        cv::Point intersectionPoint = LineDetect::getIntersection(boundaryLines[0], boundaryLines[1]);
+    if (realBoundaryLines.size() >= 2) {
+        cv::Point intersectionPoint = LineDetect::getIntersection(realBoundaryLines[0], realBoundaryLines[1]);
         angle_heading = LineDetect::getAngleFromOriginToPoint(intersectionPoint);
     }// Head to a point a certain distance away from the line
-    else if (boundaryLines.size() == 1) {
-        cv::Point targetPoint = LineDetect::moveAwayFromLine(boundaryLines[0], target_x_distance, target_y_distance);
+    else if (realBoundaryLines.size() == 1) {
+        cv::Point targetPoint = LineDetect::moveAwayFromLine(filteredBoundaryLines[0], target_x_distance, target_y_distance);
         angle_heading = LineDetect::getAngleFromOriginToPoint(targetPoint);
     }
     // If no lines are seen go straight (See initialization)
@@ -154,12 +160,16 @@ cv::Mat LaneFollow::rosToMat(const sensor_msgs::Image::ConstPtr &image) {
     return imagePtr->image;
 }
 
-std::vector<Point2d> LaneFollow::transformPoints(std::vector<cv::Point2d> points) {
+std::vector <std::vector<Point2d>> LaneFollow::transformPoints(std::vector <std::vector<cv::Point2d>> filteredPoints) {
 
-    std::vector<Point2d> realPoints;
+    std::vector <std::vector<Point2d>> realPoints;
 
-    for (int i = 0; i < points.size(); i++) {
-        realPoints.push_back(ipm.applyHomographyInv(points[i]));
+    for (int i = 0; i < filteredPoints.size(); i++) {
+        for (int j = 0; j < filteredPoints[i].size(); j++) {
+            cv::Point2d realCartesianPoint = ipm.applyHomographyInv(filteredPoints[i][j]);
+            cv::Point2d realROSPoint{realCartesianPoint.y, -realCartesianPoint.x};
+            realPoints[i].push_back(realROSPoint);
+        }
     }
 
     return realPoints;
