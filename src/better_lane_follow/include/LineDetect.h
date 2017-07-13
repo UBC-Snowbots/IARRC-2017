@@ -64,6 +64,8 @@ public:
 
     static cv::Point2d moveAwayFromLine(Polynomial line, double targetXDistance, double targetYDistance);
 
+    static cv::Point2d getPerpendicularIntersection(Polynomial line);
+
     static double getAngleFromOriginToPoint(cv::Point2d point);
 
 private:

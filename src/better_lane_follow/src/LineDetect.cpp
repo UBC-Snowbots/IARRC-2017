@@ -16,12 +16,12 @@ LineDetect::LineDetect() : initialLineDetectThreshold(50),
                            white(250),
                            windowWidth(200),
                            numVerticalSlice(10),
-                           degree(1) {}
+                           degree(1) { }
 
-std::vector <Polynomial> LineDetect::getLines(cv::Mat &filteredImage) {
+std::vector<Polynomial> LineDetect::getLines(cv::Mat &filteredImage) {
 
     intVec baseHistogram = LineDetect::getHistogram(filteredImage);
-    std::vector <Window> windows;
+    std::vector<Window> windows;
 
     for (int i = 0; i < baseHistogram.size(); i++) {
         if (baseHistogram[i] > initialLineDetectThreshold) {
@@ -30,7 +30,7 @@ std::vector <Polynomial> LineDetect::getLines(cv::Mat &filteredImage) {
         }
     }
 
-    std::vector <std::vector<cv::Point2d>> linePoints(windows.size(), std::vector<cv::Point2d>(numVerticalSlice));
+    std::vector<std::vector<cv::Point2d>> linePoints(windows.size(), std::vector<cv::Point2d>(numVerticalSlice));
 
     for (int verticalSliceIndex = 0; verticalSliceIndex < numVerticalSlice; verticalSliceIndex++) {
         for (int windowIndex = 0; windowIndex < windows.size(); windowIndex++) {
@@ -48,10 +48,10 @@ std::vector <Polynomial> LineDetect::getLines(cv::Mat &filteredImage) {
         }
     }
 
-    std::vector <Polynomial> polyLines;
+    std::vector<Polynomial> polyLines;
     Polynomial polyPoints;
 
-    for (std::vector <cv::Point2d> points : linePoints) {
+    for (std::vector<cv::Point2d> points : linePoints) {
         polyPoints = LineDetect::fitPolyLine(points, degree);
         polyLines.emplace_back(polyPoints);
     }
@@ -108,7 +108,7 @@ std::pair<int, int> LineDetect::getHistogramPeakPosition(intVec histogram) {
     return peak;
 }
 
-Polynomial LineDetect::fitPolyLine(std::vector <cv::Point2d> points, int order) {
+Polynomial LineDetect::fitPolyLine(std::vector<cv::Point2d> points, int order) {
 
     int moreOrder = order + 1;
     assert(points.size() >= moreOrder);
@@ -151,7 +151,7 @@ cv::Point2d LineDetect::getIntersection(Polynomial leftLine, Polynomial rightLin
     double combinedYIntercept = rightLine.d - leftLine.d;
 
     // Solve for x
-    double x = combinedYIntercept/combinedSlope;
+    double x = combinedYIntercept / combinedSlope;
 
     // Solve for y
     double y = leftLine.c * x + leftLine.d;
@@ -178,10 +178,49 @@ double LineDetect::getAngleFromOriginToPoint(cv::Point2d point) {
     return angle;
 }
 
-cv::Point2d LineDetect::moveAwayFromLine(Polynomial line, double targetXDistance, double targetYDistance) {
+cv::Point2d LineDetect::moveAwayFromLine(Polynomial line, double distanceAwayFromRobot, double distanceAwayFromLine) {
 
     cv::Point2d targetPoint;
 
+    // Get parallel line closer to the middle of the course.
+    Polynomial targetParallelLine;
+    targetParallelLine.c = line.c;
+    targetParallelLine.d = line.d - distanceAwayFromLine * line.d / fabs(line.d);
+
+    cv::Point2d perpendicularIntersection = getPerpendicularIntersection(targetParallelLine);
+
+    double distanceToPerpendicularIntersection = sqrt(
+            pow(perpendicularIntersection.x, 2) + pow(perpendicularIntersection.y, 2));
+
+    // cos(theta) = A/H
+    double scalarProjectionAngle = acos(distanceToPerpendicularIntersection / distanceAwayFromRobot);
+
+    // tan(theta) = O/A
+    double anglePerpendicularIntersection = atan(perpendicularIntersection.x / perpendicularIntersection.y);
+
+    // anglePerpendicularIntersection + angleHeading = scalarProjectionAngle
+    double angleHeading = scalarProjectionAngle - anglePerpendicularIntersection;
+
+    // Polar coordinates
+    targetPoint.x = distanceAwayFromRobot * cos(angleHeading);
+    targetPoint.y = distanceAwayFromRobot * sin(angleHeading);
 
     return targetPoint;
+}
+
+cv::Point2d LineDetect::getPerpendicularIntersection(Polynomial line) {
+    cv::Point2d perpendicularIntersection;
+
+    double negReciprocal = -1.0 / line.c;
+
+    // Set the two sides equal then isolate x to one side.
+    double isolatedXSlope = negReciprocal - line.c;
+
+    // Divide both sides by the isolated slope to get the x point intersection.
+    perpendicularIntersection.x = line.d / isolatedXSlope;
+
+    // Plug in the xIntersection to get the y point intersection.
+    perpendicularIntersection.y = negReciprocal * perpendicularIntersection.x;
+
+    return perpendicularIntersection;
 }
