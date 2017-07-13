@@ -34,6 +34,8 @@
             <rosparam param="max_distance_from_robot"> 2 </rosparam>
             
         <!-- Twist Message Creation Params -->
+            <!-- How far from the line we want to stay at -->
+            <rosparam param="target_distance"> 0.5 </rosparam>
             <rosparam param="angular_speed_multiplier"> 1 </rosparam>
             <rosparam param="linear_speed_multiplier"> 1 </rosparam>
             <rosparam param="theta_scaling_multiplier"> 1 </rosparam>
