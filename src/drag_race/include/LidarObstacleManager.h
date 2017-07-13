@@ -67,7 +67,9 @@ public:
     LidarObstacleManager();
 
     LidarObstacleManager(double max_obstacle_merging_distance, double cone_grouping_tolerance,
-                         double max_distance_from_robot_accepted, double min_wall_length);
+                         double max_distance_from_robot_accepted, double min_wall_length,
+                         double collision_distance, double collision_angle
+    );
 
     /**
      * Merges or adds the given obstacle to the already saved ones
@@ -85,6 +87,14 @@ public:
      * @param scan the scan to be merged in
      */
     void addLaserScan(const sensor_msgs::LaserScan &scan);
+
+    /**
+     * Determines whether there is an obstacle in front of the robot
+     * @param scan the laserscan containing the area data
+     * @param min_obstacle_distance the distance of obstacle in front to compare
+     * @return true if there is an obstancle in front, false otherwise
+     */
+    bool obstacleInFront(const sensor_msgs::LaserScan &scan, double min_obstacle_distance);
 
     /**
      * Clears all saved obstacles
@@ -160,7 +170,13 @@ public:
     // TODO: Add line_to_the_right to the constructor
     visualization_msgs::Marker getBestConeLineRVizMarker(bool line_to_the_right);
 
+    bool collisionDetected();
+
 private:
+
+    // The threshold for in-front obstacle distance
+    double collision_distance;
+    double collision_angle;
 
     // All the obstacles we currently have
     std::vector<LidarObstacle> obstacles;
@@ -176,6 +192,9 @@ private:
 
     // The mimimum length of an obstacle before it's considered a wall
     double min_wall_length;
+
+    // True if there is an obstacle within collision_distance away
+    bool collision_detected;
 
 };
 

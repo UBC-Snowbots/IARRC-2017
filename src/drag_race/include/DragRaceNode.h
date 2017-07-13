@@ -65,6 +65,15 @@ private:
     int minimum_green_recognised_count;
     int green_count_recognised;
 
+    // Incoming obstacle detection
+    int incoming_obstacle_ticks;
+    int obstacle_ticks_threshold;
+    double collision_distance;
+    double collision_angle;
+
+    // Signals that we're at the end of the course
+    bool end_of_course;
+
     // Subscribes to the LaserScan
     ros::Subscriber scan_subscriber;
     // Subscribes to traffic light detection

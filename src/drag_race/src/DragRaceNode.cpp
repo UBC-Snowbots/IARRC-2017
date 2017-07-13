@@ -56,6 +56,12 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name):
     SB_getParam(private_nh, "max_distance_from_robot_accepted", max_distance_from_robot_accepted, 2.0);
     SB_getParam(private_nh, "min_wall_length", min_wall_length, 0.4);
     SB_getParam(private_nh, "minimum_green_count_recognised", minimum_green_recognised_count, 10);
+    SB_getParam(private_nh, "obstacle_ticks_threshold", obstacle_ticks_threshold, 10);
+    SB_getParam(private_nh, "collision_distance", collision_distance, 3.0);
+
+    // In DEGREES
+    SB_getParam(private_nh, "collision_angle", collision_angle, 5.0);
+
     // Setup drag race controller with given params
     drag_race_controller = DragRaceController(target_distance, line_to_the_right, theta_scaling_multiplier,
                                               angular_speed_multiplier, linear_speed_multiplier, angular_vel_cap,
@@ -63,7 +69,11 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name):
 
     // Setup the obstacle manager with given params
     obstacle_manager = LidarObstacleManager(max_obstacle_merging_distance, cone_grouping_tolerance,
-                                            max_distance_from_robot_accepted, min_wall_length);
+                                            max_distance_from_robot_accepted, min_wall_length,
+                                            collision_distance, collision_angle);
+
+    end_of_course = false;
+    incoming_obstacle_ticks = 0;
 }
 
 void DragRaceNode::greenLightCallBack(const std_msgs::Bool &green_light_detected) {
@@ -81,6 +91,22 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan) {
 
     bool no_line_on_expected_side = false;
 
+    // TODO: Option 1
+    if (obstacle_manager.collisionDetected()){
+        incoming_obstacle_ticks++;
+    } else {
+        // False alarm
+        incoming_obstacle_ticks = 0;
+
+        // This is maybe better? Experiment
+        // incoming_obstacle_ticks--;
+        // if (incoming_obstacle_ticks < 0) incoming_obstacle_ticks = 0;
+    }
+
+    if (incoming_obstacle_ticks > obstacle_ticks_threshold) {
+        if (!end_of_course) end_of_course = true;
+    }
+
     // Get the best line for us
     LineOfBestFit best_line = obstacle_manager.getBestLine(line_to_the_right);
 
@@ -97,6 +123,11 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan) {
     if (green_count_recognised < minimum_green_recognised_count) {
         twist.angular.z = 0;
         twist.linear.x = 0;
+    }
+
+    if (end_of_course) {
+        twist.linear.x = twist.linear.y = twist.linear.z = 0;
+        twist.angular.x = twist.angular.y = twist.angular.z = 0;
     }
 
     // Publish our desired twist message

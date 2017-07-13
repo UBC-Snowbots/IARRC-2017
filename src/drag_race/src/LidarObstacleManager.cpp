@@ -6,6 +6,7 @@
 
 #include <LidarObstacleManager.h>
 #include <stack>
+#include <cmath>
 
 // TODO: We should probably get rid of the default constructor here.....
 LidarObstacleManager::LidarObstacleManager():
@@ -17,14 +18,33 @@ LidarObstacleManager::LidarObstacleManager(
         double max_obstacle_merging_distance,
         double max_distance_from_robot_accepted,
         double cone_grouping_tolerance,
-        double min_wall_length
+        double min_wall_length,
+        double collision_distance,
+        double collision_angle
 ) :
         max_obstacle_merging_distance(max_obstacle_merging_distance),
         max_distance_from_robot_accepted(max_distance_from_robot_accepted),
         cone_grouping_tolerance(cone_grouping_tolerance),
-        min_wall_length(min_wall_length){}
+        min_wall_length(min_wall_length),
+        collision_distance(collision_distance),
+        collision_angle(collision_angle*180/M_PI)
+            {}
 
 void LidarObstacleManager::addLaserScan(const sensor_msgs::LaserScan &scan) {
+
+    // side threshold
+    // TODO: Parametrize
+    double side_angle_max = M_PI_2;
+    double side_angle_min = M_PI_2 - M_PI_4/2;
+
+    // Assume if ~50% of laserscan within the regions are filled
+    // Then we are enclosed AKA at the end of the track
+    double laserscan_threshold = 0.5;
+    int left_side_hits = 0;
+    int right_side_hits = 0;
+    int front_side_hits = 0;
+
+
     // Create an obstacle for every hit in the lidar scan
     for (int i = 0; i < scan.ranges.size(); ++i) {
         // Check that the lidar hit is within acceptable bounds
@@ -32,9 +52,29 @@ void LidarObstacleManager::addLaserScan(const sensor_msgs::LaserScan &scan) {
         double range = scan.ranges[i];
         if (range < scan.range_max && range > scan.range_min) {
             addObstacle(LidarObstacle(min_wall_length, angle, range));
+
+            double abs_angle = std::abs(angle);
+            if (abs_angle < side_angle_max && abs_angle > side_angle_min) {
+                if (range < collision_distance * 2) {
+                    if (angle > 0) left_side_hits++;
+                    else right_side_hits++;
+                }
+            }
+
+            if (abs_angle < collision_angle) {
+                if(range < collision_distance) front_side_hits++;
+            }
         }
     }
+
+    int side_region_total_size = (side_angle_max - side_angle_min)/scan.angle_increment;
+    int front_region_total_size = (2*collision_angle)/scan.angle_increment;
+
+    collision_detected =    (left_side_hits > side_region_total_size * laserscan_threshold) &&
+                            (right_side_hits > side_region_total_size * laserscan_threshold) &&
+                            (front_side_hits > front_region_total_size * laserscan_threshold);
 }
+
 
 std::vector<LidarObstacle> LidarObstacleManager::getObstacles() {
     return obstacles;
@@ -308,3 +348,8 @@ visualization_msgs::Marker LidarObstacleManager::getBestConeLineRVizMarker(bool 
 
     return line;
 }
+
+bool LidarObstacleManager::collisionDetected() {
+    return collision_detected;
+}
+
