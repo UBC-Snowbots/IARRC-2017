@@ -32,7 +32,7 @@
 
         <!-- Configuration parameters -->
         <rosparam param="minimum_target_radius">50</rosparam>
-        <rosparam param="show_image_window">true</rosparam>
+        <rosparam param="show_image_window">false</rosparam>
     </node>
 
 </launch>
