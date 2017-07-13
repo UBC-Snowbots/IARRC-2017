@@ -1,0 +1,14 @@
+<launch>
+
+    <!-- Initialise the Camera -->
+    <node name="camera" pkg="vision" type="camera" output="screen">
+
+        <!-- Output -->
+        <remap from="/vision/hsv_filtered_image" to="/vision/hsv_filtered_image" />
+
+        <!-- Node parameters -->
+        <rosparam param="show_video_stream">true</rosparam>
+
+    </node>
+
+</launch>
