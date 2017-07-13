@@ -172,6 +172,7 @@ public:
 
     bool collisionDetected();
 
+
 private:
 
     // The threshold for in-front obstacle distance
