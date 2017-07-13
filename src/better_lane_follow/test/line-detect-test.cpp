@@ -172,22 +172,6 @@ TEST(LineDetect, fitPolyLineThirdOrderTest) {
     EXPECT_NEAR(expectedPolynomial.d, testPolynomial.d, 0.00001);
 }
 
-TEST(LineDetect, straightLaneFollowTest) {
-
-    std::string image_path = "images/straightImage.jpg";
-    cv::Mat testColor = imread(image_path);
-    cv::Mat testGray;
-    cv::cvtColor(testColor, testGray, CV_BGR2GRAY);
-
-    LineDetect testLineDetect;
-
-    std::vector<Polynomial> testLaneLines;
-    cv::Point2d testIntersect = testLineDetect.getIntersection(testLaneLines[0], testLaneLines[1]);
-    double testAngle = testLineDetect.getAngleFromOriginToPoint(testIntersect);
-
-    EXPECT_NEAR(0, testAngle, 10);
-}
-
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

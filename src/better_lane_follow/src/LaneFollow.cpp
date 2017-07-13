@@ -91,12 +91,12 @@ void LaneFollow::subscriberCallBack(const sensor_msgs::Image::ConstPtr &msg) {
 
     // Head to the middle of the line if 2 lines exist
     if (realBoundaryLines.size() >= 2) {
-        cv::Point intersectionPoint = LineDetect::getIntersection(realBoundaryLines[0], realBoundaryLines[1]);
-        angle_heading = LineDetect::getAngleFromOriginToPoint(intersectionPoint);
+        cv::Point intersectionPoint = ld.getIntersection(realBoundaryLines[0], realBoundaryLines[1]);
+        angle_heading = ld.getAngleFromOriginToPoint(intersectionPoint);
     }// Head to a point a certain distance away from the line
     else if (realBoundaryLines.size() == 1) {
-        cv::Point targetPoint = LineDetect::moveAwayFromLine(filteredBoundaryLines[0], target_x_distance, target_y_distance);
-        angle_heading = LineDetect::getAngleFromOriginToPoint(targetPoint);
+        cv::Point targetPoint = ld.moveAwayFromLine(filteredBoundaryLines[0], target_x_distance, target_y_distance);
+        angle_heading = ld.getAngleFromOriginToPoint(targetPoint);
     }
     // If no lines are seen go straight (See initialization)
 
