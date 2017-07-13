@@ -94,7 +94,6 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan) {
     // TODO: Option 1
     if (obstacle_manager.collisionDetected()) {
         incoming_obstacle_ticks++;
-        ROS_INFO("Tick detected %d", incoming_obstacle_ticks);
     } else {
         // False alarm
         incoming_obstacle_ticks = 0;
@@ -105,7 +104,10 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan) {
     }
 
     if (incoming_obstacle_ticks > obstacle_ticks_threshold) {
-        if (!end_of_course) end_of_course = true;
+        if (!end_of_course) {
+            end_of_course = true;
+            ROS_INFO("END OF COURSE DETECTED");
+        }
     }
 
     // Get the best line for us
