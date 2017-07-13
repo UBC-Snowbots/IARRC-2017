@@ -92,8 +92,9 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan) {
     bool no_line_on_expected_side = false;
 
     // TODO: Option 1
-    if (obstacle_manager.collisionDetected()){
+    if (obstacle_manager.collisionDetected()) {
         incoming_obstacle_ticks++;
+        ROS_INFO("Tick detected %d", incoming_obstacle_ticks);
     } else {
         // False alarm
         incoming_obstacle_ticks = 0;
