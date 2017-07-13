@@ -19,6 +19,7 @@
 #include <std_msgs/String.h>
 #include <sensor_msgs/LaserScan.h>
 #include <geometry_msgs/Twist.h>
+#include <std_msgs/Bool.h>
 
 // SB Includes
 #include <sb_utils.h>
@@ -32,6 +33,8 @@ public:
 private:
     // TODO: Doc comment
     void scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan);
+
+    void greenLightCallBack(const std_msgs::Bool &green_light_detected);
 
     // Manages obstacles, including the cones and wall
     LidarObstacleManager obstacle_manager;
@@ -58,6 +61,10 @@ private:
     double angular_speed_multiplier;
     double linear_speed_multiplier;
 
+    // Traffic light detection
+    int minimum_green_recognised_count;
+    int green_count_recognised;
+
     // Incoming obstacle detection
     int incoming_obstacle_ticks;
     int obstacle_ticks_threshold;
@@ -69,6 +76,9 @@ private:
 
     // Subscribes to the LaserScan
     ros::Subscriber scan_subscriber;
+    // Subscribes to traffic light detection
+    ros::Subscriber traffic_light_subscriber;
+
     // Publishes Twist messages to control the robot
     ros::Publisher twist_publisher;
     // Publishes the obstacles so we can see them in RViz

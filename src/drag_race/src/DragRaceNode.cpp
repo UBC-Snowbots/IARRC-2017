@@ -8,7 +8,9 @@
 
 #include <DragRaceNode.h>
 
-DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
+DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name):
+    green_count_recognised(0)
+{
     // Setup NodeHandles
     ros::init(argc, argv, node_name);
     ros::NodeHandle nh;
@@ -21,10 +23,15 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
     scan_subscriber = nh.subscribe(scan_topic, queue_size,
                                    &DragRaceNode::scanCallBack, this);
 
+    // TODO: make sure this is the right topic name
+    std::string traffic_light_topic = "/robot/vision/activity_detected";
+
+    traffic_light_subscriber = nh.subscribe(traffic_light_topic, queue_size, &DragRaceNode::greenLightCallBack, this);
+
     // Setup Publisher(s)
     std::string twist_topic = nh.resolveName("cmd_vel");
     twist_publisher = nh.advertise<geometry_msgs::Twist>
-                                (twist_topic, queue_size);
+            (twist_topic, queue_size);
     std::string cone_debug_topic = private_nh.resolveName("debug/cone");
     cone_debug_publisher = private_nh.advertise<visualization_msgs::Marker>
             (cone_debug_topic, queue_size);
@@ -44,15 +51,16 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
     SB_getParam(private_nh, "linear_speed_multiplier", linear_speed_multiplier, 1.0);
     SB_getParam(private_nh, "line_to_the_right", line_to_the_right, true);
     double max_obstacle_merging_distance, cone_grouping_tolerance, min_wall_length;
-    SB_getParam(nh, "max_obstacle_merging_distance", max_obstacle_merging_distance, 0.3);
-    SB_getParam(nh, "cone_grouping_tolerance", cone_grouping_tolerance, 1.8);
-    SB_getParam(nh, "max_distance_from_robot_accepted", max_distance_from_robot_accepted, 2.0);
-    SB_getParam(nh, "min_wall_length", min_wall_length, 0.4);
-    SB_getParam(nh, "obstacle_ticks_threshold", obstacle_ticks_threshold, 10);
-    SB_getParam(nh, "collision_distance", collision_distance, 3.0);
+    SB_getParam(private_nh, "max_obstacle_merging_distance", max_obstacle_merging_distance, 0.3);
+    SB_getParam(private_nh, "cone_grouping_tolerance", cone_grouping_tolerance, 1.8);
+    SB_getParam(private_nh, "max_distance_from_robot_accepted", max_distance_from_robot_accepted, 2.0);
+    SB_getParam(private_nh, "min_wall_length", min_wall_length, 0.4);
+    SB_getParam(private_nh, "minimum_green_count_recognised", minimum_green_recognised_count, 10);
+    SB_getParam(private_nh, "obstacle_ticks_threshold", obstacle_ticks_threshold, 10);
+    SB_getParam(private_nh, "collision_distance", collision_distance, 3.0);
 
     // In DEGREES
-    SB_getParam(nh, "collision_angle", collision_angle, 5.0);
+    SB_getParam(private_nh, "collision_angle", collision_angle, 5.0);
 
     // Setup drag race controller with given params
     drag_race_controller = DragRaceController(target_distance, line_to_the_right, theta_scaling_multiplier,
@@ -66,6 +74,12 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name) {
 
     end_of_course = false;
     incoming_obstacle_ticks = 0;
+}
+
+void DragRaceNode::greenLightCallBack(const std_msgs::Bool &green_light_detected) {
+    if (green_light_detected.data) {
+        green_count_recognised++;
+    }
 }
 
 void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan) {
@@ -105,20 +119,11 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan) {
     // Avoid the line given while staying within the boundaries
     geometry_msgs::Twist twist = drag_race_controller.determineDesiredMotion(best_line, no_line_on_expected_side);
 
-
-    // TODO: Option 2
-    /*
-    std::vector<LidarObstacle> obstacles = obstacle_manager.getObstacles();
-    for (int i = 0; i < obstacles.size(); i++){
-        LidarObstacle currObs = obstacles[i];
-        if (currObs.getObstacleType() == WALL
-                && currObs.getAvgDistance() < collision_distance
-                && currObs.getLength() > 2.0 //TODO: If going for this option, maybe make length param
-                && std::abs(currObs.getAvgAngle())*180/M_PI < collision_angle ){
-            end_of_course = true;
-        }
+    // If no green light has been detected stop.
+    if (green_count_recognised < minimum_green_recognised_count) {
+        twist.angular.z = 0;
+        twist.linear.x = 0;
     }
-    */
 
     if (end_of_course) {
         twist.linear.x = twist.linear.y = twist.linear.z = 0;
