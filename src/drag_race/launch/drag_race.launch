@@ -26,8 +26,15 @@
             <!-- The minimum length an obstacle must be to be considered a wall -->
             <rosparam param="min_wall_length"> 0.4 </rosparam>
             <rosparam param="obstacle_ticks_threshold">10</rosparam>
+
+        <!-- Stop zone detection param -->
             <rosparam param="collision_distance">3.0</rosparam>
-            <rosparam param="collision_angle">5.0</rosparam>
+            <rosparam param="front_angle">3.1415</rosparam>
+            <rosparam param="side_angle_max">1.57</rosparam>
+            <rosparam param="side_angle_min">1.30</rosparam>
+            <rosparam param="region_fill_percentage">0.5</rosparam>
+            <rosparam param="front_collision_only">true</rosparam>
+
 
         <!-- Line Detection Params -->
             <!-- The maximum distance between cones in the same group
