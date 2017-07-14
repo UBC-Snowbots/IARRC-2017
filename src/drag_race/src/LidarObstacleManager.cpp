@@ -20,26 +20,27 @@ LidarObstacleManager::LidarObstacleManager(
         double cone_grouping_tolerance,
         double min_wall_length,
         double collision_distance,
-        double collision_angle
+        double front_angle,
+        double side_angle_max,
+        double side_angle_min,
+        double region_fill_percentage,
+        bool front_collision_only
 ) :
         max_obstacle_merging_distance(max_obstacle_merging_distance),
         max_distance_from_robot_accepted(max_distance_from_robot_accepted),
         cone_grouping_tolerance(cone_grouping_tolerance),
         min_wall_length(min_wall_length),
         collision_distance(collision_distance),
-        collision_angle(collision_angle*M_PI/180)
+        front_angle(front_angle),
+        side_angle_max(side_angle_max),
+        side_angle_min(side_angle_min),
+        region_fill_percentage(region_fill_percentage),
+        front_collision_only(front_collision_only)
             {}
 
 void LidarObstacleManager::addLaserScan(const sensor_msgs::LaserScan &scan) {
 
-    // side threshold
-    // TODO: Parametrize
-    double side_angle_max = M_PI_2;
-    double side_angle_min = M_PI_2 - M_PI_4/2;
-
-    // Assume if ~50% of laserscan within the regions are filled
-    // Then we are enclosed AKA at the end of the track
-    double laserscan_threshold = 0.5;
+    // Number of hits for each region
     int left_side_hits = 0;
     int right_side_hits = 0;
     int front_side_hits = 0;
@@ -61,18 +62,26 @@ void LidarObstacleManager::addLaserScan(const sensor_msgs::LaserScan &scan) {
                 }
             }
 
-            if (abs_angle < collision_angle) {
+            if (abs_angle < front_angle/2) {
                 if(range < collision_distance) front_side_hits++;
             }
         }
     }
 
     int side_region_total_size = (side_angle_max - side_angle_min)/scan.angle_increment;
-    int front_region_total_size = (2*collision_angle)/scan.angle_increment;
+    int front_region_total_size = front_angle/scan.angle_increment;
 
-    collision_detected =    (left_side_hits > (side_region_total_size * laserscan_threshold)) &&
-                            (right_side_hits > (side_region_total_size * laserscan_threshold)) &&
-                            (front_side_hits > (front_region_total_size * laserscan_threshold));
+    if (front_collision_only) {
+        collision_detected = (front_side_hits >
+                                (front_region_total_size * region_fill_percentage));
+    } else {
+        collision_detected = (left_side_hits >
+                                (side_region_total_size * region_fill_percentage)) &&
+                             (right_side_hits >
+                                (side_region_total_size * region_fill_percentage)) &&
+                             (front_side_hits >
+                                 (front_region_total_size * region_fill_percentage));
+    }
 }
 
 
