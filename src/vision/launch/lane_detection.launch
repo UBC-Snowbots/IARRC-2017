@@ -25,7 +25,7 @@
     <!-- Initialise the IPM filter  -->
     <node name="IPMFilter" pkg="vision" type="IPMFilter" output="screen">
         <!-- Input -->
-        <remap from="/vision/hsv_filtered_image" to="/vision/hsv_filtered_image" />
+        <remap from="/vision/hsv_filtered_image" to="/vision/input_image" />
 
         <!-- Output -->
         <remap from="/vision/ipm_filtered_image" to="/vision/ipm_filtered_image" />
