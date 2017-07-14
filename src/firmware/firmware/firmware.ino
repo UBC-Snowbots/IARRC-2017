@@ -23,9 +23,9 @@
 #include <Servo.h>
 
 // Uncomment this to enable debug message logging - messages sent over serial will be echoed back
-//#define DEBUG_MESSAGES
+#define DEBUG_MESSAGES
 // Uncomment this to enable PWM debug logging - PWM signals will be echoed
-//#define DEBUG_PWM
+#define DEBUG_PWM
 
 #define BAUD_RATE 9600
 
@@ -79,8 +79,8 @@ const int MIN_PWM = 2000;
 const int MAX_PWM = 1000;
 
 // The safety cutoffs to prevent us drawing too much current
-const int MIN_PWM_VELOCITY_CUTOFF = 1375;
-const int MAX_PWM_VELOCITY_CUTOFF = 1625;
+const int MIN_PWM_CUTOFF = 1325;
+const int MAX_PWM_CUTOFF = 1675;
 
 unsigned long previousMillis = 0;
 unsigned long currentMillis = 0;
@@ -154,10 +154,14 @@ void drive(int linear_speed, int angular_speed){
 	angle = map(angular_speed, ANGULAR_MIN, ANGULAR_MAX, MIN_PWM, MAX_PWM);
 
   // Check that we're not outside our safety cutoffs
-  if (velocity > MAX_PWM_VELOCITY_CUTOFF)
-    velocity = MAX_PWM_VELOCITY_CUTOFF;
-  else if (velocity < MIN_PWM_VELOCITY_CUTOFF)
-    velocity = MIN_PWM_VELOCITY_CUTOFF;
+  if (velocity > MAX_PWM_CUTOFF)
+    velocity = MAX_PWM_CUTOFF;
+  else if (velocity < MIN_PWM_CUTOFF)
+    velocity = MIN_PWM_CUTOFF;
+   if (angle > MAX_PWM_CUTOFF)
+    angle = MAX_PWM_CUTOFF;
+  else if (velocity < MIN_PWM_CUTOFF)
+    angle = MIN_PWM_CUTOFF;
 
   // Write the commands to the motor and the servo
 	motor.writeMicroseconds(velocity);
