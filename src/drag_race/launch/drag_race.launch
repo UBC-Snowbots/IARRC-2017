@@ -7,10 +7,10 @@
     <node name="camera" pkg="vision" type="camera" output="screen"/>
 
     <!-- Start green light detection -->
-    <!-- <include file="$(find vision)/launch/stoplight_detection.launch"/> -->
+    <include file="$(find vision)/launch/stoplight_detection.launch"/>
 
     <!-- Start the steering driver to control the robot -->
-    <!-- <include file="$(find drivers)/launch/steering_driver.launch"/>-->
+    <include file="$(find drivers)/launch/steering_driver.launch"/>
 
     <!-- Start the drag race controller -->
     <node name="drag_race_node" type="drag_race_node" pkg="drag_race" output="screen">
