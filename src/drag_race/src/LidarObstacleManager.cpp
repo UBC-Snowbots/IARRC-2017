@@ -70,10 +70,10 @@ void LidarObstacleManager::addLaserScan(const sensor_msgs::LaserScan &scan) {
     int side_region_total_size = (side_angle_max - side_angle_min)/scan.angle_increment;
     int front_region_total_size = (2*collision_angle)/scan.angle_increment;
 
-    collision_detected =    (left_side_hits > (side_region_total_size * laserscan_threshold)) &&
-                            (right_side_hits > (side_region_total_size * laserscan_threshold)) &&
-                            (front_side_hits > (front_region_total_size * laserscan_threshold));
-}
+    collision_detected = (front_side_hits > (front_region_total_size * laserscan_threshold));
+                         //(right_side_hits > (side_region_total_size * laserscan_threshold)) &&
+}//(left_side_hits > (side_region_total_size * laserscan_threshold)) &&
+
 
 
 std::vector<LidarObstacle> LidarObstacleManager::getObstacles() {

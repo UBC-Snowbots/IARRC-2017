@@ -122,6 +122,10 @@ void DragRaceNode::scanCallBack(const sensor_msgs::LaserScan::ConstPtr &scan) {
     // Avoid the line given while staying within the boundaries
     geometry_msgs::Twist twist = drag_race_controller.determineDesiredMotion(best_line, no_line_on_expected_side);
 
+    if(fabs(best_line.correlation) < 0.2) {
+	twist.angular.z = 0;
+	twist.linear.x = linear_vel_cap;
+}
     // If no green light has been detected stop.
     if (green_count_recognised < minimum_green_recognised_count) {
         twist.angular.z = 0;

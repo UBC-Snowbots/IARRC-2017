@@ -23,7 +23,7 @@
     </node>
 
     <!-- Initialise stoplight detection node  -->
-    <node name="stoplight_detection" pkg="vision" type="circle_detection" output="screen">
+    <node name="stoplight_detection" pkg="vision" type="circle_detection" output="log">
         <!-- Input -->
         <remap from="/robot/vision/filtered_image" to="/vision/green_filtered_image" />
 
