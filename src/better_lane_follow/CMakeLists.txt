@@ -42,7 +42,7 @@ include_directories(
 
 ## Declare a C++ executable
 # add_executable(sample_package_node src/sample_package_node.cpp)
-add_executable(lane_follower
+add_executable(lane_follow
     src/LineDetect.cpp
     src/lane_follow.cpp
     src/LaneFollow.cpp
@@ -52,7 +52,7 @@ add_executable(lane_follower
 # target_link_libraries(sample_package_node
 #   ${catkin_LIBRARIES}
 # )
-target_link_libraries(lane_follower
+target_link_libraries(lane_follow
     ${catkin_LIBRARIES}
     ${OpenCV_LIBS}
     ${sb_utils_LIBRARIES}
