@@ -14,7 +14,6 @@ using namespace std;
 
 int main(int argc, char **argv) {
     string inputWindow = "Camera";
-    namedWindow(inputWindow, CV_WINDOW_AUTOSIZE);
 
     VideoCapture cap(0); //captures the first camera
     if (!cap.isOpened()) {
@@ -37,10 +36,8 @@ int main(int argc, char **argv) {
             cout << "Failed to read image from camera" << endl;
             break;
         }
-        imshow(inputWindow, inputImage);
         sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", inputImage).toImageMsg();
         pub.publish(msg);
-        waitKey(1);
         ros::spinOnce();
         loop_rate.sleep();
     }
