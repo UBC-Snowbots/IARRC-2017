@@ -22,5 +22,4 @@
         <rosparam param="linear_vel_cap"> 1 </rosparam>
 
     </node>
-f
 </launch>
