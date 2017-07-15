@@ -81,15 +81,9 @@ int CircleDetection::countCircles(const Mat &filtered_image, bool displayCircles
     vector<cv::Point2i> center;
     vector<float> radii;
 
-    // Convert grayscale image to black and white image
-    cv::Mat bwImage;
-    try {
-        cv::cvtColor(filtered_image, bwImage, CV_RGB2GRAY);
-    } catch(cv::Exception) {
-        bwImage = filtered_image;
-    }
+
     // Find contours of the black and white image
-    cv::findContours(bwImage.clone(), contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
+    cv::findContours(filtered_image.clone(), contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
 
     size_t count = contours.size();
 
@@ -107,7 +101,7 @@ int CircleDetection::countCircles(const Mat &filtered_image, bool displayCircles
 
     if (displayCircles) {
         // Displays a window with the detected objects being circled
-        showFilteredObjectsWindow(filtered_image, center, radii);
+//        showFilteredObjectsWindow(filtered_image, center, radii);
     }
 
     // Complains about fitting a long to an int

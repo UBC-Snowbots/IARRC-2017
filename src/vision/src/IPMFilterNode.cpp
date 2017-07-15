@@ -62,6 +62,8 @@ void IPMFilterNode::filteredImageCallBack(const sensor_msgs::ImageConstPtr &msg)
     // Outputs the image
     sensor_msgs::ImagePtr output_message = cv_bridge::CvImage(std_msgs::Header(), "mono8",
                                                               IPMFilteredImage).toImageMsg();
+    cv::imshow("IPMFilter", IPMFilteredImage);
+    waitKey(20);
     ipm_filter_pub.publish(output_message);
 }
 

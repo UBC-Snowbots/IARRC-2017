@@ -11,7 +11,7 @@
     <include file="$(find drivers)/launch/steering_driver.launch"/>
 
     <!-- Start the drag race controller -->
-    <node name="lane_follow_node" type="lane_follow_node" pkg="lane_follow" output="screen">
+    <node name="lane_follow" type="lane_follow" pkg="lane_follow" output="screen">
         <!-- The number of consecutive frames that must contain a green
             light before we start sending commands to the wheels -->
         <rosparam param="target_x_distance"> 0.5 </rosparam>
