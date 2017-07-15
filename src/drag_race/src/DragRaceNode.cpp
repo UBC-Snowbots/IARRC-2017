@@ -59,18 +59,25 @@ DragRaceNode::DragRaceNode(int argc, char **argv, std::string node_name):
     SB_getParam(private_nh, "obstacle_ticks_threshold", obstacle_ticks_threshold, 10);
     SB_getParam(private_nh, "collision_distance", collision_distance, 3.0);
 
-    // In DEGREES
-    SB_getParam(private_nh, "collision_angle", collision_angle, 5.0);
+    // NOW IN RADIANS
+    SB_getParam(private_nh, "front_angle", front_angle, M_PI_2);
+    SB_getParam(private_nh, "front_collision_only", front_collision_only, false);
+    SB_getParam(private_nh, "side_angle_max", side_angle_max, M_PI_2);
+    SB_getParam(private_nh, "side_angle_min", side_angle_min, M_PI_2 - M_PI_4/2);
+    SB_getParam(private_nh, "region_fill_percentage", region_fill_percentage, 0.5);
+
 
     // Setup drag race controller with given params
-    drag_race_controller = DragRaceController(target_distance, line_to_the_right, theta_scaling_multiplier,
-                                              angular_speed_multiplier, linear_speed_multiplier, angular_vel_cap,
+    drag_race_controller = DragRaceController(target_distance, line_to_the_right,
+                                              theta_scaling_multiplier, angular_speed_multiplier,
+                                              linear_speed_multiplier, angular_vel_cap,
                                               linear_vel_cap);
 
     // Setup the obstacle manager with given params
     obstacle_manager = LidarObstacleManager(max_obstacle_merging_distance, cone_grouping_tolerance,
                                             max_distance_from_robot_accepted, min_wall_length,
-                                            collision_distance, collision_angle);
+                                            collision_distance, front_angle, side_angle_max, side_angle_min,
+                                            region_fill_percentage, front_collision_only);
 
     end_of_course = false;
     incoming_obstacle_ticks = 0;

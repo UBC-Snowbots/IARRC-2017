@@ -12,7 +12,7 @@
         <!-- Node parameters -->
         <rosparam param="update_frequency">5.0</rosparam>
         <rosparam param="config_file" subst_value="true">$(find vision)/launch/green_light_filter.conf</rosparam>
-        <rosparam param="show_image_window">true</rosparam>
+        <rosparam param="show_image_window">false</rosparam>
         <rosparam param="show_calibration_window">true</rosparam>
 
         <!-- Input image parameters if set manually -->

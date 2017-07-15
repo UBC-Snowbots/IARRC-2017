@@ -65,11 +65,16 @@ private:
     int minimum_green_recognised_count;
     int green_count_recognised;
 
-    // Incoming obstacle detection
+    // End zone collision detection
+    // TODO: Could make all these local variables?
     int incoming_obstacle_ticks;
     int obstacle_ticks_threshold;
     double collision_distance;
-    double collision_angle;
+    double front_angle;
+    double side_angle_max;
+    double side_angle_min;
+    double region_fill_percentage;
+    bool front_collision_only;
 
     // Signals that we're at the end of the course
     bool end_of_course;

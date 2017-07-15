@@ -101,7 +101,7 @@ int CircleDetection::countCircles(const Mat &filtered_image, bool displayCircles
 
     if (displayCircles) {
         // Displays a window with the detected objects being circled
-        showFilteredObjectsWindow(filtered_image, center, radii);
+//        showFilteredObjectsWindow(filtered_image, center, radii);
     }
 
     // Complains about fitting a long to an int

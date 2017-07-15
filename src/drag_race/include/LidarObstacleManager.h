@@ -68,7 +68,9 @@ public:
 
     LidarObstacleManager(double max_obstacle_merging_distance, double cone_grouping_tolerance,
                          double max_distance_from_robot_accepted, double min_wall_length,
-                         double collision_distance, double collision_angle
+                         double collision_distance, double front_angle,
+                         double side_angle_max, double side_angle_min,
+                         double region_fill_percentage, bool front_collision_only
     );
 
     /**
@@ -175,9 +177,29 @@ public:
 
 private:
 
-    // The threshold for in-front obstacle distance
+    // **** END ZONE COLLISION DETECTION ****
+    // TODO: Move this to its own node later.
+
+    // The threshold for object hitscan distance
     double collision_distance;
-    double collision_angle;
+
+    // If True, only uses front collision detection
+    bool front_collision_only;
+
+    // The angle which defines the front region relative to the front of the robot
+    // e.g. If set to PI/2, the region extends from PI/4 to -PI/4 relative to a line
+    //      extending from the front of the robot.
+    double front_angle;
+
+    // Parameters for side obstacle detection
+    // The angles which define the side region of the robot
+    double side_angle_max;
+    double side_angle_min;
+
+    // The percentage of the region to be filled before we consider it a collision
+    double region_fill_percentage;
+
+    // ******************************
 
     // All the obstacles we currently have
     std::vector<LidarObstacle> obstacles;
