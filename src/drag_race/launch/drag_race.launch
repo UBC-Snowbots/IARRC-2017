@@ -32,7 +32,7 @@
             <rosparam param="front_angle">1</rosparam>
             <rosparam param="side_angle_max">1.57</rosparam>
             <rosparam param="side_angle_min">1.30</rosparam>
-            <rosparam param="region_fill_percentage">0.5</rosparam>
+            <rosparam param="region_fill_percentage">0</rosparam>
             <rosparam param="front_collision_only">true</rosparam>
 
         <!-- Line Detection Params -->
