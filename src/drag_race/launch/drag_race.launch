@@ -17,7 +17,7 @@
         <!-- Green Light Detection Params  -->
             <!-- The number of consecutive frames that must contain a green
                 light before we start sending commands to the wheels -->
-            <rosparam param="minimum_green_count_recognised"> 4 </rosparam>
+            <rosparam param="minimum_green_count_recognised"> -1 </rosparam>
 
         <!-- Obstacle Detection Params -->
             <!-- The maximum distance between obstacles for them to be 
